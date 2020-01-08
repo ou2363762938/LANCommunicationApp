@@ -78,4 +78,9 @@
     <string name="Toast_text_non_lan">请连接局域网！</string>
     <string name="channel_name">values.strings.xml</string>
     <string name="description">正在使用</string>
+
+    <string name="copy">复制</string>
+    <string name="transmit">转发</string>
+    <string name="delete">删除</string>
+    <string name="replay">回复</string>
 </resources>

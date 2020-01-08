@@ -9,7 +9,6 @@
         android:id="@+id/chat_message_popup_window_item"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="复制"
         android:textColor="@color/color_white"
         android:textSize="@dimen/sp_14"
         android:gravity="center" />

@@ -59,7 +59,7 @@ import java.util.Map;
 
 import static com.skysoft.smart.intranetchat.ui.activity.chatroom.ChatRoomActivity.sIsAudioRecording;
 
-public class ChatRoomMessageAdapter extends RecyclerView.Adapter<ChatRoomMessageViewHolder> implements View.OnLongClickListener {
+public class ChatRoomMessageAdapter extends RecyclerView.Adapter<ChatRoomMessageViewHolder>{
     private static String TAG = ChatRoomMessageAdapter.class.getSimpleName();
     private Context context;
     private List<ChatRecordEntity> messageBeanList = new ArrayList<>();
@@ -230,7 +230,7 @@ public class ChatRoomMessageAdapter extends RecyclerView.Adapter<ChatRoomMessage
                 }
             }
         });
-        thumbnail.setOnLongClickListener(this::onLongClick);
+        thumbnail.setOnLongClickListener(new OnLongClickRecord(bean));
     }
 
     //加载文件
@@ -253,7 +253,7 @@ public class ChatRoomMessageAdapter extends RecyclerView.Adapter<ChatRoomMessage
                 break;
         }
 
-        file.setOnLongClickListener(this::onLongClick);
+        file.setOnLongClickListener(new OnLongClickRecord(bean));
     }
 
     //加载图片
@@ -284,7 +284,7 @@ public class ChatRoomMessageAdapter extends RecyclerView.Adapter<ChatRoomMessage
                 }
             }
         });
-        image.setOnLongClickListener(this::onLongClick);
+        image.setOnLongClickListener(new OnLongClickRecord(bean));
     }
 
     /**
@@ -352,7 +352,7 @@ public class ChatRoomMessageAdapter extends RecyclerView.Adapter<ChatRoomMessage
                 }
             }
         });
-        voice.setOnLongClickListener(this::onLongClick);
+        voice.setOnLongClickListener(new OnLongClickRecord(bean));
     }
 
     //加载文本内容
@@ -367,7 +367,7 @@ public class ChatRoomMessageAdapter extends RecyclerView.Adapter<ChatRoomMessage
             holder.getMineMessage().setVisibility(View.VISIBLE);
             message = holder.getMineMessage();
         }
-        message.setOnLongClickListener(this::onLongClick);
+        message.setOnLongClickListener(new OnLongClickRecord(bean));
     }
 
     private void bindAvatar(ChatRoomMessageViewHolder holder, ChatRecordEntity bean,  boolean sender){
@@ -450,7 +450,7 @@ public class ChatRoomMessageAdapter extends RecyclerView.Adapter<ChatRoomMessage
         }else {
             callBox = holder.getMineCallBox();
         }
-        callBox.setOnLongClickListener(this::onLongClick);
+        callBox.setOnLongClickListener(new OnLongClickRecord(bean));
     }
 
     @Override
@@ -648,17 +648,7 @@ public class ChatRoomMessageAdapter extends RecyclerView.Adapter<ChatRoomMessage
         return bitmap;
     }
 
-    public void showPopupMenu(View view){
-//        PopupMenu popupMenu = new PopupMenu(context,view);
-//        popupMenu.getMenuInflater().inflate(R.menu.menu_long_click_message,popupMenu.getMenu());
-//        popupMenu.show();
-//        popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-//            @Override
-//            public boolean onMenuItemClick(MenuItem item) {
-//                Log.d(TAG, "onMenuItemClick: item.getId() = " + item.getItemId());
-//                return false;
-//            }
-//        });
+    public void showPopupMenu(View view,ChatRecordEntity chatRecordEntity){
         if (null == mInflate){
             mInflate = LayoutInflater.from(context).inflate(R.layout.chat_message_popup_window, null);
         }
@@ -673,7 +663,7 @@ public class ChatRoomMessageAdapter extends RecyclerView.Adapter<ChatRoomMessage
             mPopupRecyclerView.addItemDecoration(new DividerItemDecoration(context,DividerItemDecoration.HORIZONTAL));
         }
 
-        PopupWindowAdapter adapter = new PopupWindowAdapter(context, Arrays.asList(context.getResources().getStringArray(R.array.popup_window_item)),popupWindow);
+        PopupWindowAdapter adapter = new PopupWindowAdapter(context,chatRecordEntity,popupWindow);
         mPopupRecyclerView.setAdapter(adapter);
 
         popupWindow.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
@@ -683,9 +673,17 @@ public class ChatRoomMessageAdapter extends RecyclerView.Adapter<ChatRoomMessage
         popupWindow.showAsDropDown(view);
     }
 
-    @Override
-    public boolean onLongClick(View v) {
-        showPopupMenu(v);
-        return false;
+    private class OnLongClickRecord implements View.OnLongClickListener{
+        private ChatRecordEntity mRecordEntity;
+
+        public OnLongClickRecord(ChatRecordEntity mRecordEntity) {
+            this.mRecordEntity = mRecordEntity;
+        }
+
+        @Override
+        public boolean onLongClick(View v) {
+            showPopupMenu(v,mRecordEntity);
+            return false;
+        }
     }
 }

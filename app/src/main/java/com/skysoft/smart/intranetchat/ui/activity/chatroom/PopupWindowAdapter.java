@@ -9,7 +9,9 @@ import android.widget.PopupWindow;
 import android.widget.TextView;
 
 import com.skysoft.smart.intranetchat.R;
+import com.skysoft.smart.intranetchat.database.table.ChatRecordEntity;
 
+import java.util.Arrays;
 import java.util.List;
 
 import androidx.annotation.NonNull;
@@ -20,10 +22,25 @@ public class PopupWindowAdapter extends RecyclerView.Adapter<PopupWindowAdapter.
     private Context mContext;
     private List<String> mItemList;
     private PopupWindow mPopupWindow;
+    private ChatRecordEntity mChatRecordEntity;
 
-    public PopupWindowAdapter(Context mContext, List<String> mItemList,PopupWindow mPopupWindow) {
+    public PopupWindowAdapter(Context mContext,ChatRecordEntity mChatRecordEntity, PopupWindow mPopupWindow) {
         this.mContext = mContext;
-        this.mItemList = mItemList;
+        this.mChatRecordEntity = mChatRecordEntity;
+        Log.d(TAG, "PopupWindowAdapter: type = " + mChatRecordEntity.getType());
+        switch (mChatRecordEntity.getType()){
+            case ChatRoomConfig.RECORD_TEXT:
+                mItemList = Arrays.asList(mContext.getResources().getStringArray(R.array.popup_window_item_text));
+                break;
+            case ChatRoomConfig.RECORD_VOICE:
+                mItemList = Arrays.asList(mContext.getResources().getStringArray(R.array.popup_window_item_voice));
+                break;
+            case ChatRoomConfig.RECORD_IMAGE:
+            case ChatRoomConfig.RECORD_VIDEO:
+            case ChatRoomConfig.RECORD_FILE:
+                mItemList = Arrays.asList(mContext.getResources().getStringArray(R.array.popup_window_item_other));
+                break;
+        }
         this.mPopupWindow = mPopupWindow;
     }
 
