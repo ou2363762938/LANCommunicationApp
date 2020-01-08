@@ -12,13 +12,16 @@ import android.media.MediaMetadataRetriever;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
@@ -223,10 +226,18 @@ public class ChatRoomMessageAdapter extends RecyclerView.Adapter<ChatRoomMessage
                 }
             }
         });
+        thumbnail.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                showPopupMenu(v);
+                return false;
+            }
+        });
     }
 
     //加载文件
     private void bindFile(ChatRoomMessageViewHolder holder, ChatRecordEntity bean) {
+        ConstraintLayout file = null;
         String size = computingFileSize(bean.getLength());
         Log.d(TAG, "bindFile: size = " + size);
         switch (bean.getIsReceive()){
@@ -234,13 +245,23 @@ public class ChatRoomMessageAdapter extends RecyclerView.Adapter<ChatRoomMessage
                 holder.getSenderFileName().setText(bean.getFileName());
                 holder.getSenderFileSize().setText(size);
                 holder.getSenderFile().setVisibility(View.VISIBLE);
+                file = holder.getSenderFile();
                 break;
             case ChatRoomConfig.SEND_FILE:
                 holder.getMineFileName().setText(bean.getFileName());
                 holder.getMineFileSize().setText(size);
                 holder.getMineFile().setVisibility(View.VISIBLE);
+                file = holder.getMineFile();
                 break;
         }
+
+        file.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                showPopupMenu(v);
+                return false;
+            }
+        });
     }
 
     //加载图片
@@ -269,6 +290,13 @@ public class ChatRoomMessageAdapter extends RecyclerView.Adapter<ChatRoomMessage
                     String path = bean.getPath();
                     PictureShowActivity.goActivity(context, path);
                 }
+            }
+        });
+        image.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                showPopupMenu(v);
+                return false;
             }
         });
     }
@@ -338,6 +366,13 @@ public class ChatRoomMessageAdapter extends RecyclerView.Adapter<ChatRoomMessage
                 }
             }
         });
+        voice.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                showPopupMenu(v);
+                return false;
+            }
+        });
     }
 
     //加载文本内容
@@ -352,6 +387,13 @@ public class ChatRoomMessageAdapter extends RecyclerView.Adapter<ChatRoomMessage
             holder.getMineMessage().setVisibility(View.VISIBLE);
             message = holder.getMineMessage();
         }
+        message.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                showPopupMenu(v);
+                return false;
+            }
+        });
     }
 
     private void bindAvatar(ChatRoomMessageViewHolder holder, ChatRecordEntity bean,  boolean sender){
@@ -402,6 +444,7 @@ public class ChatRoomMessageAdapter extends RecyclerView.Adapter<ChatRoomMessage
     }
 
     private void bindCall(ChatRoomMessageViewHolder holder, ChatRecordEntity bean){
+        LinearLayout callBox = null;
         switch (bean.getIsReceive()){
             case ChatRoomConfig.RECEIVE_VOICE_CALL:
                 holder.getSenderCallBox().setVisibility(View.VISIBLE);
@@ -428,6 +471,18 @@ public class ChatRoomMessageAdapter extends RecyclerView.Adapter<ChatRoomMessage
             holder.getSenderCallImage().setColorFilter(R.color.color_gray_dark);
             holder.getSenderCallText().setTextColor(context.getResources().getColor(R.color.color_gray_dark));
         }
+        if (bean.getIsReceive() == ChatRoomConfig.RECEIVE_VOICE_CALL || bean.getIsReceive() == ChatRoomConfig.RECEIVE_VIDEO_CALL){
+            callBox = holder.getSenderCallBox();
+        }else {
+            callBox = holder.getMineCallBox();
+        }
+        callBox.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                showPopupMenu(v);
+                return false;
+            }
+        });
     }
 
     @Override
@@ -623,5 +678,18 @@ public class ChatRoomMessageAdapter extends RecyclerView.Adapter<ChatRoomMessage
             }
         }
         return bitmap;
+    }
+
+    public void showPopupMenu(View view){
+        PopupMenu popupMenu = new PopupMenu(context,view);
+        popupMenu.getMenuInflater().inflate(R.menu.menu_long_click_message,popupMenu.getMenu());
+        popupMenu.show();
+        popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                Log.d(TAG, "onMenuItemClick: item.getId() = " + item.getItemId());
+                return false;
+            }
+        });
     }
 }
