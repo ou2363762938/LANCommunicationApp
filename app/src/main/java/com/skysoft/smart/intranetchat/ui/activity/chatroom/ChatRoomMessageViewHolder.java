@@ -44,6 +44,7 @@ public class ChatRoomMessageViewHolder extends RecyclerView.ViewHolder {
     private ImageView mineCallImage;
     private TextView senderCallText;
     private TextView mineCallText;
+    private View box;
 
     public ChatRoomMessageViewHolder(@NonNull View itemView) {
         super(itemView);
@@ -73,6 +74,7 @@ public class ChatRoomMessageViewHolder extends RecyclerView.ViewHolder {
         mineCallImage = itemView.findViewById(R.id.list_view_chat_room_mine_call_image);
         senderCallText = itemView.findViewById(R.id.list_view_chat_room_sender_call_text);
         mineCallText = itemView.findViewById(R.id.list_view_chat_room_mine_call_text);
+        box = itemView;
     }
 
     public void hiddenAll(){
@@ -92,6 +94,10 @@ public class ChatRoomMessageViewHolder extends RecyclerView.ViewHolder {
         senderName.setVisibility(View.GONE);
         senderCallBox.setVisibility(View.GONE);
         mineCallBox.setVisibility(View.GONE);
+    }
+
+    public View getBox() {
+        return box;
     }
 
     public TextView getTime() {

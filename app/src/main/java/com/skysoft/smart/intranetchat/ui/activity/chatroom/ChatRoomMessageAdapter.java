@@ -17,6 +17,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
@@ -51,7 +52,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -230,7 +230,8 @@ public class ChatRoomMessageAdapter extends RecyclerView.Adapter<ChatRoomMessage
                 }
             }
         });
-        thumbnail.setOnLongClickListener(new OnLongClickRecord(bean));
+
+        thumbnail.setOnLongClickListener(new OnLongClickRecord(bean, holder));
     }
 
     //加载文件
@@ -253,7 +254,7 @@ public class ChatRoomMessageAdapter extends RecyclerView.Adapter<ChatRoomMessage
                 break;
         }
 
-        file.setOnLongClickListener(new OnLongClickRecord(bean));
+        file.setOnLongClickListener(new OnLongClickRecord(bean, holder));
     }
 
     //加载图片
@@ -284,7 +285,8 @@ public class ChatRoomMessageAdapter extends RecyclerView.Adapter<ChatRoomMessage
                 }
             }
         });
-        image.setOnLongClickListener(new OnLongClickRecord(bean));
+
+        image.setOnLongClickListener(new OnLongClickRecord(bean, holder));
     }
 
     /**
@@ -352,7 +354,8 @@ public class ChatRoomMessageAdapter extends RecyclerView.Adapter<ChatRoomMessage
                 }
             }
         });
-        voice.setOnLongClickListener(new OnLongClickRecord(bean));
+
+        voice.setOnLongClickListener(new OnLongClickRecord(bean, holder));;
     }
 
     //加载文本内容
@@ -367,7 +370,8 @@ public class ChatRoomMessageAdapter extends RecyclerView.Adapter<ChatRoomMessage
             holder.getMineMessage().setVisibility(View.VISIBLE);
             message = holder.getMineMessage();
         }
-        message.setOnLongClickListener(new OnLongClickRecord(bean));
+
+        message.setOnLongClickListener(new OnLongClickRecord(bean, holder));
     }
 
     private void bindAvatar(ChatRoomMessageViewHolder holder, ChatRecordEntity bean,  boolean sender){
@@ -450,7 +454,8 @@ public class ChatRoomMessageAdapter extends RecyclerView.Adapter<ChatRoomMessage
         }else {
             callBox = holder.getMineCallBox();
         }
-        callBox.setOnLongClickListener(new OnLongClickRecord(bean));
+
+        callBox.setOnLongClickListener(new OnLongClickRecord(bean, holder));;
     }
 
     @Override
@@ -648,7 +653,17 @@ public class ChatRoomMessageAdapter extends RecyclerView.Adapter<ChatRoomMessage
         return bitmap;
     }
 
-    public void showPopupMenu(View view,ChatRecordEntity chatRecordEntity){
+    private static int makeDropDownMeasureSpec(int measureSpec){
+        int mode = 0;
+        if (measureSpec == ViewGroup.LayoutParams.WRAP_CONTENT){
+            mode = View.MeasureSpec.UNSPECIFIED;
+        }else {
+            mode = View.MeasureSpec.EXACTLY;
+        }
+        return View.MeasureSpec.makeMeasureSpec(View.MeasureSpec.getSize(measureSpec),mode);
+    }
+
+    public void showPopupMenu(View view, ChatRecordEntity chatRecordEntity, int relativeY, int nameHeight){
         if (null == mInflate){
             mInflate = LayoutInflater.from(context).inflate(R.layout.chat_message_popup_window, null);
         }
@@ -670,19 +685,46 @@ public class ChatRoomMessageAdapter extends RecyclerView.Adapter<ChatRoomMessage
         popupWindow.setOutsideTouchable(true);
         popupWindow.setTouchable(true);
         popupWindow.setFocusable(true);
-        popupWindow.showAsDropDown(view);
+
+        View contentView = popupWindow.getContentView();
+        contentView.measure(makeDropDownMeasureSpec(popupWindow.getWidth()),
+                makeDropDownMeasureSpec(popupWindow.getHeight()));
+
+        int offsetX = 0;
+        int offsetY = -(contentView.getMeasuredHeight() + view.getHeight());
+        if (chatRecordEntity.getIsReceive() == ChatRoomConfig.SEND_FILE
+                || chatRecordEntity.getIsReceive() == ChatRoomConfig.SEND_IMAGE
+                || chatRecordEntity.getIsReceive() == ChatRoomConfig.SEND_MESSAGE
+                || chatRecordEntity.getIsReceive() == ChatRoomConfig.SEND_VIDEO
+                || chatRecordEntity.getIsReceive() == ChatRoomConfig.SEND_VIDEO_CALL
+                || chatRecordEntity.getIsReceive() == ChatRoomConfig.SEND_VOICE
+                || chatRecordEntity.getIsReceive() == ChatRoomConfig.SEND_VOICE_CALL){
+            Log.d(TAG, "showPopupMenu: right");
+            offsetX = -(contentView.getMeasuredWidth() - view.getWidth());
+        }
+
+        if (relativeY < (-offsetY)){
+            offsetY = 0;
+        }else {
+            offsetY -= nameHeight;
+        }
+
+        popupWindow.showAsDropDown(view,offsetX,offsetY,Gravity.LEFT);
     }
 
     private class OnLongClickRecord implements View.OnLongClickListener{
         private ChatRecordEntity mRecordEntity;
+        private ChatRoomMessageViewHolder holder;
 
-        public OnLongClickRecord(ChatRecordEntity mRecordEntity) {
+        public OnLongClickRecord(ChatRecordEntity mRecordEntity, ChatRoomMessageViewHolder holder) {
             this.mRecordEntity = mRecordEntity;
+            this.holder = holder;
         }
 
         @Override
         public boolean onLongClick(View v) {
-            showPopupMenu(v,mRecordEntity);
+            showPopupMenu(v,mRecordEntity,holder.getBox().getTop() + holder.getBox().getScrollX(),
+                    holder.getSenderName().getVisibility() == View.VISIBLE ? holder.getSenderName().getHeight() : 0);
             return false;
         }
     }
