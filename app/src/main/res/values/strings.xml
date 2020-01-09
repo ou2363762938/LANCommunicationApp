@@ -83,4 +83,9 @@
     <string name="transmit">转发</string>
     <string name="delete">删除</string>
     <string name="replay">回复</string>
+
+<!--    关闭转发-->
+    <string name="close_transmit">关闭</string>
+    <string name="transmit_to">发送给</string>
+    <string name="search">搜索</string>
 </resources>

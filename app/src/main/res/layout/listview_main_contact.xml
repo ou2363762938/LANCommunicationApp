@@ -16,23 +16,24 @@
     <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/contact_head"
         android:layout_width="@dimen/dp_40"
-        android:layout_height="@dimen/dp_70"
+        android:layout_height="@dimen/dp_60"
         android:layout_marginLeft="@dimen/dp_20"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"/>
 
     <TextView
         android:id="@+id/contact_name"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/dp_70"
+        android:layout_width="0dp"
+        android:layout_height="@dimen/dp_60"
         android:layout_alignParentTop="true"
         android:layout_alignParentEnd="true"
         android:layout_centerVertical="true"
-        android:layout_marginStart="@dimen/dp_84"
+        android:layout_marginStart="@dimen/dp_10"
         android:gravity="center|left"
         android:textColor="@color/color_black"
-        android:textSize="@dimen/sp_25"
-        app:layout_constraintStart_toStartOf="parent"
+        android:textSize="@dimen/sp_22"
+        app:layout_constraintStart_toEndOf="@+id/contact_head"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"/>
 

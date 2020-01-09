@@ -21,14 +21,14 @@ public class PopupWindowAdapter extends RecyclerView.Adapter<PopupWindowAdapter.
     private static final String TAG = "PopupWindowAdapter";
     private Context mContext;
     private List<String> mItemList;
-    private PopupWindow mPopupWindow;
-    private ChatRecordEntity mChatRecordEntity;
+    private PopupWindow mPopupWindow;   //关闭popupWindow
+    private ChatRecordEntity mChatRecordEntity;     //长按的消息记录
     private ChatRoomMessageAdapter mChatAdapter;
 
     public PopupWindowAdapter(Context mContext,ChatRecordEntity mChatRecordEntity, PopupWindow mPopupWindow, ChatRoomMessageAdapter mChatAdapter) {
         this.mContext = mContext;
         this.mChatRecordEntity = mChatRecordEntity;
-        Log.d(TAG, "PopupWindowAdapter: type = " + mChatRecordEntity.getType());
+        //判断长按的消息记录
         switch (mChatRecordEntity.getType()){
             case ChatRoomConfig.RECORD_TEXT:
                 mItemList = Arrays.asList(mContext.getResources().getStringArray(R.array.popup_window_item_text));
@@ -59,7 +59,21 @@ public class PopupWindowAdapter extends RecyclerView.Adapter<PopupWindowAdapter.
         holder.mItem.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d(TAG, "onClick: " + mItemList.get(position));
+                String clickContent = mItemList.get(position); //点击内容
+                Log.d(TAG, "onClick: " + clickContent);
+                if (clickContent.equals(mContext.getResources().getString(R.string.copy))){
+                    //点击复制
+
+                }else if (clickContent.equals(mContext.getResources().getString(R.string.transmit))){
+                    //点击转发
+                    TransmitActivity.startActivity(mContext);
+                }else if (clickContent.equals(mContext.getResources().getString(R.string.delete))){
+                    //点击删除
+
+                }else if (clickContent.equals(mContext.getResources().getString(R.string.replay))){
+                    //点击回复
+
+                }
                 mPopupWindow.dismiss();
             }
         });
