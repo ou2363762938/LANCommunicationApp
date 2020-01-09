@@ -23,8 +23,9 @@ public class PopupWindowAdapter extends RecyclerView.Adapter<PopupWindowAdapter.
     private List<String> mItemList;
     private PopupWindow mPopupWindow;
     private ChatRecordEntity mChatRecordEntity;
+    private ChatRoomMessageAdapter mChatAdapter;
 
-    public PopupWindowAdapter(Context mContext,ChatRecordEntity mChatRecordEntity, PopupWindow mPopupWindow) {
+    public PopupWindowAdapter(Context mContext,ChatRecordEntity mChatRecordEntity, PopupWindow mPopupWindow, ChatRoomMessageAdapter mChatAdapter) {
         this.mContext = mContext;
         this.mChatRecordEntity = mChatRecordEntity;
         Log.d(TAG, "PopupWindowAdapter: type = " + mChatRecordEntity.getType());
@@ -42,6 +43,7 @@ public class PopupWindowAdapter extends RecyclerView.Adapter<PopupWindowAdapter.
                 break;
         }
         this.mPopupWindow = mPopupWindow;
+        this.mChatAdapter = mChatAdapter;
     }
 
     @NonNull

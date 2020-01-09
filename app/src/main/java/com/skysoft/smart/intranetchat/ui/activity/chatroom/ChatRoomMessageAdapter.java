@@ -663,6 +663,12 @@ public class ChatRoomMessageAdapter extends RecyclerView.Adapter<ChatRoomMessage
         return View.MeasureSpec.makeMeasureSpec(View.MeasureSpec.getSize(measureSpec),mode);
     }
 
+    /**
+     * 弹出popupWindow
+     * @param view 被长按的控件，popupWindow围绕view显示
+     * @param chatRecordEntity 被长按的控件对应的聊天记录
+     * @param relativeY 控件相对于聊天室顶部的相对距离
+     * @param nameHeight 对方名字的高度*/
     public void showPopupMenu(View view, ChatRecordEntity chatRecordEntity, int relativeY, int nameHeight){
         if (null == mInflate){
             mInflate = LayoutInflater.from(context).inflate(R.layout.chat_message_popup_window, null);
@@ -678,20 +684,25 @@ public class ChatRoomMessageAdapter extends RecyclerView.Adapter<ChatRoomMessage
             mPopupRecyclerView.addItemDecoration(new DividerItemDecoration(context,DividerItemDecoration.HORIZONTAL));
         }
 
-        PopupWindowAdapter adapter = new PopupWindowAdapter(context,chatRecordEntity,popupWindow);
+        //popupWindow弹出的内容
+        PopupWindowAdapter adapter = new PopupWindowAdapter(context,chatRecordEntity,popupWindow,ChatRoomMessageAdapter.this);
         mPopupRecyclerView.setAdapter(adapter);
 
+        //设置popupWindow点击外部消失
         popupWindow.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         popupWindow.setOutsideTouchable(true);
         popupWindow.setTouchable(true);
         popupWindow.setFocusable(true);
 
+        //测量popupWindow的长宽
         View contentView = popupWindow.getContentView();
         contentView.measure(makeDropDownMeasureSpec(popupWindow.getWidth()),
                 makeDropDownMeasureSpec(popupWindow.getHeight()));
 
         int offsetX = 0;
         int offsetY = -(contentView.getMeasuredHeight() + view.getHeight());
+
+        //如果是接收的消息，popupWindow相对于view靠左，反之靠右
         if (chatRecordEntity.getIsReceive() == ChatRoomConfig.SEND_FILE
                 || chatRecordEntity.getIsReceive() == ChatRoomConfig.SEND_IMAGE
                 || chatRecordEntity.getIsReceive() == ChatRoomConfig.SEND_MESSAGE
@@ -703,18 +714,20 @@ public class ChatRoomMessageAdapter extends RecyclerView.Adapter<ChatRoomMessage
             offsetX = -(contentView.getMeasuredWidth() - view.getWidth());
         }
 
-        if (relativeY < (-offsetY)){
+        //判断popupWindow在view上方或者下方
+        if (relativeY < contentView.getMeasuredHeight()){
             offsetY = 0;
         }else {
             offsetY -= nameHeight;
         }
 
+        //显示popupWindow
         popupWindow.showAsDropDown(view,offsetX,offsetY,Gravity.LEFT);
     }
 
     private class OnLongClickRecord implements View.OnLongClickListener{
-        private ChatRecordEntity mRecordEntity;
-        private ChatRoomMessageViewHolder holder;
+        private ChatRecordEntity mRecordEntity;     //被长按的记录
+        private ChatRoomMessageViewHolder holder;   //被长按的holder
 
         public OnLongClickRecord(ChatRecordEntity mRecordEntity, ChatRoomMessageViewHolder holder) {
             this.mRecordEntity = mRecordEntity;
@@ -723,7 +736,7 @@ public class ChatRoomMessageAdapter extends RecyclerView.Adapter<ChatRoomMessage
 
         @Override
         public boolean onLongClick(View v) {
-            showPopupMenu(v,mRecordEntity,holder.getBox().getTop() + holder.getBox().getScrollX(),
+            showPopupMenu(v,mRecordEntity,holder.getBox().getTop() + holder.getBox().getScrollX(),  //计算view到聊天室顶部的距离
                     holder.getSenderName().getVisibility() == View.VISIBLE ? holder.getSenderName().getHeight() : 0);
             return false;
         }
