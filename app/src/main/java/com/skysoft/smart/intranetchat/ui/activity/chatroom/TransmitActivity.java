@@ -20,6 +20,7 @@ import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
@@ -152,6 +153,11 @@ public class TransmitActivity extends BaseActivity implements View.OnClickListen
         return alertDialog;
     }
 
+    /**
+     * 给Dialog绑定事件
+     * @param alertDialog 弹出的alertDialog，点击取消和发送时关闭alertDialog
+     * @param view 自定义的view，给view绑定事件
+     * @param id alertDialog对应mTransmitUsers的位置*/
     private void buildDialogView(AlertDialog alertDialog, View view, int id) {
         CircleImageView avatar = view.findViewById(R.id.transmit_avatar);
         TextView name = view.findViewById(R.id.transmit_name);
@@ -174,7 +180,9 @@ public class TransmitActivity extends BaseActivity implements View.OnClickListen
                 }else {
                     String leave = leaveWord.getText().toString();
                     Log.d(TAG, "onClick: leave = " + leave);
-                    transmitMessage(id);
+                    if (mRecordType == ChatRoomConfig.RECORD_TEXT){
+                        transmitMessage(id);
+                    }
                     if (!TextUtils.isEmpty(leave)){
                         mMessage = leave;
                         transmitMessage(id);
@@ -199,7 +207,17 @@ public class TransmitActivity extends BaseActivity implements View.OnClickListen
                 Log.d(TAG, "onClick: i = " + i);
                 showDialog(i);
                 break;
+            case R.id.transmit_search_box:
+                onClickSearchBox();
+                break;
         }
+    }
+
+    /**
+     * 点击搜索框，弹出搜索界面*/
+    private void onClickSearchBox() {
+        ScrollView scrollView = findViewById(R.id.transmit_scroll);
+        scrollView.setVisibility(View.GONE);
     }
 
     //转发文字

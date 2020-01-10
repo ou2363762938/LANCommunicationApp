@@ -88,4 +88,5 @@
     <string name="close_transmit">关闭</string>
     <string name="transmit_to">发送给</string>
     <string name="search">搜索</string>
+    <string name="no_more_result">没有更多搜索结果</string>
 </resources>
