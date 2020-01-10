@@ -6,7 +6,7 @@
 package com.skysoft.smart.intranetchat.bean;
 
 import com.skysoft.smart.intranetchat.database.table.ChatRecordEntity;
-import com.skysoft.smart.intranetchat.network.bean.ReceiveAndSaveFileBean;
+import com.skysoft.smart.intranetchat.model.network.bean.ReceiveAndSaveFileBean;
 
 public class LoadResourceBean {
     private ReceiveAndSaveFileBean rasfb;

@@ -19,7 +19,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
-import com.skysoft.smart.intranetchat.camera.util.AppPermissionUtil;
+import com.skysoft.smart.intranetchat.model.camera.util.AppPermissionUtil;
 
 import java.util.ArrayList;
 import java.util.List;

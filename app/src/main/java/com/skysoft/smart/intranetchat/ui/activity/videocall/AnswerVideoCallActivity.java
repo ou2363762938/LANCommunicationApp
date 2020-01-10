@@ -21,13 +21,13 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.bumptech.glide.Glide;
 import com.skysoft.smart.intranetchat.R;
 import com.skysoft.smart.intranetchat.app.IntranetChatApplication;
-import com.skysoft.smart.intranetchat.app.VoiceCall;
+import com.skysoft.smart.intranetchat.model.VoiceCall;
 import com.skysoft.smart.intranetchat.app.impl.OnReceiveCallHungUp;
 import com.skysoft.smart.intranetchat.app.impl.OnReceiveRequestConsent;
 import com.skysoft.smart.intranetchat.bean.RecordCallBean;
-import com.skysoft.smart.intranetchat.camera.manager.MyShowCaptureManager;
-import com.skysoft.smart.intranetchat.camera.videocall.Sender;
-import com.skysoft.smart.intranetchat.network.bean.UserInfoBean;
+import com.skysoft.smart.intranetchat.model.camera.manager.MyShowCaptureManager;
+import com.skysoft.smart.intranetchat.model.camera.videocall.Sender;
+import com.skysoft.smart.intranetchat.model.network.bean.UserInfoBean;
 import com.skysoft.smart.intranetchat.tools.customstatusbar.CustomStatusBarBackground;
 import com.skysoft.smart.intranetchat.ui.activity.chatroom.ChatRoomConfig;
 

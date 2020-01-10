@@ -14,7 +14,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.bumptech.glide.Glide;
 import com.skysoft.smart.intranetchat.R;
 import com.skysoft.smart.intranetchat.app.IntranetChatApplication;
-import com.skysoft.smart.intranetchat.app.VoiceCall;
+import com.skysoft.smart.intranetchat.model.VoiceCall;
 import com.skysoft.smart.intranetchat.app.impl.OnReceiveCallHungUp;
 import com.skysoft.smart.intranetchat.app.impl.OnReceiveRequestConsent;
 import com.skysoft.smart.intranetchat.bean.RecordCallBean;

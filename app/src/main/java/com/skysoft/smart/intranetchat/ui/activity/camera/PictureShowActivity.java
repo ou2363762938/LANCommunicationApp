@@ -10,7 +10,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.skysoft.smart.intranetchat.R;
-import com.skysoft.smart.intranetchat.camera.widget.ClipViewLayout;
+import com.skysoft.smart.intranetchat.model.camera.widget.ClipViewLayout;
 import com.skysoft.smart.intranetchat.tools.customstatusbar.CustomStatusBarBackground;
 
 /***

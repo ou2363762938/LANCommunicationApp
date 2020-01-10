@@ -19,11 +19,11 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.bumptech.glide.Glide;
 import com.skysoft.smart.intranetchat.R;
 import com.skysoft.smart.intranetchat.app.IntranetChatApplication;
-import com.skysoft.smart.intranetchat.app.VoiceCall;
+import com.skysoft.smart.intranetchat.model.VoiceCall;
 import com.skysoft.smart.intranetchat.app.impl.OnEstablishCallConnect;
 import com.skysoft.smart.intranetchat.app.impl.OnReceiveCallHungUp;
-import com.skysoft.smart.intranetchat.camera.audioTrack.VioceCallPlay;
-import com.skysoft.smart.intranetchat.camera.manager.MyAudioManager;
+import com.skysoft.smart.intranetchat.model.camera.audioTrack.VioceCallPlay;
+import com.skysoft.smart.intranetchat.model.camera.manager.MyAudioManager;
 import com.skysoft.smart.intranetchat.tools.customstatusbar.CustomStatusBarBackground;
 import com.skysoft.smart.intranetchat.ui.activity.videocall.VideoCallActivity;
 

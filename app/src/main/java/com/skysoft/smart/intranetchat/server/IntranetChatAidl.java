@@ -11,17 +11,17 @@ import android.util.Log;
 
 import com.skysoft.smart.intranetchat.IIntranetChatAidlInterface;
 import com.skysoft.smart.intranetchat.IIntranetChatAidlInterfaceCallback;
-import com.skysoft.smart.intranetchat.network.bean.AskResourceBean;
-import com.skysoft.smart.intranetchat.network.bean.ResponseBean;
-import com.skysoft.smart.intranetchat.network.bean.UserInfoBean;
-import com.skysoft.smart.intranetchat.network.call.VoiceCallThread;
-import com.skysoft.smart.intranetchat.network.manager.PathManager;
-import com.skysoft.smart.intranetchat.network.manager.ResourceManager;
-import com.skysoft.smart.intranetchat.network.Config;
-import com.skysoft.smart.intranetchat.network.bean.FileBean;
-import com.skysoft.smart.intranetchat.network.bean.ResourceManagerBean;
-import com.skysoft.smart.intranetchat.network.manager.Sender;
-import com.skysoft.smart.intranetchat.network.receive.MonitorUdpReceivePortThread;
+import com.skysoft.smart.intranetchat.model.network.bean.AskResourceBean;
+import com.skysoft.smart.intranetchat.model.network.bean.ResponseBean;
+import com.skysoft.smart.intranetchat.model.network.bean.UserInfoBean;
+import com.skysoft.smart.intranetchat.model.network.call.VoiceCallThread;
+import com.skysoft.smart.intranetchat.model.network.manager.PathManager;
+import com.skysoft.smart.intranetchat.model.network.manager.ResourceManager;
+import com.skysoft.smart.intranetchat.model.network.Config;
+import com.skysoft.smart.intranetchat.model.network.bean.FileBean;
+import com.skysoft.smart.intranetchat.model.network.bean.ResourceManagerBean;
+import com.skysoft.smart.intranetchat.model.network.manager.Sender;
+import com.skysoft.smart.intranetchat.model.network.receive.MonitorUdpReceivePortThread;
 import com.skysoft.smart.intranetchat.tools.GsonTools;
 
 import java.util.List;

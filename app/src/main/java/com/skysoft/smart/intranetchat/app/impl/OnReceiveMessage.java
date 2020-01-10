@@ -5,8 +5,8 @@
  */
 package com.skysoft.smart.intranetchat.app.impl;
 
-import com.skysoft.smart.intranetchat.network.bean.FileBean;
-import com.skysoft.smart.intranetchat.network.bean.MessageBean;
+import com.skysoft.smart.intranetchat.model.network.bean.FileBean;
+import com.skysoft.smart.intranetchat.model.network.bean.MessageBean;
 
 public interface OnReceiveMessage {
     void onReceiveMessage(MessageBean message, String host);

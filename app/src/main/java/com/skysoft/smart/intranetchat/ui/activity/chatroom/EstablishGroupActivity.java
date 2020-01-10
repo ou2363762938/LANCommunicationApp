@@ -22,14 +22,12 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.skysoft.smart.intranetchat.R;
-import com.skysoft.smart.intranetchat.app.EstablishGroup;
 import com.skysoft.smart.intranetchat.app.IntranetChatApplication;
 import com.skysoft.smart.intranetchat.bean.GroupMemberList;
-import com.skysoft.smart.intranetchat.bean.GroupMembersBean;
 import com.skysoft.smart.intranetchat.database.MyDataBase;
 import com.skysoft.smart.intranetchat.database.table.ContactEntity;
 import com.skysoft.smart.intranetchat.database.table.GroupMemberEntity;
-import com.skysoft.smart.intranetchat.network.bean.EstablishGroupBean;
+import com.skysoft.smart.intranetchat.model.network.bean.EstablishGroupBean;
 import com.skysoft.smart.intranetchat.tools.QuickClickListener;
 import com.skysoft.smart.intranetchat.tools.customstatusbar.CustomStatusBarBackground;
 import com.skysoft.smart.intranetchat.tools.toastutil.ToastUtil;

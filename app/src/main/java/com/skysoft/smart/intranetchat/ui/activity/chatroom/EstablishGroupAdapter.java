@@ -19,13 +19,13 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.skysoft.smart.intranetchat.R;
-import com.skysoft.smart.intranetchat.app.EstablishGroup;
+import com.skysoft.smart.intranetchat.model.EstablishGroup;
 import com.skysoft.smart.intranetchat.app.IntranetChatApplication;
 import com.skysoft.smart.intranetchat.database.table.ContactEntity;
 import com.skysoft.smart.intranetchat.database.table.GroupMemberEntity;
 import com.skysoft.smart.intranetchat.database.table.LatestChatHistoryEntity;
-import com.skysoft.smart.intranetchat.network.bean.EstablishGroupBean;
-import com.skysoft.smart.intranetchat.network.bean.UserInfoBean;
+import com.skysoft.smart.intranetchat.model.network.bean.EstablishGroupBean;
+import com.skysoft.smart.intranetchat.model.network.bean.UserInfoBean;
 import com.skysoft.smart.intranetchat.tools.Identifier;
 import com.skysoft.smart.intranetchat.tools.QuickClickListener;
 import com.skysoft.smart.intranetchat.tools.toastutil.ToastUtil;

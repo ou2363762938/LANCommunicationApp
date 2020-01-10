@@ -5,8 +5,7 @@
  */
 package com.skysoft.smart.intranetchat.app.impl;
 
-import com.skysoft.smart.intranetchat.network.bean.MessageBean;
-import com.skysoft.smart.intranetchat.network.bean.UserInfoBean;
+import com.skysoft.smart.intranetchat.model.network.bean.UserInfoBean;
 
 public interface HandleInfo {
     void onReceiveVoiceCall(UserInfoBean userInfoBean,String host);

@@ -14,7 +14,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
 
-    <com.skysoft.smart.intranetchat.camera.widget.ClipViewLayout
+    <com.skysoft.smart.intranetchat.model.camera.widget.ClipViewLayout
         android:id="@+id/clipViewLayout_picture"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

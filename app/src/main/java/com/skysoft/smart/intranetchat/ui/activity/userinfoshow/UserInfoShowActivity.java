@@ -13,9 +13,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.bumptech.glide.Glide;
 import com.skysoft.smart.intranetchat.R;
 import com.skysoft.smart.intranetchat.app.IntranetChatApplication;
-import com.skysoft.smart.intranetchat.app.Login;
+import com.skysoft.smart.intranetchat.model.Login;
 import com.skysoft.smart.intranetchat.database.table.ContactEntity;
-import com.skysoft.smart.intranetchat.network.Config;
+import com.skysoft.smart.intranetchat.model.network.Config;
 import com.skysoft.smart.intranetchat.tools.customstatusbar.CustomStatusBarBackground;
 import com.skysoft.smart.intranetchat.ui.activity.chatroom.ChatRoomConfig;
 

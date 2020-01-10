@@ -21,8 +21,8 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.skysoft.smart.intranetchat.R;
-import com.skysoft.smart.intranetchat.camera.entity.EventMessage;
-import com.skysoft.smart.intranetchat.camera.manager.MyVideoManager;
+import com.skysoft.smart.intranetchat.model.camera.entity.EventMessage;
+import com.skysoft.smart.intranetchat.model.camera.manager.MyVideoManager;
 import com.skysoft.smart.intranetchat.tools.QuickClickListener;
 import com.skysoft.smart.intranetchat.tools.customstatusbar.CustomStatusBarBackground;
 

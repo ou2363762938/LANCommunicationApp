@@ -1,6 +1,5 @@
 package com.skysoft.smart.intranetchat.ui.activity.chatroom;
 
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -8,7 +7,6 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Point;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -17,10 +15,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
-import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -28,15 +24,11 @@ import com.bumptech.glide.Glide;
 import com.skysoft.smart.intranetchat.R;
 import com.skysoft.smart.intranetchat.app.BaseActivity;
 import com.skysoft.smart.intranetchat.app.IntranetChatApplication;
-import com.skysoft.smart.intranetchat.app.SendMessage;
+import com.skysoft.smart.intranetchat.model.SendMessage;
 import com.skysoft.smart.intranetchat.bean.TransmitBean;
 import com.skysoft.smart.intranetchat.database.table.ChatRecordEntity;
-import com.skysoft.smart.intranetchat.database.table.ContactEntity;
 import com.skysoft.smart.intranetchat.database.table.LatestChatHistoryEntity;
-import com.skysoft.smart.intranetchat.network.bean.MessageBean;
-import com.skysoft.smart.intranetchat.tools.customstatusbar.CustomStatusBarBackground;
-
-import org.w3c.dom.Text;
+import com.skysoft.smart.intranetchat.model.network.bean.MessageBean;
 
 import java.util.ArrayList;
 import java.util.Iterator;

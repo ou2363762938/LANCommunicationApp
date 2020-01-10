@@ -30,7 +30,7 @@
 
     </RelativeLayout>
 
-    <com.skysoft.smart.intranetchat.camera.widget.ClipViewLayout
+    <com.skysoft.smart.intranetchat.model.camera.widget.ClipViewLayout
         android:id="@+id/clipViewLayout"
         android:layout_width="match_parent"
         android:layout_height="0dp"

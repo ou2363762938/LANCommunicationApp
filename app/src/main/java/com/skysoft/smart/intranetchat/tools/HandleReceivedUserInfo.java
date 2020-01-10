@@ -10,14 +10,12 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.skysoft.smart.intranetchat.app.IntranetChatApplication;
-import com.skysoft.smart.intranetchat.database.MyDataBase;
-import com.skysoft.smart.intranetchat.database.dao.ContactDao;
 import com.skysoft.smart.intranetchat.database.table.ContactEntity;
-import com.skysoft.smart.intranetchat.network.Config;
-import com.skysoft.smart.intranetchat.network.bean.AskResourceBean;
-import com.skysoft.smart.intranetchat.network.bean.FileBean;
-import com.skysoft.smart.intranetchat.network.bean.UserInfoBean;
-import com.skysoft.smart.intranetchat.network.manager.PathManager;
+import com.skysoft.smart.intranetchat.model.network.Config;
+import com.skysoft.smart.intranetchat.model.network.bean.AskResourceBean;
+import com.skysoft.smart.intranetchat.model.network.bean.FileBean;
+import com.skysoft.smart.intranetchat.model.network.bean.UserInfoBean;
+import com.skysoft.smart.intranetchat.model.network.manager.PathManager;
 
 import org.greenrobot.eventbus.EventBus;
 

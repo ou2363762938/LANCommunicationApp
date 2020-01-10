@@ -5,7 +5,6 @@
  */
 package com.skysoft.smart.intranetchat.server;
 
-import android.annotation.TargetApi;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -13,7 +12,6 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentSender;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
@@ -22,9 +20,9 @@ import android.util.Log;
 
 import com.skysoft.smart.intranetchat.R;
 import com.skysoft.smart.intranetchat.app.IntranetChatApplication;
-import com.skysoft.smart.intranetchat.network.receive.MonitorCallThread;
-import com.skysoft.smart.intranetchat.network.receive.MonitorTcpReceivePortThread;
-import com.skysoft.smart.intranetchat.network.receive.MonitorUdpReceivePortThread;
+import com.skysoft.smart.intranetchat.model.network.receive.MonitorCallThread;
+import com.skysoft.smart.intranetchat.model.network.receive.MonitorTcpReceivePortThread;
+import com.skysoft.smart.intranetchat.model.network.receive.MonitorUdpReceivePortThread;
 
 import java.net.Inet6Address;
 import java.net.InetAddress;

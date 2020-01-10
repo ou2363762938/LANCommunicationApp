@@ -25,17 +25,17 @@ import com.skysoft.smart.intranetchat.R;
 import com.skysoft.smart.intranetchat.tools.QuickClickListener;
 import com.skysoft.smart.intranetchat.ui.activity.camera.ClipImageActivity;
 import com.skysoft.smart.intranetchat.ui.activity.camera.ShowPictureActivity;
-import com.skysoft.smart.intranetchat.camera.entity.EventMessage;
-import com.skysoft.smart.intranetchat.camera.manager.MyCameraManager;
-import com.skysoft.smart.intranetchat.camera.widget.AutoFitTextureView;
-import com.skysoft.smart.intranetchat.camera.widget.FocusView;
+import com.skysoft.smart.intranetchat.model.camera.entity.EventMessage;
+import com.skysoft.smart.intranetchat.model.camera.manager.MyCameraManager;
+import com.skysoft.smart.intranetchat.model.camera.widget.AutoFitTextureView;
+import com.skysoft.smart.intranetchat.model.camera.widget.FocusView;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
-import static com.skysoft.smart.intranetchat.camera.manager.MyCameraManager.CLOSE_FLASH;
-import static com.skysoft.smart.intranetchat.camera.manager.MyCameraManager.OPEN_FLASH;
+import static com.skysoft.smart.intranetchat.model.camera.manager.MyCameraManager.CLOSE_FLASH;
+import static com.skysoft.smart.intranetchat.model.camera.manager.MyCameraManager.OPEN_FLASH;
 
 
 public class CameraFragment extends Fragment implements View.OnClickListener {

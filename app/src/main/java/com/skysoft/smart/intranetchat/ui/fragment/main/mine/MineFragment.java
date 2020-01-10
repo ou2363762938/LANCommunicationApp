@@ -16,7 +16,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -29,16 +28,16 @@ import com.bumptech.glide.Glide;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.skysoft.smart.intranetchat.R;
 import com.skysoft.smart.intranetchat.app.IntranetChatApplication;
-import com.skysoft.smart.intranetchat.app.Login;
+import com.skysoft.smart.intranetchat.model.Login;
 import com.skysoft.smart.intranetchat.tools.QuickClickListener;
 import com.skysoft.smart.intranetchat.tools.toastutil.ToastUtil;
 import com.skysoft.smart.intranetchat.ui.activity.camera.CameraActivity;
 import com.skysoft.smart.intranetchat.ui.activity.camera.ClipImageActivity;
-import com.skysoft.smart.intranetchat.camera.entity.EventMessage;
+import com.skysoft.smart.intranetchat.model.camera.entity.EventMessage;
 import com.skysoft.smart.intranetchat.database.MyDataBase;
 import com.skysoft.smart.intranetchat.database.table.MineInfoEntity;
-import com.skysoft.smart.intranetchat.network.Config;
-import com.skysoft.smart.intranetchat.network.bean.UserInfoBean;
+import com.skysoft.smart.intranetchat.model.network.Config;
+import com.skysoft.smart.intranetchat.model.network.bean.UserInfoBean;
 import com.skysoft.smart.intranetchat.tools.Identifier;
 
 import org.greenrobot.eventbus.EventBus;

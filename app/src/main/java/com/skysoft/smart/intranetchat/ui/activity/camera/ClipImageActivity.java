@@ -15,9 +15,9 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.skysoft.smart.intranetchat.R;
-import com.skysoft.smart.intranetchat.camera.entity.EventMessage;
-import com.skysoft.smart.intranetchat.camera.util.FileUtil;
-import com.skysoft.smart.intranetchat.camera.widget.ClipViewLayout;
+import com.skysoft.smart.intranetchat.model.camera.entity.EventMessage;
+import com.skysoft.smart.intranetchat.model.camera.util.FileUtil;
+import com.skysoft.smart.intranetchat.model.camera.widget.ClipViewLayout;
 import com.skysoft.smart.intranetchat.tools.customstatusbar.CustomStatusBarBackground;
 
 import org.greenrobot.eventbus.EventBus;

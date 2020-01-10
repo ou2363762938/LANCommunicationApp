@@ -20,8 +20,8 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.RequestOptions;
 import com.skysoft.smart.intranetchat.R;
-import com.skysoft.smart.intranetchat.camera.util.BitmapUtil;
-import com.skysoft.smart.intranetchat.camera.util.FileUtil;
+import com.skysoft.smart.intranetchat.model.camera.util.BitmapUtil;
+import com.skysoft.smart.intranetchat.model.camera.util.FileUtil;
 import com.skysoft.smart.intranetchat.tools.customstatusbar.CustomStatusBarBackground;
 
 
