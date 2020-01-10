@@ -7,10 +7,12 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Point;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,6 +26,8 @@ import com.bumptech.glide.Glide;
 import com.skysoft.smart.intranetchat.R;
 import com.skysoft.smart.intranetchat.app.BaseActivity;
 import com.skysoft.smart.intranetchat.app.IntranetChatApplication;
+import com.skysoft.smart.intranetchat.bean.SendMessageBean;
+import com.skysoft.smart.intranetchat.database.MyDataBase;
 import com.skysoft.smart.intranetchat.model.SendMessage;
 import com.skysoft.smart.intranetchat.bean.TransmitBean;
 import com.skysoft.smart.intranetchat.database.table.ChatRecordEntity;
@@ -170,6 +174,11 @@ public class TransmitActivity extends BaseActivity implements View.OnClickListen
                 }else {
                     String leave = leaveWord.getText().toString();
                     Log.d(TAG, "onClick: leave = " + leave);
+                    transmitMessage(id);
+                    if (!TextUtils.isEmpty(leave)){
+                        mMessage = leave;
+                        transmitMessage(id);
+                    }
                     alertDialog.dismiss();
                     TransmitActivity.this.finish();
                 }
@@ -189,37 +198,25 @@ public class TransmitActivity extends BaseActivity implements View.OnClickListen
                 int i = ((ViewGroup) v.getParent()).indexOfChild(v);
                 Log.d(TAG, "onClick: i = " + i);
                 showDialog(i);
-//                if (mRecordType == ChatRoomConfig.RECORD_TEXT){
-//                    transmitMessage(i);
-//                }
                 break;
         }
     }
 
     //转发文字
     private void transmitMessage(int i) {
-        MessageBean messageBean = new MessageBean();
-        messageBean.setMsg(mMessage);
-        messageBean.setTimeStamp(System.currentTimeMillis());
-        messageBean.setSender(IntranetChatApplication.getsMineUserInfo().getIdentifier());
-        if (mTransmitUsers.get(i).isGroup()){
-            messageBean.setReceiver(mTransmitUsers.get(i).getmUserIdentifier());
-        }else {
-            messageBean.setReceiver(messageBean.getSender());
-        }
-        ChatRecordEntity chatRecordEntity = new ChatRecordEntity();
-        chatRecordEntity.setContent(mMessage);
-        chatRecordEntity.setIsReceive(ChatRoomConfig.SEND_MESSAGE);
-        chatRecordEntity.setReceiver(mTransmitUsers.get(i).getmUserIdentifier());
-        chatRecordEntity.setSender(IntranetChatApplication.getsMineUserInfo().getIdentifier());
-        chatRecordEntity.setTime(messageBean.getTimeStamp());
-        chatRecordEntity.setType(ChatRoomConfig.RECORD_TEXT);//发送消息
-        if (!mTransmitUsers.get(i).isGroup()){
-            if (!TextUtils.isEmpty(mTransmitUsers.get(i).getmHost())){
-                SendMessage.sendMessage(messageBean,mTransmitUsers.get(i).getmHost());
+        //转发消息
+        ChatRecordEntity recordEntity = SendMessage.sendMessage(new SendMessageBean(mMessage,
+                mTransmitUsers.get(i).getmUserIdentifier(),
+                mTransmitUsers.get(i).getmHost(),
+                mTransmitUsers.get(i).getmAvatarPath(),
+                mTransmitUsers.get(i).getmUseName(),
+                mTransmitUsers.get(i).isGroup()));
+        //记录消息
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                MyDataBase.getInstance().getChatRecordDao().insert(recordEntity);
             }
-        }else {
-            SendMessage.broadMessage(messageBean);
-        }
+        }).start();
     }
 }

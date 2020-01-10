@@ -39,6 +39,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.skysoft.smart.intranetchat.MainActivity;
 import com.skysoft.smart.intranetchat.R;
 import com.skysoft.smart.intranetchat.app.IntranetChatApplication;
+import com.skysoft.smart.intranetchat.bean.SendMessageBean;
 import com.skysoft.smart.intranetchat.model.SendFile;
 import com.skysoft.smart.intranetchat.model.SendMessage;
 import com.skysoft.smart.intranetchat.app.impl.OnReceiveMessage;
@@ -444,7 +445,8 @@ public class ChatRoomActivity extends AppCompatActivity implements View.OnClickL
                 }
             }).start();
             //刷新最近聊天
-            refreshMessageFragment(content);
+            SendMessage.sendMessage(new SendMessageBean(content, receiverIdentifier, host,
+                    receiverAvatarPath, receiverName, isGroup));
         }else if (b == Config.SEND_FILE_BIG){
             ToastUtil.toast(ChatRoomActivity.this,getString(R.string.file_size_too_big));
         }else if(b == Config.SEND_FILE_NOT_FOUND){
@@ -915,34 +917,10 @@ public class ChatRoomActivity extends AppCompatActivity implements View.OnClickL
             ToastUtil.toast(ChatRoomActivity.this, getString(R.string.chat_room_word_limit));
             return;
         }
-        //刷新聊天室的聊天界面
-        MessageBean messageBean = new MessageBean();
-        messageBean.setMsg(message);
-        messageBean.setTimeStamp(System.currentTimeMillis());
-        messageBean.setSender(IntranetChatApplication.getsMineUserInfo().getIdentifier());
-        if (isGroup){
-            messageBean.setReceiver(receiverIdentifier);
-        }else {
-            messageBean.setReceiver(messageBean.getSender());
-        }
-        ChatRecordEntity chatRecordEntity = new ChatRecordEntity();
-        chatRecordEntity.setContent(message);
-        chatRecordEntity.setIsReceive(ChatRoomConfig.SEND_MESSAGE);
-        chatRecordEntity.setReceiver(receiverIdentifier);
-        chatRecordEntity.setSender(IntranetChatApplication.getsMineUserInfo().getIdentifier());
-        chatRecordEntity.setTime(messageBean.getTimeStamp());
-        chatRecordEntity.setType(ChatRoomConfig.RECORD_TEXT);
+        ChatRecordEntity recordEntity = SendMessage.sendMessage(new SendMessageBean(message, receiverIdentifier, host,
+                receiverAvatarPath, receiverName, isGroup));
         inputMessage.setText("");
-        adapter.add(chatRecordEntity);
-
-        //发送消息
-        if (!isGroup){
-            SendMessage.sendMessage(messageBean,host);
-        }else {
-            SendMessage.broadMessage(messageBean);
-        }
-        //更新最近消息列表
-        refreshMessageFragment(message);
+        adapter.add(recordEntity);
     }
 
     public static String millsToTime(long time) {
@@ -983,64 +961,11 @@ public class ChatRoomActivity extends AppCompatActivity implements View.OnClickL
         return fullTime;
     }
 
-    private LatestChatHistoryEntity adapterToLatest(String message) {
-        LatestChatHistoryEntity latestChatHistoryEntity = new LatestChatHistoryEntity();
-        latestChatHistoryEntity.setContentTimeMill(System.currentTimeMillis());
-        latestChatHistoryEntity.setContentTime(millsToTime(System.currentTimeMillis()));
-        latestChatHistoryEntity.setContent(message);
-        latestChatHistoryEntity.setHost(host);
-        latestChatHistoryEntity.setStatus(com.skysoft.smart.intranetchat.model.network.Config.STATUS_ONLINE);
-        latestChatHistoryEntity.setUnReadNumber(0);
-        latestChatHistoryEntity.setUserName(receiverName);
-        latestChatHistoryEntity.setUserIdentifier(receiverIdentifier);
-        latestChatHistoryEntity.setUserHeadPath(receiverAvatarPath);
-        return latestChatHistoryEntity;
-    }
-
     @Override
     public void onBackPressed() {
         super.onBackPressed();
         MainActivity.go(ChatRoomActivity.this);
         finish();
-    }
-
-    //刷新消息界面
-    private void refreshMessageFragment(String content) {
-        List<LatestChatHistoryEntity> messageList = IntranetChatApplication.getMessageList();
-        Iterator<LatestChatHistoryEntity> iterator = messageList.iterator();
-        while (iterator.hasNext()) {
-            LatestChatHistoryEntity next = iterator.next();
-            if (next.getUserIdentifier().equals(receiverIdentifier)) {
-                next.setContent(content);
-                next.setHost(host);
-                next.setUnReadNumber(0);
-                next.setContentTime(millsToTime(System.currentTimeMillis()));
-                next.setContentTimeMill(System.currentTimeMillis());
-                next.setStatus(com.skysoft.smart.intranetchat.model.network.Config.STATUS_ONLINE);
-                next.setUserName(receiverName);
-                next.setUserHeadPath(receiverAvatarPath);
-                MessageListSort.CollectionsList(IntranetChatApplication.getMessageList());
-                IntranetChatApplication.getsMessageListAdapter().notifyDataSetChanged();
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        MyDataBase.getInstance().getLatestChatHistoryDao().update(next);
-                    }
-                }).start();
-                return;
-            }
-        }
-        LatestChatHistoryEntity latestChatHistoryEntity = adapterToLatest(content);
-        messageList.add(latestChatHistoryEntity);
-        MessageListSort.CollectionsList(IntranetChatApplication.getMessageList());
-        IntranetChatApplication.getsMessageListAdapter().notifyDataSetChanged();
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                MyDataBase.getInstance().getLatestChatHistoryDao().insert(latestChatHistoryEntity);
-            }
-        }).start();
-        //发送消息
     }
 
     public OnScrollToPosition onScrollToPosition = new OnScrollToPosition() {
