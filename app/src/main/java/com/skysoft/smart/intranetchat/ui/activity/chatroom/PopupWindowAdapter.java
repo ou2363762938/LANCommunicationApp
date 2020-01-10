@@ -66,7 +66,7 @@ public class PopupWindowAdapter extends RecyclerView.Adapter<PopupWindowAdapter.
 
                 }else if (clickContent.equals(mContext.getResources().getString(R.string.transmit))){
                     //点击转发
-                    TransmitActivity.startActivity(mContext);
+                    transmitByType();
                 }else if (clickContent.equals(mContext.getResources().getString(R.string.delete))){
                     //点击删除
 
@@ -77,6 +77,12 @@ public class PopupWindowAdapter extends RecyclerView.Adapter<PopupWindowAdapter.
                 mPopupWindow.dismiss();
             }
         });
+    }
+
+    private void transmitByType(){
+        if (mChatRecordEntity.getType() == ChatRoomConfig.RECORD_TEXT){
+            TransmitActivity.startActivity(mContext,mChatRecordEntity.getContent(),mChatRecordEntity.getType(),mChatRecordEntity.getReceiver());
+        }
     }
 
     @Override

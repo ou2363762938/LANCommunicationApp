@@ -450,6 +450,7 @@ public class IntranetChatApplication extends Application {
                         LatestChatHistoryEntity next = iterator.next();
                         if (next.getUserIdentifier().equals(temp.getIdentifier())){
                             next.setStatus(temp.getStatus());
+                            next.setHost(temp.getHost());
 
                             boolean change = false;
                             if (temp.getAvatarPath() == null && !TextUtils.isEmpty(next.getUserHeadPath()) && temp.getAvatarIdentifier().equals(defaultAvatarIdentifier)){

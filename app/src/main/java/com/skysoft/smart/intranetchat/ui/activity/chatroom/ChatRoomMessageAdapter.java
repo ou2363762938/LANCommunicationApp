@@ -653,7 +653,7 @@ public class ChatRoomMessageAdapter extends RecyclerView.Adapter<ChatRoomMessage
         return bitmap;
     }
 
-    private static int makeDropDownMeasureSpec(int measureSpec){
+    public static int makeDropDownMeasureSpec(int measureSpec){
         int mode = 0;
         if (measureSpec == ViewGroup.LayoutParams.WRAP_CONTENT){
             mode = View.MeasureSpec.UNSPECIFIED;

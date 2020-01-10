@@ -37,7 +37,7 @@ public class LatestChatHistoryEntity {
     @ColumnInfo(name = "un_read_number")
     private int unReadNumber;
     @ColumnInfo
-    private int group;
+    private int group;      //单聊为0，群聊为1
     @Ignore
     private int status;
     //B:[Intranet Chat] [APP][UI] Chat Room Oliver Ou 2019/11/4
