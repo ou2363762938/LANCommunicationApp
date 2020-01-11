@@ -7,19 +7,21 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Point;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
+import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.util.Log;
-import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
@@ -33,7 +35,6 @@ import com.skysoft.smart.intranetchat.model.SendMessage;
 import com.skysoft.smart.intranetchat.bean.TransmitBean;
 import com.skysoft.smart.intranetchat.database.table.ChatRecordEntity;
 import com.skysoft.smart.intranetchat.database.table.LatestChatHistoryEntity;
-import com.skysoft.smart.intranetchat.model.network.bean.MessageBean;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -57,6 +58,38 @@ public class TransmitActivity extends BaseActivity implements View.OnClickListen
     private String mMessage;
     private int mRecordType;        //转发消息的内型
     private String mTransmitRoomIdentifier;     //转发消息的聊天室Identifier
+    private ScrollView mScroll;     //title以下的内容
+    private ConstraintLayout mTitle;
+    private LinearLayout mSearchInputBox;
+    private LinearLayout mSearchResultBox;
+    private ListView mSearchResultList;     //搜索结果的list
+    private TextView mNoMoreResult;     //没有更多搜索结果
+    private EditText mInputSearchKey;
+    private ImageView mClearInputSearchKey;   //删除搜索框输入的内容
+    private TextView mCancelSearch;     //取消搜索
+
+    private TextWatcher mInputSearchKeyListener = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+        }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+        }
+
+        @Override
+        public void afterTextChanged(Editable s) {
+            Log.d(TAG, "afterTextChanged: s = " + s.toString());
+            if (!TextUtils.isEmpty(s.toString())){
+                mSearchResultBox.setBackgroundColor(getResources().getColor(R.color.color_white));
+                mNoMoreResult.setVisibility(View.VISIBLE);
+            }else {
+                mSearchResultBox.setBackgroundColor(getResources().getColor(R.color.color_light_black));
+                mNoMoreResult.setVisibility(View.GONE);
+            }
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,9 +112,21 @@ public class TransmitActivity extends BaseActivity implements View.OnClickListen
         mClose = findViewById(R.id.close_transmit);
         mSearchBox = findViewById(R.id.transmit_search_box);
         mRecentlyChat = findViewById(R.id.transmit_recently_chat);
+        mScroll = findViewById(R.id.transmit_scroll);
+        mTitle = findViewById(R.id.transmit_title);
+        mSearchInputBox = findViewById(R.id.transmit_search_input_box);
+        mSearchResultBox = findViewById(R.id.transmit_search_result_box);
+        mSearchResultList = findViewById(R.id.transmit_search_result_list);
+        mNoMoreResult = findViewById(R.id.transmit_no_more_result);
+        mInputSearchKey = findViewById(R.id.transmit_search);
+        mClearInputSearchKey = findViewById(R.id.transmit_clear_search_content);
+        mCancelSearch = findViewById(R.id.transmit_cancel_search);
 
         mClose.setOnClickListener(this);
         mSearchBox.setOnClickListener(this::onClick);
+        mClearInputSearchKey.setOnClickListener(this::onClick);
+        mCancelSearch.setOnClickListener(this::onClick);
+        mInputSearchKey.addTextChangedListener(mInputSearchKeyListener);
     }
 
     private void initData() {
@@ -208,16 +253,37 @@ public class TransmitActivity extends BaseActivity implements View.OnClickListen
                 showDialog(i);
                 break;
             case R.id.transmit_search_box:
-                onClickSearchBox();
+                openSearchBox();
+                break;
+            case R.id.transmit_clear_search_content:
+                mInputSearchKey.setText("");
+                break;
+            case R.id.transmit_cancel_search:
+                closeSearchBox();
                 break;
         }
     }
 
     /**
      * 点击搜索框，弹出搜索界面*/
-    private void onClickSearchBox() {
-        ScrollView scrollView = findViewById(R.id.transmit_scroll);
-        scrollView.setVisibility(View.GONE);
+    private void openSearchBox() {
+        mScroll.setVisibility(View.GONE);
+        mTitle.setVisibility(View.GONE);
+
+        mSearchInputBox.setVisibility(View.VISIBLE);
+        mSearchResultBox.setVisibility(View.VISIBLE);
+        mSearchResultBox.setBackgroundColor(getResources().getColor(R.color.color_light_black));
+    }
+
+    private void closeSearchBox() {
+        mInputSearchKey.setText("");
+        mSearchResultBox.setVisibility(View.GONE);
+        mNoMoreResult.setVisibility(View.GONE);
+        mSearchResultList.setVisibility(View.GONE);
+        mSearchInputBox.setVisibility(View.GONE);
+
+        mTitle.setVisibility(View.VISIBLE);
+        mScroll.setVisibility(View.VISIBLE);
     }
 
     //转发文字
@@ -236,5 +302,15 @@ public class TransmitActivity extends BaseActivity implements View.OnClickListen
                 MyDataBase.getInstance().getChatRecordDao().insert(recordEntity);
             }
         }).start();
+    }
+
+    @Override
+    public void onBackPressed() {
+
+        if (mTitle.getVisibility() == View.GONE){
+            closeSearchBox();
+            return;
+        }
+        super.onBackPressed();
     }
 }
