@@ -17,7 +17,7 @@ import com.skysoft.smart.intranetchat.model.Login;
 import com.skysoft.smart.intranetchat.database.table.ContactEntity;
 import com.skysoft.smart.intranetchat.model.network.Config;
 import com.skysoft.smart.intranetchat.tools.customstatusbar.CustomStatusBarBackground;
-import com.skysoft.smart.intranetchat.ui.activity.chatroom.ChatRoomConfig;
+import com.skysoft.smart.intranetchat.ui.activity.chatroom.ChatRoom.ChatRoomConfig;
 
 import java.util.Iterator;
 

@@ -25,10 +25,10 @@
         android:requestLegacyExternalStorage="true"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".ui.activity.chatroom.TransmitActivity"
+        <activity android:name=".ui.activity.chatroom.PopupWindow.TransmitActivity"
             android:screenOrientation="portrait"/>
         <activity
-            android:name=".ui.activity.chatroom.EstablishGroupActivity"
+            android:name=".ui.activity.chatroom.EstablishGroup.EstablishGroupActivity"
             android:screenOrientation="portrait" />
         <activity
             android:name=".ui.activity.videocall.VideoCallActivity"
@@ -40,7 +40,7 @@
             android:name=".ui.activity.videocall.LaunchVideoCallActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".ui.activity.chatroom.ChatRoomActivity"
+            android:name=".ui.activity.chatroom.ChatRoom.ChatRoomActivity"
             android:launchMode="singleTask"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustPan|stateHidden" />

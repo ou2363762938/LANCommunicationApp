@@ -29,7 +29,7 @@ import com.skysoft.smart.intranetchat.bean.RecordCallBean;
 import com.skysoft.smart.intranetchat.model.camera.manager.MyShowCaptureManager;
 import com.skysoft.smart.intranetchat.model.camera.videocall.Sender;
 import com.skysoft.smart.intranetchat.tools.customstatusbar.CustomStatusBarBackground;
-import com.skysoft.smart.intranetchat.ui.activity.chatroom.ChatRoomConfig;
+import com.skysoft.smart.intranetchat.ui.activity.chatroom.ChatRoom.ChatRoomConfig;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;

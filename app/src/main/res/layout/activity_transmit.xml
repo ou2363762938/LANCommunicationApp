@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".ui.activity.chatroom.TransmitActivity">
+    tools:context=".ui.activity.chatroom.PopupWindow.TransmitActivity">
     <View
         android:id="@+id/custom_status_bar_background"
         android:layout_width="match_parent"

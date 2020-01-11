@@ -13,7 +13,7 @@ import com.skysoft.smart.intranetchat.model.network.Config;
 import com.skysoft.smart.intranetchat.model.network.bean.EstablishGroupBean;
 import com.skysoft.smart.intranetchat.model.network.bean.UserInfoBean;
 import com.skysoft.smart.intranetchat.tools.GsonTools;
-import com.skysoft.smart.intranetchat.ui.activity.chatroom.ChatRoomActivity;
+import com.skysoft.smart.intranetchat.ui.activity.chatroom.ChatRoom.ChatRoomActivity;
 
 import java.util.ArrayList;
 import java.util.Iterator;

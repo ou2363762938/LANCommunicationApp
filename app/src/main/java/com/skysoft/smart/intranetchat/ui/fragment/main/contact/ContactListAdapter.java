@@ -19,7 +19,7 @@ import com.bumptech.glide.Glide;
 import com.skysoft.smart.intranetchat.R;
 import com.skysoft.smart.intranetchat.database.table.ContactEntity;
 import com.skysoft.smart.intranetchat.tools.QuickClickListener;
-import com.skysoft.smart.intranetchat.ui.activity.chatroom.ChatRoomActivity;
+import com.skysoft.smart.intranetchat.ui.activity.chatroom.ChatRoom.ChatRoomActivity;
 import com.skysoft.smart.intranetchat.ui.activity.userinfoshow.UserInfoShowActivity;
 
 import java.util.List;

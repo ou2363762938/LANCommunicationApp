@@ -18,7 +18,7 @@ import com.skysoft.smart.intranetchat.app.IntranetChatApplication;
 import com.skysoft.smart.intranetchat.tools.customstatusbar.CustomStatusBarBackground;
 import com.skysoft.smart.intranetchat.tools.listsort.MessageListSort;
 import com.skysoft.smart.intranetchat.tools.QuickClickListener;
-import com.skysoft.smart.intranetchat.ui.activity.chatroom.EstablishGroupActivity;
+import com.skysoft.smart.intranetchat.ui.activity.chatroom.EstablishGroup.EstablishGroupActivity;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;

@@ -43,7 +43,7 @@ import com.skysoft.smart.intranetchat.model.camera.util.CameraUtil;
 import com.skysoft.smart.intranetchat.model.camera.videocall.Manager;
 import com.skysoft.smart.intranetchat.tools.customstatusbar.CustomStatusBarBackground;
 import com.skysoft.smart.intranetchat.tools.toastutil.ToastUtil;
-import com.skysoft.smart.intranetchat.ui.activity.chatroom.ChatRoomConfig;
+import com.skysoft.smart.intranetchat.ui.activity.chatroom.ChatRoom.ChatRoomConfig;
 
 import org.greenrobot.eventbus.EventBus;
 

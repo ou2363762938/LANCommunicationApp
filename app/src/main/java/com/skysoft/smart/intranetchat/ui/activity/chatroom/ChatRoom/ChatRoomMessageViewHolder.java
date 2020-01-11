@@ -3,7 +3,7 @@
  * Created by Oliver Ou on 2019/10/30
  * Description: [Intranet Chat] [APP][UI] Chat Room
  */
-package com.skysoft.smart.intranetchat.ui.activity.chatroom;
+package com.skysoft.smart.intranetchat.ui.activity.chatroom.ChatRoom;
 
 import android.view.View;
 import android.widget.ImageView;

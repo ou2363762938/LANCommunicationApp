@@ -41,8 +41,8 @@ import com.skysoft.smart.intranetchat.model.network.bean.UserInfoBean;
 import com.skysoft.smart.intranetchat.model.network.bean.VoiceCallDataBean;
 import com.skysoft.smart.intranetchat.tools.GsonTools;
 import com.skysoft.smart.intranetchat.tools.HandleReceivedUserInfo;
-import com.skysoft.smart.intranetchat.ui.activity.chatroom.ChatRoomConfig;
-import com.skysoft.smart.intranetchat.ui.activity.chatroom.ChatRoomActivity;
+import com.skysoft.smart.intranetchat.ui.activity.chatroom.ChatRoom.ChatRoomConfig;
+import com.skysoft.smart.intranetchat.ui.activity.chatroom.ChatRoom.ChatRoomActivity;
 
 import org.greenrobot.eventbus.EventBus;
 

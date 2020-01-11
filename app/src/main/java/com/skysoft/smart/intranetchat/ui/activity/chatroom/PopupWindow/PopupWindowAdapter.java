@@ -1,4 +1,4 @@
-package com.skysoft.smart.intranetchat.ui.activity.chatroom;
+package com.skysoft.smart.intranetchat.ui.activity.chatroom.PopupWindow;
 
 import android.content.Context;
 import android.util.Log;
@@ -10,6 +10,8 @@ import android.widget.TextView;
 
 import com.skysoft.smart.intranetchat.R;
 import com.skysoft.smart.intranetchat.database.table.ChatRecordEntity;
+import com.skysoft.smart.intranetchat.ui.activity.chatroom.ChatRoom.ChatRoomConfig;
+import com.skysoft.smart.intranetchat.ui.activity.chatroom.ChatRoom.ChatRoomMessageAdapter;
 
 import java.util.Arrays;
 import java.util.List;

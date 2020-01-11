@@ -67,10 +67,10 @@ import com.skysoft.smart.intranetchat.model.network.bean.UserInfoBean;
 import com.skysoft.smart.intranetchat.server.IntranetChatServer;
 import com.skysoft.smart.intranetchat.tools.GsonTools;
 import com.skysoft.smart.intranetchat.tools.Identifier;
-import com.skysoft.smart.intranetchat.ui.activity.chatroom.ChatRoomActivity;
-import com.skysoft.smart.intranetchat.ui.activity.chatroom.ChatRoomConfig;
-import com.skysoft.smart.intranetchat.ui.activity.chatroom.ChatRoomMessageAdapter;
-import com.skysoft.smart.intranetchat.ui.activity.chatroom.EstablishGroupAdapter;
+import com.skysoft.smart.intranetchat.ui.activity.chatroom.ChatRoom.ChatRoomActivity;
+import com.skysoft.smart.intranetchat.ui.activity.chatroom.ChatRoom.ChatRoomConfig;
+import com.skysoft.smart.intranetchat.ui.activity.chatroom.ChatRoom.ChatRoomMessageAdapter;
+import com.skysoft.smart.intranetchat.ui.activity.chatroom.EstablishGroup.EstablishGroupAdapter;
 import com.skysoft.smart.intranetchat.ui.fragment.main.contact.ContactListAdapter;
 import com.skysoft.smart.intranetchat.ui.fragment.main.message.MessageListAdapter;
 

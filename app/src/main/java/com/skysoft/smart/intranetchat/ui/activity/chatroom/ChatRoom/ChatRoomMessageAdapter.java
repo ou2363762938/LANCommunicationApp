@@ -3,7 +3,7 @@
  * Created by Oliver Ou on 2019/10/30
  * Description: [Intranet Chat] [APP][UI] Chat Room
  */
-package com.skysoft.smart.intranetchat.ui.activity.chatroom;
+package com.skysoft.smart.intranetchat.ui.activity.chatroom.ChatRoom;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -45,6 +45,7 @@ import com.skysoft.smart.intranetchat.database.table.ChatRecordEntity;
 import com.skysoft.smart.intranetchat.database.table.ContactEntity;
 import com.skysoft.smart.intranetchat.database.table.FileEntity;
 import com.skysoft.smart.intranetchat.model.network.bean.ReceiveAndSaveFileBean;
+import com.skysoft.smart.intranetchat.ui.activity.chatroom.PopupWindow.PopupWindowAdapter;
 import com.skysoft.smart.intranetchat.ui.activity.userinfoshow.UserInfoShowActivity;
 
 import java.io.File;
@@ -56,7 +57,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import static com.skysoft.smart.intranetchat.ui.activity.chatroom.ChatRoomActivity.sIsAudioRecording;
+import static com.skysoft.smart.intranetchat.ui.activity.chatroom.ChatRoom.ChatRoomActivity.sIsAudioRecording;
 
 public class ChatRoomMessageAdapter extends RecyclerView.Adapter<ChatRoomMessageViewHolder>{
     private static String TAG = ChatRoomMessageAdapter.class.getSimpleName();

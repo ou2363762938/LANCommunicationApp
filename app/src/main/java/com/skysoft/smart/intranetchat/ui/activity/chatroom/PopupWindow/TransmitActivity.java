@@ -1,4 +1,4 @@
-package com.skysoft.smart.intranetchat.ui.activity.chatroom;
+package com.skysoft.smart.intranetchat.ui.activity.chatroom.PopupWindow;
 
 import androidx.constraintlayout.widget.ConstraintLayout;
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -35,6 +35,7 @@ import com.skysoft.smart.intranetchat.model.SendMessage;
 import com.skysoft.smart.intranetchat.bean.TransmitBean;
 import com.skysoft.smart.intranetchat.database.table.ChatRecordEntity;
 import com.skysoft.smart.intranetchat.database.table.LatestChatHistoryEntity;
+import com.skysoft.smart.intranetchat.ui.activity.chatroom.ChatRoom.ChatRoomConfig;
 
 import java.util.ArrayList;
 import java.util.Iterator;

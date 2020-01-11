@@ -7,7 +7,6 @@ package com.skysoft.smart.intranetchat.model;
 
 import android.os.RemoteException;
 import android.text.TextUtils;
-import android.util.Log;
 
 import com.skysoft.smart.intranetchat.app.IntranetChatApplication;
 import com.skysoft.smart.intranetchat.bean.SendMessageBean;
@@ -17,8 +16,8 @@ import com.skysoft.smart.intranetchat.database.table.LatestChatHistoryEntity;
 import com.skysoft.smart.intranetchat.model.network.bean.MessageBean;
 import com.skysoft.smart.intranetchat.tools.GsonTools;
 import com.skysoft.smart.intranetchat.tools.listsort.MessageListSort;
-import com.skysoft.smart.intranetchat.ui.activity.chatroom.ChatRoomActivity;
-import com.skysoft.smart.intranetchat.ui.activity.chatroom.ChatRoomConfig;
+import com.skysoft.smart.intranetchat.ui.activity.chatroom.ChatRoom.ChatRoomActivity;
+import com.skysoft.smart.intranetchat.ui.activity.chatroom.ChatRoom.ChatRoomConfig;
 
 import java.util.Iterator;
 import java.util.List;

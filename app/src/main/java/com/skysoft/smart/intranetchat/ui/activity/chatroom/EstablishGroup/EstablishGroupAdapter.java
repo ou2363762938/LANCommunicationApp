@@ -3,7 +3,7 @@
  * Created by Oliver Ou on 2019/11/6
  * Description: [Intranet Chat] [APP][UI] Group chat
  */
-package com.skysoft.smart.intranetchat.ui.activity.chatroom;
+package com.skysoft.smart.intranetchat.ui.activity.chatroom.EstablishGroup;
 
 import android.content.Context;
 import android.text.TextUtils;
@@ -29,6 +29,7 @@ import com.skysoft.smart.intranetchat.model.network.bean.UserInfoBean;
 import com.skysoft.smart.intranetchat.tools.Identifier;
 import com.skysoft.smart.intranetchat.tools.QuickClickListener;
 import com.skysoft.smart.intranetchat.tools.toastutil.ToastUtil;
+import com.skysoft.smart.intranetchat.ui.activity.chatroom.ChatRoom.ChatRoomActivity;
 import com.skysoft.smart.intranetchat.ui.activity.userinfoshow.UserInfoShowActivity;
 import com.skysoft.smart.intranetchat.ui.fragment.main.message.MessageListAdapter;
 

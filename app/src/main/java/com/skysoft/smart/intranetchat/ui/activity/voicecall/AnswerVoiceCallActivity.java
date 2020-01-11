@@ -19,7 +19,7 @@ import com.skysoft.smart.intranetchat.app.impl.OnReceiveCallHungUp;
 import com.skysoft.smart.intranetchat.app.impl.OnReceiveRequestConsent;
 import com.skysoft.smart.intranetchat.bean.RecordCallBean;
 import com.skysoft.smart.intranetchat.tools.customstatusbar.CustomStatusBarBackground;
-import com.skysoft.smart.intranetchat.ui.activity.chatroom.ChatRoomConfig;
+import com.skysoft.smart.intranetchat.ui.activity.chatroom.ChatRoom.ChatRoomConfig;
 
 import org.greenrobot.eventbus.EventBus;
 

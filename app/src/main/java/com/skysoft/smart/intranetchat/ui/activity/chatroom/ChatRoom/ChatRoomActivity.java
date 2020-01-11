@@ -3,7 +3,7 @@
  * Created by Oliver Ou on 2019/10/30
  * Description: [Intranet Chat] [APP][UI] Chat Room
  */
-package com.skysoft.smart.intranetchat.ui.activity.chatroom;
+package com.skysoft.smart.intranetchat.ui.activity.chatroom.ChatRoom;
 
 import android.content.ContentResolver;
 import android.content.Context;
@@ -62,7 +62,6 @@ import com.skysoft.smart.intranetchat.database.table.ChatRecordEntity;
 import com.skysoft.smart.intranetchat.database.table.ContactEntity;
 import com.skysoft.smart.intranetchat.database.table.FileEntity;
 import com.skysoft.smart.intranetchat.database.table.LatestChatHistoryEntity;
-import com.skysoft.smart.intranetchat.tools.listsort.MessageListSort;
 import com.skysoft.smart.intranetchat.model.network.Config;
 import com.skysoft.smart.intranetchat.model.network.bean.FileBean;
 import com.skysoft.smart.intranetchat.model.network.bean.MessageBean;
@@ -70,6 +69,7 @@ import com.skysoft.smart.intranetchat.model.network.bean.ReceiveAndSaveFileBean;
 import com.skysoft.smart.intranetchat.server.IntranetChatServer;
 import com.skysoft.smart.intranetchat.tools.ContentUriUtil;
 import com.skysoft.smart.intranetchat.tools.Identifier;
+import com.skysoft.smart.intranetchat.ui.activity.chatroom.EstablishGroup.EstablishGroupActivity;
 import com.skysoft.smart.intranetchat.ui.activity.login.OnSoftKeyboardStateChangedListener;
 import com.skysoft.smart.intranetchat.ui.activity.videocall.LaunchVideoCallActivity;
 import com.skysoft.smart.intranetchat.ui.activity.voicecall.LaunchVoiceCallActivity;

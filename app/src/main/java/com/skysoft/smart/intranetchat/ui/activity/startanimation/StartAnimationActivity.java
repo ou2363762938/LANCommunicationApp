@@ -29,7 +29,7 @@ import com.skysoft.smart.intranetchat.database.table.RefuseGroupEntity;
 import com.skysoft.smart.intranetchat.model.network.Config;
 import com.skysoft.smart.intranetchat.server.IntranetChatServer;
 import com.skysoft.smart.intranetchat.tools.customstatusbar.CustomStatusBarBackground;
-import com.skysoft.smart.intranetchat.ui.activity.chatroom.ChatRoomActivity;
+import com.skysoft.smart.intranetchat.ui.activity.chatroom.ChatRoom.ChatRoomActivity;
 import com.skysoft.smart.intranetchat.ui.activity.login.LoginActivity;
 
 import java.io.File;

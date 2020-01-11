@@ -24,7 +24,7 @@ import com.skysoft.smart.intranetchat.ui.SwipeLayout;
 import com.skysoft.smart.intranetchat.database.MyDataBase;
 import com.skysoft.smart.intranetchat.database.table.LatestChatHistoryEntity;
 import com.skysoft.smart.intranetchat.tools.listsort.MessageListSort;
-import com.skysoft.smart.intranetchat.ui.activity.chatroom.ChatRoomActivity;
+import com.skysoft.smart.intranetchat.ui.activity.chatroom.ChatRoom.ChatRoomActivity;
 
 import java.util.ArrayList;
 import java.util.List;
