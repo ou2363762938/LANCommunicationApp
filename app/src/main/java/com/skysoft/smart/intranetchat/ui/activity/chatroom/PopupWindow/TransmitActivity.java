@@ -69,6 +69,8 @@ public class TransmitActivity extends BaseActivity implements View.OnClickListen
     private ImageView mClearInputSearchKey;   //删除搜索框输入的内容
     private TextView mCancelSearch;     //取消搜索
 
+    private SearchResultAdapter mAdapter;
+
     private TextWatcher mInputSearchKeyListener = new TextWatcher() {
         @Override
         public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -85,10 +87,14 @@ public class TransmitActivity extends BaseActivity implements View.OnClickListen
             if (!TextUtils.isEmpty(s.toString())){
                 mSearchResultBox.setBackgroundColor(getResources().getColor(R.color.color_white));
                 mNoMoreResult.setVisibility(View.VISIBLE);
+                mSearchResultList.setVisibility(View.VISIBLE);
             }else {
                 mSearchResultBox.setBackgroundColor(getResources().getColor(R.color.color_light_black));
                 mNoMoreResult.setVisibility(View.GONE);
+                mSearchResultList.setVisibility(View.GONE);
             }
+
+            mAdapter.onInputSearchKeyChange(s.toString());
         }
     };
 
@@ -128,6 +134,14 @@ public class TransmitActivity extends BaseActivity implements View.OnClickListen
         mClearInputSearchKey.setOnClickListener(this::onClick);
         mCancelSearch.setOnClickListener(this::onClick);
         mInputSearchKey.addTextChangedListener(mInputSearchKeyListener);
+        mAdapter = new SearchResultAdapter(this, new OnSelectSearchResultListener() {
+            @Override
+            public void onSelectSearchResultListener(TransmitBean bean) {
+                closeSearchBox();
+                mTransmitUsers.add(bean);
+                showDialog(mTransmitUsers.size()-1);
+            }
+        });
     }
 
     private void initData() {
@@ -289,13 +303,17 @@ public class TransmitActivity extends BaseActivity implements View.OnClickListen
 
     //转发文字
     private void transmitMessage(int i) {
+        transmitMessage(mMessage,mTransmitUsers.get(i));
+    }
+
+    public static void transmitMessage(String message, TransmitBean transmitBean){
         //转发消息
-        ChatRecordEntity recordEntity = SendMessage.sendMessage(new SendMessageBean(mMessage,
-                mTransmitUsers.get(i).getmUserIdentifier(),
-                mTransmitUsers.get(i).getmHost(),
-                mTransmitUsers.get(i).getmAvatarPath(),
-                mTransmitUsers.get(i).getmUseName(),
-                mTransmitUsers.get(i).isGroup()));
+        ChatRecordEntity recordEntity = SendMessage.sendMessage(new SendMessageBean(message,
+                transmitBean.getmUserIdentifier(),
+                transmitBean.getmHost(),
+                transmitBean.getmAvatarPath(),
+                transmitBean.getmUseName(),
+                transmitBean.isGroup()));
         //记录消息
         new Thread(new Runnable() {
             @Override
