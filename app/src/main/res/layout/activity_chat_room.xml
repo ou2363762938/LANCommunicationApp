@@ -8,13 +8,13 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:mContext=".ui.activity.chatroom.ChatRoomActivity">
-    <View
-        android:id="@+id/custom_status_bar_background"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"/>
+<!--    <View-->
+<!--        android:id="@+id/custom_status_bar_background"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        app:layout_constraintStart_toStartOf="parent"-->
+<!--        app:layout_constraintEnd_toEndOf="parent"-->
+<!--        app:layout_constraintTop_toTopOf="parent"/>-->
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/chat_room_title"
@@ -84,6 +84,47 @@
         app:layout_constraintVertical_bias="1.0"
         tools:layout_editor_absoluteX="0dp" />
 
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/replay_box"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/dp_10"
+        app:layout_constraintBottom_toTopOf="@+id/chat_room_input">
+        <View
+            android:id="@+id/replay_pillar"
+            android:layout_width="@dimen/dp_5"
+            android:layout_height="match_parent"
+            android:background="@color/color_gray"
+            android:layout_marginEnd="@dimen/dp_10"
+            app:layout_constraintStart_toStartOf="parent"/>
+
+        <TextView
+            android:id="@+id/replay_receiver_name"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toEndOf="@+id/replay_pillar"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/replay_cancel"
+            android:textSize="@dimen/sp_16"
+            android:layout_marginBottom="@dimen/dp_10"/>
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toEndOf="@+id/replay_pillar"
+            app:layout_constraintTop_toBottomOf="@+id/replay_receiver_name"
+            app:layout_constraintEnd_toStartOf="@+id/replay_cancel"
+            android:textSize="@dimen/sp_16"/>
+
+        <ImageView
+            android:id="@+id/replay_cancel"
+            android:layout_width="@dimen/dp_40"
+            android:layout_height="@dimen/dp_40"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:src="@drawable/ic_cancel"/>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
     <LinearLayout
         android:id="@+id/chat_room_input"
         android:layout_width="match_parent"
@@ -126,6 +167,14 @@
             android:textSize="@dimen/sp_16"
             android:text="@string/hold_down_the_talk"
             android:background="@drawable/bg_message_input" />
+        <ImageView
+            android:id="@+id/chat_room_more_function"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:minHeight="@dimen/dp_50"
+            android:layout_gravity="bottom"
+            android:src="@drawable/ic_plus"/>
         <TextView
             android:id="@+id/chat_room_send_message"
             android:layout_width="0dp"
@@ -136,14 +185,6 @@
             android:textSize="@dimen/sp_22"
             android:gravity="center"
             android:layout_gravity="bottom"/>
-        <ImageView
-            android:id="@+id/chat_room_more_function"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="wrap_content"
-            android:minHeight="@dimen/dp_50"
-            android:layout_gravity="bottom"
-            android:src="@drawable/ic_plus"/>
     </LinearLayout>
 
     <LinearLayout
