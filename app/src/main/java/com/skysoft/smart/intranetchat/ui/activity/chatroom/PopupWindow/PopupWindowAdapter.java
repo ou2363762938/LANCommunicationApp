@@ -1,5 +1,7 @@
 package com.skysoft.smart.intranetchat.ui.activity.chatroom.PopupWindow;
 
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -65,7 +67,7 @@ public class PopupWindowAdapter extends RecyclerView.Adapter<PopupWindowAdapter.
                 Log.d(TAG, "onClick: " + clickContent);
                 if (clickContent.equals(mContext.getResources().getString(R.string.copy))){
                     //点击复制
-
+                    copy();
                 }else if (clickContent.equals(mContext.getResources().getString(R.string.transmit))){
                     //点击转发
                     transmitByType();
@@ -79,6 +81,15 @@ public class PopupWindowAdapter extends RecyclerView.Adapter<PopupWindowAdapter.
                 mPopupWindow.dismiss();
             }
         });
+    }
+
+    private void copy() {
+        if (mChatRecordEntity.getType() == ChatRoomConfig.RECORD_TEXT){
+            //复制文字到系统粘贴板
+            ClipboardManager clipboardManager = (ClipboardManager) mContext.getSystemService(Context.CLIPBOARD_SERVICE);
+            ClipData label = ClipData.newPlainText("label", mChatRecordEntity.getContent());
+            clipboardManager.setPrimaryClip(label);
+        }
     }
 
     private void transmitByType(){
