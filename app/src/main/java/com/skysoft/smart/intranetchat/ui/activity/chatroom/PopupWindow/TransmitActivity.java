@@ -41,6 +41,8 @@ import com.skysoft.smart.intranetchat.ui.activity.chatroom.ChatRoom.ChatRoomConf
 import com.skysoft.smart.intranetchat.ui.activity.chatroom.ChatRoom.ChatRoomMessageAdapter;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -257,17 +259,29 @@ public class TransmitActivity extends BaseActivity implements View.OnClickListen
                 }else {
                     String leave = leaveWord.getText().toString();      //获得输入的留言
                     Log.d(TAG, "onClick: leave = " + leave);
+
+                    ChatRecordEntity messageRecord = null;
+                    ChatRecordEntity leaveRecord = null;
+
                     if (mRecordType == ChatRoomConfig.RECORD_TEXT){
                         //转发文字
-                        transmitMessage(id);
+                        messageRecord = transmitMessage(id);
                     }else if (mRecordType == ChatRoomConfig.RECORD_IMAGE){
                         //转发图片
-                        transmitFile(id);
+                        messageRecord = transmitFile(id);
                     }
                     if (!TextUtils.isEmpty(leave)){     //如果输入留言，转发留言
                         mMessage = leave;
-                        transmitMessage(id);
+                        leaveRecord = transmitMessage(id);
+                        //同时向数据库写入转发记录和留言记录
+                        ChatRecordEntity[] entities = new ChatRecordEntity[2];
+                        entities[0] = messageRecord;
+                        entities[1] = leaveRecord;
+                        record(entities);
+                    }else {
+                        record(messageRecord);
                     }
+
                     alertDialog.dismiss();
                     TransmitActivity.this.finish();
                 }
@@ -325,15 +339,15 @@ public class TransmitActivity extends BaseActivity implements View.OnClickListen
     /**
      * 转发文字
      * @param i 转发对象在mTransmitUsers中的位置*/
-    private void transmitMessage(int i) {
-        transmitMessage(mMessage,mTransmitUsers.get(i));
+    private ChatRecordEntity transmitMessage(int i) {
+        return transmitMessage(mMessage,mTransmitUsers.get(i));
     }
 
     /**
      * 转发文字
      * @param message 转发的文字
      * @param transmitBean 转发对象*/
-    public static void transmitMessage(String message, TransmitBean transmitBean){
+    public static ChatRecordEntity transmitMessage(String message, TransmitBean transmitBean){
         //转发消息
         ChatRecordEntity recordEntity = SendMessage.sendMessage(new SendMessageBean(message,
                 transmitBean.getmUserIdentifier(),
@@ -342,13 +356,13 @@ public class TransmitActivity extends BaseActivity implements View.OnClickListen
                 transmitBean.getmUseName(),
                 transmitBean.isGroup()));
 
-        record(recordEntity);
+        return recordEntity;
     }
 
     /**
      * 转发文件，目前仅支持图片和视频
      * @param i 转发对象在mTransmitUsers中的位置*/
-    private void transmitFile(int i){
+    private ChatRecordEntity transmitFile(int i){
         int type = mMessage.equals(ChatRoomConfig.RECORD_VIDEO) ? 2 : 1;
         ChatRecordEntity chatRecordEntity = SendMessage.sendMessage(new EventMessage(mMessage, type),
                 new SendMessageBean(mMessage,
@@ -358,23 +372,22 @@ public class TransmitActivity extends BaseActivity implements View.OnClickListen
                         mTransmitUsers.get(i).getmUseName(),
                         mTransmitUsers.get(i).isGroup()),
                 true);
-
-        record(chatRecordEntity);
+        return chatRecordEntity;
     }
 
     /**
      * 转发消息后增加聊天记录
      * @param recordEntity 消息记录*/
-    public static void record(ChatRecordEntity recordEntity){
+    public static void record(ChatRecordEntity... recordEntity){
         //记录消息
         new Thread(new Runnable() {
             @Override
             public void run() {
                 ChatRecordDao chatRecordDao = MyDataBase.getInstance().getChatRecordDao();
                 //如果上次聊天时间超过现在2分钟，插入上次聊天时间
-                long latestRecordTime = chatRecordDao.getLatestRecordTime(recordEntity.getReceiver());
-                if (latestRecordTime != 0 && recordEntity.getTime() - latestRecordTime > 2*60*1000){
-                    ChatRecordEntity recordTime = ChatRoomMessageAdapter.generatorTimeRecord(recordEntity.getReceiver(),latestRecordTime);
+                long latestRecordTime = chatRecordDao.getLatestRecordTime(recordEntity[0].getReceiver());
+                if (latestRecordTime != 0 && recordEntity[0].getTime() - latestRecordTime > 2*60*1000){
+                    ChatRecordEntity recordTime = ChatRoomMessageAdapter.generatorTimeRecord(recordEntity[0].getReceiver(),latestRecordTime);
                     chatRecordDao.insert(recordTime);
                 }
                 //记录转发
