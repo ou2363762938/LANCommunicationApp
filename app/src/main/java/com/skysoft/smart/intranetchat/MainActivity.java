@@ -122,7 +122,7 @@ public class MainActivity extends AppCompatActivity{
         //E: [PT-80][Intranet Chat] [APP][UI] TextBadgeItem 一直为红色,Allen Luo,2019/11/12
     }
     private void setView() {
-        mBottomNavigationBar.setMode(BottomNavigationBar. MODE_FIXED)
+        mBottomNavigationBar.setMode(BottomNavigationBar. MODE_SHIFTING)
                 .setBackgroundStyle(BottomNavigationBar.BACKGROUND_STYLE_STATIC)
                 .setActiveColor(R.color.color_white);
 
