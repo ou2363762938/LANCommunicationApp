@@ -36,6 +36,7 @@ import com.skysoft.smart.intranetchat.model.SendMessage;
 import com.skysoft.smart.intranetchat.bean.TransmitBean;
 import com.skysoft.smart.intranetchat.database.table.ChatRecordEntity;
 import com.skysoft.smart.intranetchat.database.table.LatestChatHistoryEntity;
+import com.skysoft.smart.intranetchat.model.camera.entity.EventMessage;
 import com.skysoft.smart.intranetchat.ui.activity.chatroom.ChatRoom.ChatRoomConfig;
 import com.skysoft.smart.intranetchat.ui.activity.chatroom.ChatRoom.ChatRoomMessageAdapter;
 
@@ -213,8 +214,8 @@ public class TransmitActivity extends BaseActivity implements View.OnClickListen
                 .create();
 
         Window window = alertDialog.getWindow();
-        window.setBackgroundDrawable(new BitmapDrawable());
-        buildDialogView(alertDialog,view,id);
+        window.setBackgroundDrawable(new BitmapDrawable());     //显示Dialog圆角
+        buildDialogView(alertDialog,view,id);       //填充dialog的控件，添加点击事件等
         return alertDialog;
     }
 
@@ -224,31 +225,46 @@ public class TransmitActivity extends BaseActivity implements View.OnClickListen
      * @param view 自定义的view，给view绑定事件
      * @param id alertDialog对应mTransmitUsers的位置*/
     private void buildDialogView(AlertDialog alertDialog, View view, int id) {
-        CircleImageView avatar = view.findViewById(R.id.transmit_avatar);
+        CircleImageView avatar = view.findViewById(R.id.transmit_avatar);   //转发对象的头像
         TextView name = view.findViewById(R.id.transmit_name);
-        TextView message = view.findViewById(R.id.transmit_message);
-        EditText leaveWord = view.findViewById(R.id.transmit_input_leave);
-        Button cancel = view.findViewById(R.id.transmit_cancel);
-        Button send = view.findViewById(R.id.transmit_send);
+        TextView message = view.findViewById(R.id.transmit_message);    //显示文字消息
+        ImageView image = view.findViewById(R.id.transmit_image);       //显示图片
+        EditText leaveWord = view.findViewById(R.id.transmit_input_leave);      //留言
+        Button cancel = view.findViewById(R.id.transmit_cancel);        //取消按钮
+        Button send = view.findViewById(R.id.transmit_send);        //确认按钮
 
-        TransmitBean transmitBean = mTransmitUsers.get(id);
+        TransmitBean transmitBean = mTransmitUsers.get(id);     //转发对象
         if (!TextUtils.isEmpty(transmitBean.getmAvatarPath())){
             Glide.with(TransmitActivity.this).load(transmitBean.getmAvatarPath()).into(avatar);
         }
         name.setText(transmitBean.getmUseName());
-        message.setText(mMessage);
+
+        if (mRecordType == ChatRoomConfig.RECORD_IMAGE){
+            //显示转发的图片，不显示图片路径
+            message.setVisibility(View.GONE);
+            image.setVisibility(View.VISIBLE);
+            Glide.with(TransmitActivity.this).load(mMessage).into(image);
+        }else {
+            //显示转发的文字
+            message.setText(mMessage);
+        }
+
         View.OnClickListener onClickListener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (v.getId() == R.id.transmit_cancel){
                     alertDialog.dismiss();
                 }else {
-                    String leave = leaveWord.getText().toString();
+                    String leave = leaveWord.getText().toString();      //获得输入的留言
                     Log.d(TAG, "onClick: leave = " + leave);
                     if (mRecordType == ChatRoomConfig.RECORD_TEXT){
+                        //转发文字
                         transmitMessage(id);
+                    }else if (mRecordType == ChatRoomConfig.RECORD_IMAGE){
+                        //转发图片
+                        transmitFile(id);
                     }
-                    if (!TextUtils.isEmpty(leave)){
+                    if (!TextUtils.isEmpty(leave)){     //如果输入留言，转发留言
                         mMessage = leave;
                         transmitMessage(id);
                     }
@@ -306,11 +322,17 @@ public class TransmitActivity extends BaseActivity implements View.OnClickListen
         mScroll.setVisibility(View.VISIBLE);
     }
 
-    //转发文字
+    /**
+     * 转发文字
+     * @param i 转发对象在mTransmitUsers中的位置*/
     private void transmitMessage(int i) {
         transmitMessage(mMessage,mTransmitUsers.get(i));
     }
 
+    /**
+     * 转发文字
+     * @param message 转发的文字
+     * @param transmitBean 转发对象*/
     public static void transmitMessage(String message, TransmitBean transmitBean){
         //转发消息
         ChatRecordEntity recordEntity = SendMessage.sendMessage(new SendMessageBean(message,
@@ -319,16 +341,43 @@ public class TransmitActivity extends BaseActivity implements View.OnClickListen
                 transmitBean.getmAvatarPath(),
                 transmitBean.getmUseName(),
                 transmitBean.isGroup()));
+
+        record(recordEntity);
+    }
+
+    /**
+     * 转发文件，目前仅支持图片和视频
+     * @param i 转发对象在mTransmitUsers中的位置*/
+    private void transmitFile(int i){
+        int type = mMessage.equals(ChatRoomConfig.RECORD_VIDEO) ? 2 : 1;
+        ChatRecordEntity chatRecordEntity = SendMessage.sendMessage(new EventMessage(mMessage, type),
+                new SendMessageBean(mMessage,
+                        mTransmitUsers.get(i).getmUserIdentifier(),
+                        mTransmitUsers.get(i).getmHost(),
+                        mTransmitUsers.get(i).getmAvatarPath(),
+                        mTransmitUsers.get(i).getmUseName(),
+                        mTransmitUsers.get(i).isGroup()),
+                true);
+
+        record(chatRecordEntity);
+    }
+
+    /**
+     * 转发消息后增加聊天记录
+     * @param recordEntity 消息记录*/
+    public static void record(ChatRecordEntity recordEntity){
         //记录消息
         new Thread(new Runnable() {
             @Override
             public void run() {
                 ChatRecordDao chatRecordDao = MyDataBase.getInstance().getChatRecordDao();
+                //如果上次聊天时间超过现在2分钟，插入上次聊天时间
                 long latestRecordTime = chatRecordDao.getLatestRecordTime(recordEntity.getReceiver());
                 if (latestRecordTime != 0 && recordEntity.getTime() - latestRecordTime > 2*60*1000){
                     ChatRecordEntity recordTime = ChatRoomMessageAdapter.generatorTimeRecord(recordEntity.getReceiver(),latestRecordTime);
                     chatRecordDao.insert(recordTime);
                 }
+                //记录转发
                 chatRecordDao.insert(recordEntity);
             }
         }).start();

@@ -345,137 +345,11 @@ public class ChatRoomActivity extends AppCompatActivity implements View.OnClickL
         if (!sendVoice && eventMessage.getType() == 3){
             return;
         }
-        initReceiveEventMessage(eventMessage);
-    }
-
-    private void initReceiveEventMessage(EventMessage eventMessage){
-        if (!IntranetChatApplication.isNetWortState()){
-            ToastUtil.toast(ChatRoomActivity.this, getString(R.string.Toast_text_non_lan));
-            return;
+        ChatRecordEntity recordEntity = SendMessage.sendMessage(eventMessage, new SendMessageBean("", receiverIdentifier, host,
+                receiverAvatarPath, receiverName, isGroup),true);
+        if (null != recordEntity){
+            adapter.add(recordEntity);
         }
-        //记录文件
-        ChatRecordEntity chatRecordEntity = initChatRecordEntity(eventMessage.getMessage());
-        //发送文件
-        Identifier identifier = new Identifier();
-        String fileIdentifier = identifier.getFileIdentifier(eventMessage.getMessage());
-        chatRecordEntity.setContent(fileIdentifier);
-        ReceiveAndSaveFileBean rasfb = initRASFB(fileIdentifier, eventMessage.getMessage());
-        handleEventMessage(eventMessage,chatRecordEntity,rasfb);
-    }
-
-    //处理收到的EventMessage实体类（存储文件，发送文件）
-    private void handleEventMessage(EventMessage eventMessage, ChatRecordEntity chatRecordEntity, ReceiveAndSaveFileBean rasfb) {
-        int type = 0;
-        int isReceive = 0;
-        String content = null;
-        int fileType = 0;
-        switch (eventMessage.getType()) {
-            case 1:
-                type = ChatRoomConfig.RECORD_IMAGE;
-                isReceive = ChatRoomConfig.SEND_IMAGE;
-                content = getString(R.string.image);
-                fileType = Config.FILE_PICTURE;
-                break;
-            case 2:
-                type = ChatRoomConfig.RECORD_VIDEO;
-                isReceive = ChatRoomConfig.SEND_VIDEO;
-                content = getString(R.string.video);
-                fileType = Config.FILE_VIDEO;
-                chatRecordEntity.setPath(ChatRoomMessageAdapter.createVideoThumbnailFile(chatRecordEntity.getPath()));
-                chatRecordEntity.setFileName(eventMessage.getMessage());
-                break;
-            case 3:
-                type = ChatRoomConfig.RECORD_VOICE;
-                isReceive = ChatRoomConfig.SEND_VOICE;
-                content = getString(R.string.voice);
-                fileType = Config.FILE_VOICE;
-                break;
-            case 4:
-                type = ChatRoomConfig.RECORD_FILE;
-                isReceive = ChatRoomConfig.SEND_FILE;
-                content = getString(R.string.file);
-                fileType = Config.FILE_COMMON;
-                break;
-            default:
-                return;
-        }
-        chatRecordEntity.setType(type);
-        chatRecordEntity.setIsReceive(isReceive);
-        chatRecordEntity.setLength((int) eventMessage.getLength());
-        //记录文件
-        FileEntity fileEntity = new FileEntity();
-        fileEntity.setPath(eventMessage.getMessage());
-        fileEntity.setIdentifier(rasfb.getIdentifier());
-        switch (eventMessage.getType()) {
-            case 1:
-                fileEntity.setType(Config.FILE_PICTURE);
-                break;
-            case 2:
-                fileEntity.setType(Config.FILE_VIDEO);
-                break;
-            case 4:
-                fileEntity.setType(Config.FILE_COMMON);
-                break;
-        }
-        File file = new File(eventMessage.getMessage());
-        fileEntity.setFileName(file.getName());
-        if (eventMessage.getType() == 4){
-            chatRecordEntity.setLength(file.length());
-            chatRecordEntity.setFileName(fileEntity.getFileName());
-        }
-        //发送录音文件
-        SendFile sendFile = new SendFile();
-        Log.d(TAG, "handleEventMessage: fileType = " + fileType);
-        int b = 0;
-        if (isGroup){
-            b = sendFile.sendFile(rasfb, "255.255.255.255", fileType, (int) eventMessage.getLength());
-        }else {
-            b = sendFile.sendFile(rasfb, host, fileType, (int) eventMessage.getLength());
-        }
-        if (b == Config.SEND_SUCCESS){
-            adapter.add(chatRecordEntity);
-            //存储文件
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    //存储图片和视频
-                    if (chatRecordEntity.getType() != ChatRoomConfig.RECORD_VOICE) {
-                        MyDataBase.getInstance().getFileDao().insert(fileEntity);
-                    }
-                }
-            }).start();
-            //刷新最近聊天
-            SendMessage.sendMessage(new SendMessageBean(content, receiverIdentifier, host,
-                    receiverAvatarPath, receiverName, isGroup));
-        }else if (b == Config.SEND_FILE_BIG){
-            ToastUtil.toast(ChatRoomActivity.this,getString(R.string.file_size_too_big));
-        }else if(b == Config.SEND_FILE_NOT_FOUND){
-            ToastUtil.toast(ChatRoomActivity.this,getString(R.string.file_not_found));
-        }else if (b == Config.SEND_FILE_ZEOR){
-            ToastUtil.toast(ChatRoomActivity.this,getString(R.string.file_size_0B));
-        }
-    }
-
-    private ChatRecordEntity initChatRecordEntity(String path){
-        ChatRecordEntity chatRecordEntity = new ChatRecordEntity();
-        chatRecordEntity.setTime(System.currentTimeMillis());
-        chatRecordEntity.setSender(IntranetChatApplication.getsMineUserInfo().getIdentifier());
-        chatRecordEntity.setReceiver(receiverIdentifier);
-        chatRecordEntity.setPath(path);
-        return chatRecordEntity;
-    }
-
-    private ReceiveAndSaveFileBean initRASFB(String fileIdentifier,String filePath){
-        ReceiveAndSaveFileBean rasfb = new ReceiveAndSaveFileBean();
-        rasfb.setIdentifier(fileIdentifier);
-        rasfb.setPath(filePath);
-        rasfb.setSender(IntranetChatApplication.getsMineUserInfo().getIdentifier());
-        if (isGroup){
-            rasfb.setReceiver(receiverIdentifier);
-        }else {
-            rasfb.setReceiver(rasfb.getSender());
-        }
-        return rasfb;
     }
 
     private void init() {
@@ -767,8 +641,6 @@ public class ChatRoomActivity extends AppCompatActivity implements View.OnClickL
         startActivityForResult(intent, 2);
     }
 
-
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == 2 && resultCode == RESULT_OK) {
@@ -790,7 +662,8 @@ public class ChatRoomActivity extends AppCompatActivity implements View.OnClickL
             }else {
                 eventMessage.setType(4);
             }
-            initReceiveEventMessage(eventMessage);
+            SendMessage.sendMessage(eventMessage, new SendMessageBean("", receiverIdentifier, host,
+                    receiverAvatarPath, receiverName, isGroup),false);
         }
         super.onActivityResult(requestCode, resultCode, data);
     }

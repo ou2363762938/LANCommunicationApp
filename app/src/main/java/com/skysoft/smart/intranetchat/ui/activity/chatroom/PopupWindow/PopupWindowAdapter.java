@@ -95,6 +95,8 @@ public class PopupWindowAdapter extends RecyclerView.Adapter<PopupWindowAdapter.
     private void transmitByType(){
         if (mChatRecordEntity.getType() == ChatRoomConfig.RECORD_TEXT){
             TransmitActivity.startActivity(mContext,mChatRecordEntity.getContent(),mChatRecordEntity.getType(),mChatRecordEntity.getReceiver());
+        }else if (mChatRecordEntity.getType() == ChatRoomConfig.RECORD_IMAGE){
+            TransmitActivity.startActivity(mContext,mChatRecordEntity.getPath(),mChatRecordEntity.getType(),mChatRecordEntity.getReceiver());
         }
     }
 

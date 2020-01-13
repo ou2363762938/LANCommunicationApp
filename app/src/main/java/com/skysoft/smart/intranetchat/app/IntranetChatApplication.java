@@ -104,6 +104,8 @@ public class IntranetChatApplication extends Application {
 
     private static IntranetChatCallback sCallback = new IntranetChatCallback();
 
+    private static Context mAppContext;
+
     //B:[Intranet Chat] [APP][UI] Chat Room Oliver Ou 2019/10/31
     public static UserInfoBean sMineUserInfo = null;
     //B:[Intranet Chat] [APP][UI] Chat Room Oliver Ou 2019/11/1
@@ -139,6 +141,14 @@ public class IntranetChatApplication extends Application {
     private static EstablishGroupAdapter sEstablishGroupAdapter;
     private static String sHostIp;
     private static Map<String ,FileEntity> sMonitorReceiveFile = new HashMap<>();
+
+    public static Context getContext() {
+        return mAppContext;
+    }
+
+    public static void setContext(Context context){
+        mAppContext = context;
+    }
 
     //监测文件接收情况
     public static void initMonitorReceiveFile(Map<String ,FileEntity> init){
@@ -993,6 +1003,7 @@ public class IntranetChatApplication extends Application {
         sCreateProgress = pid;
         if (isCurrentProcess) {
             MyDataBase.getInstance();
+            setContext(this);
             Intent intent = new Intent(this, IntranetChatServer.class);
 //            startForegroundService(intent);
             bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
