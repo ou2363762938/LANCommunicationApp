@@ -6,7 +6,6 @@
 package com.skysoft.smart.intranetchat.ui.activity.chatroom.EstablishGroup;
 
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -17,11 +16,11 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 
 import com.skysoft.smart.intranetchat.R;
+import com.skysoft.smart.intranetchat.app.BaseActivity;
 import com.skysoft.smart.intranetchat.app.IntranetChatApplication;
 import com.skysoft.smart.intranetchat.bean.GroupMemberList;
 import com.skysoft.smart.intranetchat.database.MyDataBase;
@@ -29,7 +28,6 @@ import com.skysoft.smart.intranetchat.database.table.ContactEntity;
 import com.skysoft.smart.intranetchat.database.table.GroupMemberEntity;
 import com.skysoft.smart.intranetchat.model.network.bean.EstablishGroupBean;
 import com.skysoft.smart.intranetchat.tools.QuickClickListener;
-import com.skysoft.smart.intranetchat.tools.customstatusbar.CustomStatusBarBackground;
 import com.skysoft.smart.intranetchat.tools.toastutil.ToastUtil;
 import com.skysoft.smart.intranetchat.ui.activity.chatroom.ChatRoom.ChatRoomActivity;
 import com.skysoft.smart.intranetchat.ui.activity.chatroom.ChatRoom.ChatRoomConfig;
@@ -42,12 +40,12 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-public class EstablishGroupActivity extends AppCompatActivity {
+public class EstablishGroupActivity extends BaseActivity {
     private static String TAG = EstablishGroupActivity.class.getSimpleName();
     private ListView mContactListView;
     private EstablishGroupAdapter mAdapter;
-    private Button mCancel;
-    private Button mConfirm;
+    private TextView mCancel;
+    private TextView mConfirm;
     private String receiverIdentifier;
     private boolean isGroup;
     private List<GroupMemberEntity> groupMemberEntities;
@@ -56,11 +54,10 @@ public class EstablishGroupActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_establish_group);
+        setStatusView(R.id.custom_status_bar_background);
         mContactListView = findViewById(R.id.establish_group_list);
         mCancel = findViewById(R.id.establish_group_cancel);
         mConfirm = findViewById(R.id.establish_group_confirm);
-        CustomStatusBarBackground.customStatusBarTransparent(this);
-        CustomStatusBarBackground.drawableViewStatusBar(this,R.drawable.custom_gradient_main_title,findViewById(R.id.custom_status_bar_background));
         EventBus.getDefault().register(this);
         Intent intent = getIntent();
         Bundle bundle = intent.getExtras();

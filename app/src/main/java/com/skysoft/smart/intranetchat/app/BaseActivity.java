@@ -14,7 +14,7 @@ import androidx.appcompat.app.AppCompatActivity;
 public abstract class BaseActivity extends AppCompatActivity {
     private static final String TAG = "BaseActivity";
 
-    private View mStatus;
+    private View mStatus;   //title到状态栏的之间的view
     private int mTitleDrawableResource = R.drawable.custom_gradient_main_title;
 
     public void setTitleDrawable(int resource){

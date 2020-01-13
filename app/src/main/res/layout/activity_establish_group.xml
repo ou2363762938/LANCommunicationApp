@@ -14,29 +14,33 @@
         android:layout_height="wrap_content"/>
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/dp_10">
-        <Button
+        android:layout_height="@dimen/dp_55"
+        android:background="@drawable/custom_gradient_main_title">
+        <TextView
             android:id="@+id/establish_group_cancel"
             android:layout_width="@dimen/dp_80"
             android:layout_height="@dimen/dp_35"
-            android:text="取消"
+            android:text="@string/clip_image_cancel"
             android:layout_marginStart="@dimen/dp_20"
-            android:background="@drawable/custom_button_selector"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"/>
+            app:layout_constraintStart_toStartOf="parent"
+            android:gravity="center"
+            android:textSize="@dimen/sp_18"
+            android:textColor="@color/color_white"/>
 
-        <Button
+        <TextView
             android:id="@+id/establish_group_confirm"
             android:layout_width="@dimen/dp_80"
             android:layout_height="@dimen/dp_35"
             android:layout_marginEnd="@dimen/dp_20"
-            android:text="确定"
-            android:background="@drawable/custom_button_selector"
+            android:text="@string/clip_image_determine"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"/>
+            app:layout_constraintEnd_toEndOf="parent"
+            android:gravity="center"
+            android:textSize="@dimen/sp_18"
+            android:textColor="@color/color_white"/>
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <ListView
