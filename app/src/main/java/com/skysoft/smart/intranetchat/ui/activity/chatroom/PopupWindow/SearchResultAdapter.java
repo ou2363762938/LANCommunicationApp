@@ -93,9 +93,10 @@ public class SearchResultAdapter extends BaseAdapter {
         //a~z:97~122
         //A~Z:65~90
         if (null == bean){
-            for (int i = 0; i < key.length(); i++){
+            for (int i = 1; i < key.length(); i++){
                 bean = baseMatchingContactEntity(key.substring(0,i),contactEntity);
                 if (null != bean){
+                    Log.d(TAG, "matchingContactEntity: key.substring(0,i)" + key.substring(0,i));
                     break;
                 }
             }
@@ -105,7 +106,19 @@ public class SearchResultAdapter extends BaseAdapter {
             for (int i = 0; i < key.length() ; i++){
                 bean = baseMatchingContactEntity(""+key.charAt(i),contactEntity);
                 if (null != bean){
+                    Log.d(TAG, "matchingContactEntity: key.charAt(i)" + ""+key.charAt(i));
                     break;
+                }else {
+                    //忽视大小写
+                    if (key.charAt(i)>=65 && key.charAt(i)<=90){
+                        bean = baseMatchingContactEntity(""+(char) (key.charAt(i)+32),contactEntity);
+                    }else if (key.charAt(i) >= 97 && key.charAt(i)<=122){
+                        bean = baseMatchingContactEntity(""+(char) (key.charAt(i)-32),contactEntity);
+                    }
+
+                    if (null != bean){
+                        break;
+                    }
                 }
             }
         }
@@ -118,7 +131,7 @@ public class SearchResultAdapter extends BaseAdapter {
      * @param contactEntity 联系人
      * @return null：key和contactEntity不匹配*/
     private TransmitBean baseMatchingContactEntity(String key, ContactEntity contactEntity){
-        if (contactEntity.getName().contains(key)){
+        if (!TextUtils.isEmpty(key) && contactEntity.getName().contains(key)){
             return new TransmitBean(contactEntity.getAvatarPath()
                     ,contactEntity.getName()
                     ,contactEntity.getIdentifier()
