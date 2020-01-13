@@ -31,10 +31,13 @@ public class SearchResultAdapter extends BaseAdapter {
     private LayoutInflater mInflater;
     private List<TransmitBean> mSearchResults = new ArrayList<>();
     private OnSelectSearchResultListener mOnSelectListener;
+    private String mCurrentRoomIdentifier;
 
-    public SearchResultAdapter(Context context, OnSelectSearchResultListener mOnSelectListener) {
+    public SearchResultAdapter(Context context, OnSelectSearchResultListener mOnSelectListener,String mCurrentRoomIdentifier) {
         this.mSoftContext = new SoftReference<Context>(context);
         this.mOnSelectListener = mOnSelectListener;
+        this.mCurrentRoomIdentifier = mCurrentRoomIdentifier;
+        mInflater = LayoutInflater.from(mSoftContext.get());
     }
 
     public void onInputSearchKeyChange(String key){
@@ -51,6 +54,9 @@ public class SearchResultAdapter extends BaseAdapter {
 
         while (contactIterator.hasNext()){
             ContactEntity contactEntity = contactIterator.next();
+            if (contactEntity.getIdentifier().equals(mCurrentRoomIdentifier)){
+                continue;
+            }
             TransmitBean bean = matchingContactEntity(key, contactEntity);
             if (null != bean){
                 list.add(bean);
@@ -59,6 +65,9 @@ public class SearchResultAdapter extends BaseAdapter {
 
         while (groupIterator.hasNext()){
             ContactEntity contactEntity = groupIterator.next();
+            if (contactEntity.getIdentifier().equals(mCurrentRoomIdentifier)){
+                continue;
+            }
             TransmitBean bean = matchingContactEntity(key, contactEntity);
             if (null != bean){
                 bean.setGroup(true);
@@ -67,20 +76,56 @@ public class SearchResultAdapter extends BaseAdapter {
         }
 
         Log.d(TAG, "onInputSearchKeyChange: size = " + list.size());
-        mSearchResults = list;
+        if (mSearchResults.size() != 0){
+            mSearchResults.clear();
+        }
+        mSearchResults.addAll(list);
         notifyDataSetChanged();
     }
 
+    /**
+     * 匹配key和contactEntity.getName()
+     * @param key 关键词
+     * @param contactEntity 联系人
+     * @return null：key和contactEntity不匹配*/
     private TransmitBean matchingContactEntity(String key, ContactEntity contactEntity){
-        TransmitBean bean = null;
+        TransmitBean bean = baseMatchingContactEntity(key,contactEntity);
+        //a~z:97~122
+        //A~Z:65~90
+        if (null == bean){
+            for (int i = 0; i < key.length(); i++){
+                bean = baseMatchingContactEntity(key.substring(0,i),contactEntity);
+                if (null != bean){
+                    break;
+                }
+            }
+        }
+
+        if (null == bean){
+            for (int i = 0; i < key.length() ; i++){
+                bean = baseMatchingContactEntity(""+key.charAt(i),contactEntity);
+                if (null != bean){
+                    break;
+                }
+            }
+        }
+        return bean;
+    }
+
+    /**
+     * 匹配key和contactEntity.getName()
+     * @param key 关键词
+     * @param contactEntity 联系人
+     * @return null：key和contactEntity不匹配*/
+    private TransmitBean baseMatchingContactEntity(String key, ContactEntity contactEntity){
         if (contactEntity.getName().contains(key)){
-            bean = new TransmitBean(contactEntity.getAvatarPath()
+            return new TransmitBean(contactEntity.getAvatarPath()
                     ,contactEntity.getName()
                     ,contactEntity.getIdentifier()
                     ,false
                     ,contactEntity.getHost());
         }
-        return bean;
+        return null;
     }
 
     @Override
@@ -105,6 +150,7 @@ public class SearchResultAdapter extends BaseAdapter {
         SearchResultViewHolder holder = null;
         if (convertView == null){
             convertView = mInflater.inflate(R.layout.listview_main_contact,null);
+            holder = new SearchResultViewHolder();
             holder.mAvatar = convertView.findViewById(R.id.contact_head);
             holder.mName = convertView.findViewById(R.id.contact_name);
             holder.mBox = convertView.findViewById(R.id.contact_list_item);

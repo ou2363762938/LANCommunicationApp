@@ -87,7 +87,9 @@ public class TransmitActivity extends BaseActivity implements View.OnClickListen
             if (!TextUtils.isEmpty(s.toString())){
                 mSearchResultBox.setBackgroundColor(getResources().getColor(R.color.color_white));
                 mNoMoreResult.setVisibility(View.VISIBLE);
-                mSearchResultList.setVisibility(View.VISIBLE);
+                if(mSearchResultList.getVisibility() == View.GONE){
+                    mSearchResultList.setVisibility(View.VISIBLE);
+                }
             }else {
                 mSearchResultBox.setBackgroundColor(getResources().getColor(R.color.color_light_black));
                 mNoMoreResult.setVisibility(View.GONE);
@@ -141,7 +143,8 @@ public class TransmitActivity extends BaseActivity implements View.OnClickListen
                 mTransmitUsers.add(bean);
                 showDialog(mTransmitUsers.size()-1);
             }
-        });
+        },mTransmitRoomIdentifier);
+        mSearchResultList.setAdapter(mAdapter);
     }
 
     private void initData() {
