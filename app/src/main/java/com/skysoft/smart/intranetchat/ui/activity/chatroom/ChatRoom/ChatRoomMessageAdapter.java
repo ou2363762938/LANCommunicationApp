@@ -31,6 +31,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.ImageViewTarget;
 import com.skysoft.smart.intranetchat.R;
+import com.skysoft.smart.intranetchat.database.dao.ChatRecordDao;
 import com.skysoft.smart.intranetchat.model.SendFile;
 import com.skysoft.smart.intranetchat.model.network.Config;
 import com.skysoft.smart.intranetchat.tools.QuickClickListener;
@@ -74,6 +75,7 @@ public class ChatRoomMessageAdapter extends RecyclerView.Adapter<ChatRoomMessage
     private RecyclerView mPopupRecyclerView;
     private ArrayList<String> mHasCode = new ArrayList<>();
     private Map<String ,ChatRoomMessageViewHolder> mVideoHolder = new HashMap<>();
+    private int mLongClickPosition = 0;     //当前被长按的记录的位置
 
     public int getTopPosition() {
         return mTopPosition;
@@ -355,7 +357,7 @@ public class ChatRoomMessageAdapter extends RecyclerView.Adapter<ChatRoomMessage
             }
         });
 
-        voice.setOnLongClickListener(new OnLongClickRecord(bean, holder));;
+        voice.setOnLongClickListener(new OnLongClickRecord(bean, holder));
     }
 
     //加载文本内容
@@ -455,7 +457,7 @@ public class ChatRoomMessageAdapter extends RecyclerView.Adapter<ChatRoomMessage
             callBox = holder.getMineCallBox();
         }
 
-        callBox.setOnLongClickListener(new OnLongClickRecord(bean, holder));;
+        callBox.setOnLongClickListener(new OnLongClickRecord(bean, holder));
     }
 
     @Override
@@ -736,9 +738,62 @@ public class ChatRoomMessageAdapter extends RecyclerView.Adapter<ChatRoomMessage
 
         @Override
         public boolean onLongClick(View v) {
+            mLongClickPosition = holder.getAdapterPosition();       //记录长按的位置
             showPopupMenu(v,mRecordEntity,holder.getBox().getTop() + holder.getBox().getScrollX(),  //计算view到聊天室顶部的距离
                     holder.getSenderName().getVisibility() == View.VISIBLE ? holder.getSenderName().getHeight() : 0);
             return false;
         }
+    }
+
+    /**
+     * 删除聊天记录*/
+    public void deleteChatRecord(){
+        int position = mLongClickPosition;      //记录长按位置
+
+        ChatRecordEntity[] deleteEntities = new ChatRecordEntity[2];    //被删除的两条记录
+        boolean common = true;      //普通情况下只删除选中的那条记录
+        if (mLongClickPosition != 0 &&      //不是第一条记录
+                messageBeanList.get(mLongClickPosition-1).getType() == ChatRoomConfig.RECORD_TIME &&    //上一条记录是时间
+                (messageBeanList.size()-1 == mLongClickPosition ||      //最后一条
+                        messageBeanList.get(mLongClickPosition+1).getType() == ChatRoomConfig.RECORD_TIME)){        //下一条记录是时间
+            common = false;
+            mLongClickPosition --;
+        }else if (mLongClickPosition == 0 &&       //第一条记录
+                messageBeanList.get(1).getType() == ChatRoomConfig.RECORD_TIME){    //第二条记录是时间
+            common = false;
+        }
+        //如果满足上诉条件任意一条，deleteEntities[0]为时间记录，deleteEntities[1]为聊天记录
+        //反之，deleteEntities[0]为当前选中的记录
+        deleteEntities[0] = messageBeanList.get(mLongClickPosition);
+
+        if (!common){
+            //deleteEntities[1]为聊天记录，deleteEntities[0]为时间记录
+            deleteEntities[1] = messageBeanList.get(mLongClickPosition+1);
+            messageBeanList.remove(mLongClickPosition+1);   //从列表中移除mLongClickPosition+1指向的记录
+        }
+
+        messageBeanList.remove(mLongClickPosition);     //从列表中移除mLongClickPosition指向的记录
+        notifyDataSetChanged();
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                ChatRecordDao chatRecordDao = MyDataBase.getInstance().getChatRecordDao();
+
+                if (position == 0){     //长按第一条记录，判断显示的第一条记录在数据库的上一条记录是否是时间记录
+                    ChatRecordEntity recordBeforeTime = chatRecordDao.getLatestRecordBeforeTime(deleteEntities[0].getReceiver(), deleteEntities[0].getTime(), deleteEntities[0].getId());
+                    if (null != recordBeforeTime && recordBeforeTime.getType() == ChatRoomConfig.RECORD_TIME){
+                        chatRecordDao.delete(recordBeforeTime);
+                    }
+                }
+
+                if (null != deleteEntities[1]){     //删除两条记录
+                    chatRecordDao.delete(deleteEntities);
+                }else {
+                    //只删除选中的长按记录
+                    chatRecordDao.delete(deleteEntities[0]);
+                }
+            }
+        }).start();
     }
 }

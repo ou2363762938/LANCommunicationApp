@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.skysoft.smart.intranetchat.R;
 import com.skysoft.smart.intranetchat.database.table.ChatRecordEntity;
 import com.skysoft.smart.intranetchat.ui.activity.chatroom.ChatRoom.ChatRoomConfig;
@@ -73,7 +74,7 @@ public class PopupWindowAdapter extends RecyclerView.Adapter<PopupWindowAdapter.
                     transmitByType();
                 }else if (clickContent.equals(mContext.getResources().getString(R.string.delete))){
                     //点击删除
-
+                    delete();
                 }else if (clickContent.equals(mContext.getResources().getString(R.string.replay))){
                     //点击回复
 
@@ -98,6 +99,33 @@ public class PopupWindowAdapter extends RecyclerView.Adapter<PopupWindowAdapter.
         }else if (mChatRecordEntity.getType() == ChatRoomConfig.RECORD_IMAGE){
             TransmitActivity.startActivity(mContext,mChatRecordEntity.getPath(),mChatRecordEntity.getType(),mChatRecordEntity.getReceiver());
         }
+    }
+
+    /**删除选中的记录*/
+    private void delete(){
+        BottomSheetDialog dialog = new BottomSheetDialog(mContext);     //底部弹窗
+        //弹窗加载的视图
+        View view = LayoutInflater.from(mContext).inflate(R.layout.dialog_delete_record, null);
+
+        //点击删除
+        view.findViewById(R.id.delete_record).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mChatAdapter.deleteChatRecord();
+                dialog.dismiss();
+            }
+        });
+
+        //点击取消
+        view.findViewById(R.id.cancel_delete).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
+
+        dialog.setContentView(view);
+        dialog.show();
     }
 
     @Override

@@ -7,10 +7,12 @@ package com.skysoft.smart.intranetchat.database.dao;
 
 
 import com.skysoft.smart.intranetchat.database.table.ChatRecordEntity;
+import com.skysoft.smart.intranetchat.ui.activity.chatroom.ChatRoom.ChatRoomConfig;
 
 import java.util.List;
 
 import androidx.room.Dao;
+import androidx.room.Delete;
 import androidx.room.Insert;
 import androidx.room.Query;
 import androidx.room.Update;
@@ -34,4 +36,10 @@ public interface ChatRecordDao {
 
     @Query("select time from chat_record where receiver =:userIdentifier order by time desc limit 1")
     long getLatestRecordTime(String userIdentifier);
+
+    @Delete
+    void delete(ChatRecordEntity... entities);
+
+    @Query("select * from chat_record where receiver =:userIdentifier and time <=:time and id < :id order by time desc limit 1")
+    ChatRecordEntity getLatestRecordBeforeTime(String userIdentifier,long time,int id);
 }
