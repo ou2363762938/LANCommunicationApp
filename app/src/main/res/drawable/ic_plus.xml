@@ -2,8 +2,8 @@
 <!--Created by Oliver ou on 2019/10/30-->
 <!--Description: Voice or video communication function-->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="@dimen/dp_200"
-    android:height="@dimen/dp_200"
+    android:width="@dimen/dp_20"
+    android:height="@dimen/dp_20"
     android:viewportWidth="1024"
     android:viewportHeight="1024">
   <path
