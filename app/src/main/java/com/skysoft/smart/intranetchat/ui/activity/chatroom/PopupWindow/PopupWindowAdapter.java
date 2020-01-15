@@ -36,15 +36,28 @@ public class PopupWindowAdapter extends RecyclerView.Adapter<PopupWindowAdapter.
         //判断长按的消息记录
         switch (mChatRecordEntity.getType()){
             case ChatRoomConfig.RECORD_TEXT:
-                mItemList = Arrays.asList(mContext.getResources().getStringArray(R.array.popup_window_item_text));
+                if (mChatRecordEntity.getIsReceive() == ChatRoomConfig.RECEIVE_MESSAGE && mChatAdapter.isGroup()){
+                    mItemList = Arrays.asList(mContext.getResources().getStringArray(R.array.popup_window_item_text));
+                }else {
+                    mItemList = Arrays.asList(mContext.getResources().getStringArray(R.array.popup_window_item_text_send));
+                }
                 break;
             case ChatRoomConfig.RECORD_VOICE:
-                mItemList = Arrays.asList(mContext.getResources().getStringArray(R.array.popup_window_item_voice));
+                if (mChatRecordEntity.getIsReceive() == ChatRoomConfig.RECEIVE_VOICE && mChatAdapter.isGroup()){
+                    mItemList = Arrays.asList(mContext.getResources().getStringArray(R.array.popup_window_item_voice));
+                }
                 break;
             case ChatRoomConfig.RECORD_IMAGE:
             case ChatRoomConfig.RECORD_VIDEO:
             case ChatRoomConfig.RECORD_FILE:
-                mItemList = Arrays.asList(mContext.getResources().getStringArray(R.array.popup_window_item_other));
+                if (mChatRecordEntity.getIsReceive() == ChatRoomConfig.SEND_FILE
+                        || mChatRecordEntity.getIsReceive() == ChatRoomConfig.SEND_VIDEO
+                        || mChatRecordEntity.getIsReceive() == ChatRoomConfig.SEND_IMAGE
+                        || !mChatAdapter.isGroup()){
+                    mItemList = Arrays.asList(mContext.getResources().getStringArray(R.array.popup_window_item_other_send));
+                }else {
+                    mItemList = Arrays.asList(mContext.getResources().getStringArray(R.array.popup_window_item_other));
+                }
                 break;
         }
         this.mPopupWindow = mPopupWindow;

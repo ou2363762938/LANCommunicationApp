@@ -79,6 +79,15 @@ public class ChatRoomMessageAdapter extends RecyclerView.Adapter<ChatRoomMessage
     private OnClickReplayOrNotify mOnClickReplayOrNotify;
     private ChatRoomMessageViewHolder mLongClickHolder;
     private boolean isUpLongClickAvatar = true;
+    private boolean isGroup;
+
+    public boolean isGroup() {
+        return isGroup;
+    }
+
+    public void setGroup(boolean group) {
+        isGroup = group;
+    }
 
     public OnClickReplayOrNotify getOnClickReplayOrNotify() {
         return mOnClickReplayOrNotify;
@@ -120,10 +129,11 @@ public class ChatRoomMessageAdapter extends RecyclerView.Adapter<ChatRoomMessage
         this.mReceiverIdentifier = mReceiverIdentifier;
     }
 
-    public ChatRoomMessageAdapter(Context context, String mineAvatarPath, String recieverIdentifier) {
+    public ChatRoomMessageAdapter(Context context, String mineAvatarPath, String receiverIdentifier, Boolean isGroup) {
         this.context = context;
         this.mineAvatarPath = mineAvatarPath;
-        this.mReceiverIdentifier = recieverIdentifier;
+        this.mReceiverIdentifier = receiverIdentifier;
+        this.isGroup = isGroup;
     }
 
     @NonNull

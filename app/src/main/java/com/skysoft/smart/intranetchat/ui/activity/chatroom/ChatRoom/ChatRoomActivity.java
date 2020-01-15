@@ -42,6 +42,7 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.skysoft.smart.intranetchat.MainActivity;
 import com.skysoft.smart.intranetchat.R;
 import com.skysoft.smart.intranetchat.app.IntranetChatApplication;
@@ -82,15 +83,12 @@ import org.greenrobot.eventbus.ThreadMode;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import static com.skysoft.smart.intranetchat.MainActivity.CALL_FROM_OTHER;
 
@@ -168,13 +166,24 @@ public class ChatRoomActivity extends AppCompatActivity implements View.OnClickL
     private OnClickReplayOrNotify mOnClickReplayOrNotify = new OnClickReplayOrNotify() {
         @Override
         public void onClickReplay(ChatRecordEntity recordEntity, String name) {
-            if (recordEntity.getIsReceive() == ChatRoomConfig.RECEIVE_MESSAGE){
-                mReplayMesssageBox.setVisibility(View.VISIBLE);
-                mReplayReceiverMessage.setText(name + ":\n\t\t" + recordEntity.getContent());
+            mReplayMesssageBox.setVisibility(View.VISIBLE);
 
-                onClickNotify(recordEntity,name);
-                mSendMessageType = 2;
+            if (recordEntity.getIsReceive() == ChatRoomConfig.RECEIVE_MESSAGE){
+                mReplayImage.setVisibility(View.GONE);
+                mReplayReceiverMessage.setText(name);
+                mReplayReceiverMessage.append(" :\n\t\t");
+                mReplayReceiverMessage.append(recordEntity.getContent());
+            }else if (recordEntity.getIsReceive() == ChatRoomConfig.RECEIVE_IMAGE){
+                mReplayReceiverMessage.setText(name);
+                mReplayReceiverMessage.append(" :");
+                mReplayImage.setVisibility(View.VISIBLE);
+                if (!TextUtils.isEmpty(recordEntity.getPath())){
+                    Glide.with(ChatRoomActivity.this).load(recordEntity.getPath()).into(mReplayImage);
+                }
             }
+
+            onClickNotify(recordEntity,name);
+            mSendMessageType = 2;
         }
 
         @Override
@@ -289,7 +298,7 @@ public class ChatRoomActivity extends AppCompatActivity implements View.OnClickL
         }).start();
 
         //加载历史聊天记录
-        IntranetChatApplication.setsChatRoomMessageAdapter(new ChatRoomMessageAdapter(this,IntranetChatApplication.getsMineAvatarPath(),receiverIdentifier));
+        IntranetChatApplication.setsChatRoomMessageAdapter(new ChatRoomMessageAdapter(this,IntranetChatApplication.getsMineAvatarPath(),receiverIdentifier,isGroup));
         adapter = IntranetChatApplication.getsChatRoomMessageAdapter();
         adapter.setHasStableIds(true);
         GroupMembersBean bean = new GroupMembersBean();
