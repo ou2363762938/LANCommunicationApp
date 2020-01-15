@@ -9,13 +9,19 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.MediaStore;
+import android.text.Editable;
+import android.text.SpannableStringBuilder;
+import android.text.Spanned;
 import android.text.TextUtils;
+import android.text.TextWatcher;
+import android.text.style.ImageSpan;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.Gravity;
@@ -40,13 +46,13 @@ import com.skysoft.smart.intranetchat.MainActivity;
 import com.skysoft.smart.intranetchat.R;
 import com.skysoft.smart.intranetchat.app.IntranetChatApplication;
 import com.skysoft.smart.intranetchat.bean.SendMessageBean;
-import com.skysoft.smart.intranetchat.model.SendFile;
 import com.skysoft.smart.intranetchat.model.SendMessage;
 import com.skysoft.smart.intranetchat.app.impl.OnReceiveMessage;
 import com.skysoft.smart.intranetchat.bean.GroupMembersBean;
 import com.skysoft.smart.intranetchat.bean.LoadResourceBean;
 import com.skysoft.smart.intranetchat.model.camera.manager.MyMediaPlayerManager;
 import com.skysoft.smart.intranetchat.model.camera.videocall.Sender;
+import com.skysoft.smart.intranetchat.tools.CreateNotifyBitmap;
 import com.skysoft.smart.intranetchat.tools.QuickClickListener;
 import com.skysoft.smart.intranetchat.tools.customstatusbar.CustomStatusBarBackground;
 import com.skysoft.smart.intranetchat.tools.toastutil.ToastUtil;
@@ -60,15 +66,11 @@ import com.skysoft.smart.intranetchat.database.MyDataBase;
 import com.skysoft.smart.intranetchat.database.dao.ChatRecordDao;
 import com.skysoft.smart.intranetchat.database.table.ChatRecordEntity;
 import com.skysoft.smart.intranetchat.database.table.ContactEntity;
-import com.skysoft.smart.intranetchat.database.table.FileEntity;
 import com.skysoft.smart.intranetchat.database.table.LatestChatHistoryEntity;
-import com.skysoft.smart.intranetchat.model.network.Config;
 import com.skysoft.smart.intranetchat.model.network.bean.FileBean;
 import com.skysoft.smart.intranetchat.model.network.bean.MessageBean;
-import com.skysoft.smart.intranetchat.model.network.bean.ReceiveAndSaveFileBean;
 import com.skysoft.smart.intranetchat.server.IntranetChatServer;
 import com.skysoft.smart.intranetchat.tools.ContentUriUtil;
-import com.skysoft.smart.intranetchat.tools.Identifier;
 import com.skysoft.smart.intranetchat.ui.activity.chatroom.EstablishGroup.EstablishGroupActivity;
 import com.skysoft.smart.intranetchat.ui.activity.login.OnSoftKeyboardStateChangedListener;
 import com.skysoft.smart.intranetchat.ui.activity.videocall.LaunchVideoCallActivity;
@@ -78,13 +80,18 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
-import java.io.File;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import static com.skysoft.smart.intranetchat.MainActivity.CALL_FROM_OTHER;
 
 public class ChatRoomActivity extends AppCompatActivity implements View.OnClickListener,GestureDetector.OnGestureListener {
@@ -132,6 +139,12 @@ public class ChatRoomActivity extends AppCompatActivity implements View.OnClickL
     private boolean mHiddenSoftKeyboard = false;
     private boolean isAudioRecording = false;
     public static boolean sIsAudioRecording = false;
+    private ConstraintLayout mReplayMesssageBox;
+    private TextView mReplayReceiverMessage;
+    private ImageView mReplayImage;
+    private ImageView mReplayCancel;
+    private int mSendMessageType = 0;       //0 普通文字消息,1 @消息,2 回复消息
+    private Map<ImageSpan,String> mNotifyReceivers = new HashMap<>();
     private OnSoftKeyboardStateChangedListener mOSSCL = new OnSoftKeyboardStateChangedListener() {
 
         @Override
@@ -149,6 +162,92 @@ public class ChatRoomActivity extends AppCompatActivity implements View.OnClickL
             if (isClosing){
                 isInputMessage = false;
             }
+        }
+    };
+
+    private OnClickReplayOrNotify mOnClickReplayOrNotify = new OnClickReplayOrNotify() {
+        @Override
+        public void onClickReplay(ChatRecordEntity recordEntity, String name) {
+            if (recordEntity.getIsReceive() == ChatRoomConfig.RECEIVE_MESSAGE){
+                mReplayMesssageBox.setVisibility(View.VISIBLE);
+                mReplayReceiverMessage.setText(name + ":\n\t\t" + recordEntity.getContent());
+
+                onClickNotify(recordEntity,name);
+                mSendMessageType = 2;
+            }
+        }
+
+        @Override
+        public void onClickNotify(ChatRecordEntity recordEntity, String name) {
+            if (!mNotifyReceivers.containsValue(recordEntity.getSender())){     //未被@
+                mSendMessageType = 1;
+                String notify = " @" + name + " ";
+                int start = inputMessage.getSelectionStart();       //当前光标位置
+                SpannableStringBuilder spannableString = new SpannableStringBuilder(notify);    //构建SpannableStringBuilder
+                Bitmap bitmap = CreateNotifyBitmap.notifyBitmap(ChatRoomActivity.this,notify);      //构建内容为notify的bitmap
+                ImageSpan imageSpan = new ImageSpan(ChatRoomActivity.this,bitmap);      //构建内容为bitmap的ImageSpan
+                spannableString.setSpan(imageSpan,
+                        1,notify.length()-1,
+                        Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);        //SpannableStringBuilder天剑ImageSpan
+                //原内容中插入SpannableStringBuilder
+                Editable editable = inputMessage.getEditableText();
+                editable.insert(inputMessage.getSelectionStart(),spannableString);
+                inputMessage.setText(editable);
+                //移动光标到SpannableStringBuilder后
+                inputMessage.setSelection(start+notify.length());
+                //记录插入的ImageSpan
+                mNotifyReceivers.put(imageSpan,recordEntity.getSender());
+            }
+        }
+    };
+
+    private TextWatcher mWatchInputMessage = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            if (after == 0){    //删除内容是after为0
+                Editable editableText = inputMessage.getEditableText();     //用于获得ImageSpan[]
+                int remainImageSpan = 0;    //删除内容后剩余的ImageSpan数量
+
+                if (start != 0){    //被删除内容的起始位置不是原内容的开端
+                    //计算被删除内容之前的ImageSpan数量
+                    ImageSpan[] spans = editableText.getSpans(0, start, ImageSpan.class);
+                    if (null != spans && spans.length != 0){
+                        remainImageSpan += spans.length;
+                    }
+                }else if (start+count == s.length()){       //所有内容内清空，清空mNotifyReceivers
+                    mNotifyReceivers.clear();
+                    return;
+                }
+
+                if (start+count != s.length()){     //被删除内容的末尾位置不是原内容结尾
+                    //计算被删除内容之后的ImageSpan数量
+                    ImageSpan[] spans = editableText.getSpans(start+count, s.length(), ImageSpan.class);
+                    if (null != spans && spans.length != 0){
+                        remainImageSpan += spans.length;
+                    }
+                }
+
+                Log.d(TAG, "beforeTextChanged: spans.length = " + remainImageSpan);
+                if (mNotifyReceivers.size() != remainImageSpan){    //值不同，有ImageSpan被删除
+                    ImageSpan[] spans = editableText.getSpans(start, count, ImageSpan.class);   //被删除内容中的ImageSpan
+                    for (int i = 0;i < spans.length; i++){
+                        //mNotifyReceivers删除被删除的ImageSpan
+                        mNotifyReceivers.remove(spans[i]);
+                    }
+
+                    if (remainImageSpan == 0){
+                        mSendMessageType = 0;   //没有@任何人
+                    }
+                }
+            }
+        }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+        }
+
+        @Override
+        public void afterTextChanged(Editable s) {
         }
     };
 
@@ -201,6 +300,7 @@ public class ChatRoomActivity extends AppCompatActivity implements View.OnClickL
         adapter.setOnScrollToPosition(onScrollToPosition);
         recyclerView.setAdapter(adapter);
         roomName.setText(receiverName);
+        adapter.setOnClickReplayOrNotify(mOnClickReplayOrNotify);       //注册回复和@
 
         myHost = IntranetChatServer.getHostIP();
 
@@ -465,6 +565,14 @@ public class ChatRoomActivity extends AppCompatActivity implements View.OnClickL
                 mUp = dy < 0;
             }
         });
+
+        inputMessage.addTextChangedListener(mWatchInputMessage);        //监听输入框内容变化
+
+        mReplayReceiverMessage = findViewById(R.id.replay_receiver_message);
+        mReplayMesssageBox = findViewById(R.id.replay_box);
+        mReplayImage = findViewById(R.id.replay_image);
+        mReplayCancel = findViewById(R.id.replay_cancel);
+        mReplayCancel.setOnClickListener(this::onClick);
     }
 
     @Override
@@ -620,6 +728,12 @@ public class ChatRoomActivity extends AppCompatActivity implements View.OnClickL
             case R.id.chat_room_input_voice_box:
                 if (!isClosing) {
                     fold();
+                }
+                break;
+            case R.id.replay_cancel:    //关闭回复消息展示框
+                if (QuickClickListener.isFastClick()){
+                    mReplayMesssageBox.setVisibility(View.GONE);
+                    mSendMessageType = 1;
                 }
                 break;
         }

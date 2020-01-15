@@ -452,6 +452,16 @@ public class IntranetChatCallback extends IIntranetChatAidlInterfaceCallback.Stu
         setMonitorReceiveFile(identifier,null,Config.STEP_DOWN_LOAD_FAILURE);
     }
 
+    @Override
+    public void receiveNotifyMessageBean(String notifyMessageJson, String host) throws RemoteException {
+
+    }
+
+    @Override
+    public void receiveReplayMessageBean(String notifyMessageJson, String host) throws RemoteException {
+
+    }
+
     /**记录文件接收情况*/
     private void setMonitorReceiveFile(String identifier, String path, int step){
         if (step == Config.STEP_SUCCESS){

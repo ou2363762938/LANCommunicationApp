@@ -77,7 +77,7 @@ public class PopupWindowAdapter extends RecyclerView.Adapter<PopupWindowAdapter.
                     delete();
                 }else if (clickContent.equals(mContext.getResources().getString(R.string.replay))){
                     //点击回复
-
+                    mChatAdapter.replayChatRecord();
                 }
                 mPopupWindow.dismiss();
             }

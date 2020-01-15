@@ -7,7 +7,10 @@ package com.skysoft.smart.intranetchat.model.network.receive;
 
 import android.util.Log;
 
+import com.google.gson.Gson;
 import com.skysoft.smart.intranetchat.model.network.bean.EstablishGroupBean;
+import com.skysoft.smart.intranetchat.model.network.bean.NotificationMessageBean;
+import com.skysoft.smart.intranetchat.model.network.bean.ReplayMessageBean;
 import com.skysoft.smart.intranetchat.model.network.bean.ResponseBean;
 import com.skysoft.smart.intranetchat.model.network.manager.FileWaitToSend;
 import com.skysoft.smart.intranetchat.model.network.manager.PathManager;
@@ -54,6 +57,12 @@ public class ParseDataPacketThread extends Thread {
                 /*receive message*/
                 onReceiveMessageBean(dataPacketBean,host);
                 break;
+            case Config.CODE_MESSAGE_NOTIFICATION:
+                onReceiveNotificationMessageBean(dataPacketBean,host);
+                break;
+            case Config.CODE_MESSAGE_REPLAY:
+                onReceiveReplayMessageBean(dataPacketBean,host);
+                break;
             case Config.CODE_USERINFO:
                 /*receive userInfo*/
                 onReceiveUserInfoBean(dataPacketBean,host);
@@ -84,6 +93,22 @@ public class ParseDataPacketThread extends Thread {
                 onReceiveEstablishGroupBean(dataPacketBean,host);
                 break;
         }
+    }
+
+    private void onReceiveReplayMessageBean(DataPacketBean dataPacketBean, String host) {
+        ReplayMessageBean replayMessageBean = (ReplayMessageBean) GsonTools.formJson(dataPacketBean.getData(),ReplayMessageBean.class);
+        if (null == replayMessageBean){
+            return;
+        }
+        MonitorUdpReceivePortThread.broadcastReceive(Config.CODE_MESSAGE_REPLAY,dataPacketBean.getData(),host);
+    }
+
+    private void onReceiveNotificationMessageBean(DataPacketBean dataPacketBean, String host) {
+        NotificationMessageBean notificationMessageBean = (NotificationMessageBean) GsonTools.formJson(dataPacketBean.getData(),NotificationMessageBean.class);
+        if (null == notificationMessageBean){
+            return;
+        }
+        MonitorUdpReceivePortThread.broadcastReceive(Config.CODE_MESSAGE_NOTIFICATION,dataPacketBean.getData(),host);
     }
 
     /*当收到建群通知*/

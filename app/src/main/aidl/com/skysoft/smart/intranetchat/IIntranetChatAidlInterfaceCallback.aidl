@@ -64,4 +64,10 @@ interface IIntranetChatAidlInterfaceCallback {
 
     /*当接收文件失败*/
     void receiveFileFailure(String identifier);
+
+    /*接收到@消息*/
+    void receiveNotifyMessageBean(String notifyMessageJson, String host);
+
+    /*接收到回复消息*/
+    void receiveReplayMessageBean(String notifyMessageJson, String host);
 }

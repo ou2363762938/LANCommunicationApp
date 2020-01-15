@@ -29,6 +29,11 @@ public class ChatRoomConfig {
     public static final int RECEIVE_VOICE_CALL = 19;
     public static final int SEND_VOICE_CALL = 20;
 
+    public static final int RECORD_NOTIFY_MESSAGE = 21;     //@别人
+    public static final int RECORD_REPLAY_MESSAGE = 22;     //回复消息
+    public static final int SEND_REPLAY_MESSAGE = 23;       //发送回复
+    public static final int RECEIVE_REPLAY_MESSAGE = 24;    //收到回复
+
     public static final String NAME = "name";
     public static final String AVATAR = "avatar";
     public static final String HOST = "host";

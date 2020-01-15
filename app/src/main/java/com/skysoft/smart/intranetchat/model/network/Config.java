@@ -29,6 +29,8 @@ public class Config {
 
     //code
     public static final int CODE_MESSAGE = 10;
+    public static final int CODE_MESSAGE_NOTIFICATION = 101;
+    public static final int CODE_MESSAGE_REPLAY = 102;
     public static final int CODE_USERINFO = 11;
     public static final int CODE_REQUEST = 12;
     public static final int CODE_FILE = 13;

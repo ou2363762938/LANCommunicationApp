@@ -70,6 +70,12 @@ public class MonitorUdpReceivePortThread extends Thread {
                         case Config.CODE_MESSAGE:
                             broadcastItem.onReceiveMessage(data,host);
                             break;
+                        case Config.CODE_MESSAGE_NOTIFICATION:
+                            broadcastItem.receiveNotifyMessageBean(data,host);
+                            break;
+                        case Config.CODE_MESSAGE_REPLAY:
+                            broadcastItem.receiveReplayMessageBean(data,host);
+                            break;
                         case Config.CODE_USERINFO:
                             broadcastItem.onReceiveUserInfo(data,host);
                             break;

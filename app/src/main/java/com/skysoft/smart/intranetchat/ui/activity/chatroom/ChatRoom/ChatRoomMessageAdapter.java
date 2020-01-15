@@ -15,6 +15,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -60,7 +61,7 @@ import java.util.Map;
 
 import static com.skysoft.smart.intranetchat.ui.activity.chatroom.ChatRoom.ChatRoomActivity.sIsAudioRecording;
 
-public class ChatRoomMessageAdapter extends RecyclerView.Adapter<ChatRoomMessageViewHolder>{
+public class ChatRoomMessageAdapter extends RecyclerView.Adapter<ChatRoomMessageViewHolder> implements View.OnTouchListener {
     private static String TAG = ChatRoomMessageAdapter.class.getSimpleName();
     private Context context;
     private List<ChatRecordEntity> messageBeanList = new ArrayList<>();
@@ -74,8 +75,18 @@ public class ChatRoomMessageAdapter extends RecyclerView.Adapter<ChatRoomMessage
     private View mInflate;
     private RecyclerView mPopupRecyclerView;
     private ArrayList<String> mHasCode = new ArrayList<>();
-    private Map<String ,ChatRoomMessageViewHolder> mVideoHolder = new HashMap<>();
     private int mLongClickPosition = 0;     //当前被长按的记录的位置
+    private OnClickReplayOrNotify mOnClickReplayOrNotify;
+    private ChatRoomMessageViewHolder mLongClickHolder;
+    private boolean isUpLongClickAvatar = true;
+
+    public OnClickReplayOrNotify getOnClickReplayOrNotify() {
+        return mOnClickReplayOrNotify;
+    }
+
+    public void setOnClickReplayOrNotify(OnClickReplayOrNotify mOnClickReplayOrNotify) {
+        this.mOnClickReplayOrNotify = mOnClickReplayOrNotify;
+    }
 
     public int getTopPosition() {
         return mTopPosition;
@@ -196,9 +207,6 @@ public class ChatRoomMessageAdapter extends RecyclerView.Adapter<ChatRoomMessage
         switch (bean.getIsReceive()){
             case ChatRoomConfig.RECEIVE_VIDEO:
                 thumbnail = holder.getSenderVideoThumbnail();
-                if (TextUtils.isEmpty(bean.getPath())){
-                    mVideoHolder.put(bean.getContent(),holder);
-                }
                 break;
             case ChatRoomConfig.SEND_VIDEO:
                 thumbnail = holder.getMineVideoThumbnail();
@@ -410,7 +418,23 @@ public class ChatRoomMessageAdapter extends RecyclerView.Adapter<ChatRoomMessage
             holder.getSenderAvatar().setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    UserInfoShowActivity.go(context,temp.getmMemberName(),temp.getmMemberAvatarPath(),bean.getSender());
+                    if (isUpLongClickAvatar && QuickClickListener.isFastClick()){       //防止长按后立即触发单击事件
+                        UserInfoShowActivity.go(context,temp.getmMemberName(),temp.getmMemberAvatarPath(),bean.getSender());
+                    }
+                }
+            });
+
+            //长按头像显示@*****
+            holder.getSenderAvatar().setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    if (null != mOnClickReplayOrNotify){
+                        //在输入框中显示@***
+                        mOnClickReplayOrNotify.onClickNotify(bean,holder.getSenderName().getText().toString());
+                    }
+                    isUpLongClickAvatar = false;        //正在长按avatar，avatar的单击事件不能触发
+                    v.setOnTouchListener(ChatRoomMessageAdapter.this::onTouch);     //监听松开avatar
+                    return false;
                 }
             });
         }else {
@@ -421,6 +445,19 @@ public class ChatRoomMessageAdapter extends RecyclerView.Adapter<ChatRoomMessage
             }
             holder.getMineAvatar().setVisibility(View.VISIBLE);
         }
+    }
+
+    @Override
+    public boolean onTouch(View v, MotionEvent event) {
+        if (v.getId() == R.id.list_view_chat_room_sender_avatar){
+            if (event.getAction() == MotionEvent.ACTION_UP){
+                Log.d(TAG, "onTouch: up");
+                isUpLongClickAvatar = true;     //松开长按
+                v.setOnTouchListener(null);     //取消触摸监听
+                QuickClickListener.isFastClick();       //避免松开手指立即触发单击事件
+            }
+        }
+        return false;
     }
 
     private void bindCall(ChatRoomMessageViewHolder holder, ChatRecordEntity bean){
@@ -550,32 +587,6 @@ public class ChatRoomMessageAdapter extends RecyclerView.Adapter<ChatRoomMessage
         }
         MyMediaPlayerManager.getsInstance().play(path);
 //        1572865304716
-    }
-
-    //收到文件后，将文件加载到列表中
-    public void onReceiveAndSaveFile(ReceiveAndSaveFileBean receiveAndSaveFileBean) {
-        Log.d(TAG, "onReceiveAndSaveFile: " + receiveAndSaveFileBean.toString());
-        Iterator<ChatRecordEntity> iterator = messageBeanList.iterator();
-        int i = 0;
-        while (iterator.hasNext()){
-            ChatRecordEntity next = iterator.next();
-            if (!TextUtils.isEmpty(next.getContent()) && next.getContent().equals(receiveAndSaveFileBean.getIdentifier())){
-                next.setPath(receiveAndSaveFileBean.getPath());
-                //加载图片
-                if (next.getType() == ChatRoomConfig.RECORD_IMAGE) {
-                    onBindViewHolder(holder, i);
-                }
-
-                //加载视频
-                if (next.getType() == ChatRoomConfig.RECORD_VIDEO){
-                    ChatRoomMessageViewHolder videoHolder = mVideoHolder.get(next.getContent());
-                    onBindViewHolder(holder,i);
-                    mVideoHolder.remove(next.getContent());
-                    return;
-                }
-            }
-            i++;
-        }
     }
 
     public static String createVideoThumbnailFile(String path) {
@@ -739,6 +750,7 @@ public class ChatRoomMessageAdapter extends RecyclerView.Adapter<ChatRoomMessage
         @Override
         public boolean onLongClick(View v) {
             mLongClickPosition = holder.getAdapterPosition();       //记录长按的位置
+            mLongClickHolder = holder;
             showPopupMenu(v,mRecordEntity,holder.getBox().getTop() + holder.getBox().getScrollX(),  //计算view到聊天室顶部的距离
                     holder.getSenderName().getVisibility() == View.VISIBLE ? holder.getSenderName().getHeight() : 0);
             return false;
@@ -795,5 +807,13 @@ public class ChatRoomMessageAdapter extends RecyclerView.Adapter<ChatRoomMessage
                 }
             }
         }).start();
+    }
+
+    /**
+     * 回复消息*/
+    public void replayChatRecord(){
+        if (null != mLongClickHolder && null != mOnClickReplayOrNotify){
+            mOnClickReplayOrNotify.onClickReplay(messageBeanList.get(mLongClickPosition),mLongClickHolder.getSenderName().getText().toString());
+        }
     }
 }
