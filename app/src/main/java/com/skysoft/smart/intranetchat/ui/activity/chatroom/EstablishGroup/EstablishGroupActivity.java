@@ -79,9 +79,9 @@ public class EstablishGroupActivity extends BaseActivity {
             }).start();
         }else {
             //新建群
-            Iterator<ContactEntity> iterator = IntranetChatApplication.getsContactList().iterator();
+            Iterator<String> iterator = IntranetChatApplication.getsContactList().iterator();
             while (iterator.hasNext()){
-                ContactEntity next = iterator.next();
+                ContactEntity next = IntranetChatApplication.sContactMap.get(iterator.next());
                 next.setCheck(false);
                 next.setShowCheck(true);
                 contactEntityList.add(next);

@@ -113,7 +113,8 @@ public class EstablishGroup {
         contactEntity.setGroup(1);
         contactEntity.setAvatarPath(establishGroupBean.getmGroupAvatarIdentifier());
         contactEntity.setNotifyId((int) (System.currentTimeMillis() - IntranetChatApplication.getsBaseTimeLine()));
-        IntranetChatApplication.getsGroupContactList().add(contactEntity);
+        IntranetChatApplication.getsGroupContactList().add(contactEntity.getIdentifier());
+        IntranetChatApplication.sGroupContactMap.put(contactEntity.getIdentifier(),contactEntity);
     }
 
     public static void establishGroup(EstablishGroupBean establishGroupBean,String host){

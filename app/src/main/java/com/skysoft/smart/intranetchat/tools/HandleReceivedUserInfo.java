@@ -37,7 +37,7 @@ public class HandleReceivedUserInfo {
             contactEntity.setHost(host);
             EventBus.getDefault().post(contactEntity);
         }else {
-            ContactEntity temp = IntranetChatApplication.getsContactList().get(index);
+            ContactEntity temp = IntranetChatApplication.sContactMap.get(IntranetChatApplication.getsContactList().get(index));
 
             ContactEntity contactEntity = new ContactEntity();
             contactEntity.setAvatarPath(temp.getAvatarPath());
@@ -79,14 +79,7 @@ public class HandleReceivedUserInfo {
         if (TextUtils.isEmpty(identifier)){
             return -1;
         }
-        int index = 0;
-        List<ContactEntity> contactList = IntranetChatApplication.getsContactList();
-        for (; index < contactList.size();index ++){
-            if (!TextUtils.isEmpty(contactList.get(index).getIdentifier()) && contactList.get(index).getIdentifier().equals(identifier)){
-                return index;
-            }
-        }
-        return -1;
+        return IntranetChatApplication.getsContactList().indexOf(identifier);
     }
 
     public static void askAvatar(UserInfoBean userInfo,String host){

@@ -179,17 +179,14 @@ public class EstablishGroupAdapter extends BaseAdapter {
         //设置群唯一标识符
         Identifier identifier = new Identifier();
         String groupIdentifier = identifier.getGroupIdentifier(identifiers);
-        Iterator<ContactEntity> groupIterator = IntranetChatApplication.getsGroupContactList().iterator();
-        while (groupIterator.hasNext()){
-            ContactEntity next = groupIterator.next();
-            if (next.getIdentifier().equals(groupIdentifier)){
-                ToastUtil.toast(mContext,mContext.getString(R.string.repeated_construction_group));
-                establishGroupBean.setmName(next.getName());
-                establishGroupBean.setmGroupIdentifier(groupIdentifier);
-                establishGroupBean.setmGroupAvatarIdentifier(next.getAvatarPath());
-                establishGroupBean.setRemark(true);
-                return establishGroupBean;
-            }
+        ContactEntity next = IntranetChatApplication.sGroupContactMap.get(groupIdentifier);
+        if (null != next){
+            ToastUtil.toast(mContext,mContext.getString(R.string.repeated_construction_group));
+            establishGroupBean.setmName(next.getName());
+            establishGroupBean.setmGroupIdentifier(groupIdentifier);
+            establishGroupBean.setmGroupAvatarIdentifier(next.getAvatarPath());
+            establishGroupBean.setRemark(true);
+            return establishGroupBean;
         }
         //发送群建立通知
 
@@ -203,7 +200,10 @@ public class EstablishGroupAdapter extends BaseAdapter {
         LatestChatHistoryEntity latestChatHistoryEntity = EstablishGroup.LatestChatFromGroup(establishGroupBean);
         String content = establishGroupBean.getmGroupName() + "成为好友，请开始聊天吧";
         latestChatHistoryEntity.setContent(content);
-        IntranetChatApplication.getMessageList().add(latestChatHistoryEntity);
+        //记录此消息
+        IntranetChatApplication.getMessageList().add(latestChatHistoryEntity.getUserIdentifier());
+        IntranetChatApplication.sLatestChatHistoryMap.put(latestChatHistoryEntity.getUserIdentifier(),latestChatHistoryEntity);
+        //刷新消息
         MessageListAdapter messageListAdapter = IntranetChatApplication.getsMessageListAdapter();
         if (messageListAdapter != null){
             messageListAdapter.notifyDataSetChanged();
@@ -227,15 +227,11 @@ public class EstablishGroupAdapter extends BaseAdapter {
         Iterator<GroupMemberEntity> iterator = memberEntities.iterator();
         while (iterator.hasNext()){
             GroupMemberEntity next = iterator.next();
-            Iterator<ContactEntity> contactIterator = IntranetChatApplication.getsContactList().iterator();
-            while (contactIterator.hasNext()){
-                ContactEntity contactEntity = contactIterator.next();
-                if (contactEntity.getIdentifier().equals(next.getGroupMemberIdentifier())){
-                    contactEntity.setCheck(true);
-                    contactEntity.setShowCheck(false);
-                    mContactBeanList.add(contactEntity);
-                    break;
-                }
+            ContactEntity contactEntity = IntranetChatApplication.sContactMap.get(next.getGroupMemberIdentifier());
+            if (null != contactEntity){
+                contactEntity.setCheck(true);
+                contactEntity.setShowCheck(false);
+                mContactBeanList.add(contactEntity);
             }
         }
         notifyDataSetChanged();

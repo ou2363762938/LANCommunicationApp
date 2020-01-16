@@ -98,54 +98,33 @@ public class StartAnimationActivity extends AppCompatActivity {
                 }
                 List<LatestChatHistoryEntity> allHistory = MyDataBase.getInstance().getLatestChatHistoryDao().getAllHistory();
                 List<ContactEntity> allContact = MyDataBase.getInstance().getContactDao().getAllContact();
-                List<ContactEntity> contactEntities = new ArrayList<>();
-                List<ContactEntity> groupContactEntities = new ArrayList<>();
+                List<String> contactEntities = new ArrayList<>();
+                List<String> groupContactEntities = new ArrayList<>();
                 Iterator<ContactEntity> iterator = allContact.iterator();
                 Map<String ,String > identifiers = new HashMap<>();
                 List<ContactEntity> deleteContact = new ArrayList<>();
                 int i = 0;
-                while (iterator.hasNext()){
+                while (iterator.hasNext()){     //便利数据库获得的联系人
                     ContactEntity next = iterator.next();
-                    next.setNotifyId(i++);
-                    if (identifiers.containsKey(next.getIdentifier())){
-                        if (!TextUtils.isEmpty(next.getAvatarPath())){
-                            identifiers.remove(next.getIdentifier());
-                            identifiers.put(next.getIdentifier(),next.getAvatarPath());
-                        }
-                        deleteContact.add(next);
-                        continue;
-                    }
+                    next.setNotifyId(i++);      //联系人消息通知的唯一ID
+
                     identifiers.put(next.getIdentifier(),next.getAvatarPath());
                     if (next.getGroup() == 0){
-                        contactEntities.add(next);
+                        contactEntities.add(next.getIdentifier());
+                        //记录此联系人
+                        IntranetChatApplication.sContactMap.put(next.getIdentifier(),next);
                     }else {
-                        groupContactEntities.add(next);
-                    }
-                }
-                Iterator<ContactEntity> contactIterator = contactEntities.iterator();
-                while (contactIterator.hasNext()){
-                    ContactEntity next = contactIterator.next();
-                    if (TextUtils.isEmpty(next.getAvatarPath())){
-                        if (!TextUtils.isEmpty(identifiers.get(next.getIdentifier()))){
-                            next.setAvatarPath(identifiers.get(next.getIdentifier()));
-                            MyDataBase.getInstance().getContactDao().update(next);
-                        }
-                    }
-                }
-                Iterator<ContactEntity> groupIterator = groupContactEntities.iterator();
-                while (groupIterator.hasNext()){
-                    ContactEntity next = groupIterator.next();
-                    if (TextUtils.isEmpty(next.getAvatarPath())){
-                        if (!TextUtils.isEmpty(identifiers.get(next.getIdentifier()))){
-                            next.setAvatarPath(identifiers.get(next.getIdentifier()));
-                            MyDataBase.getInstance().getContactDao().update(next);
-                        }
+                        groupContactEntities.add(next.getIdentifier());
+                        //记录此群
+                        IntranetChatApplication.sGroupContactMap.put(next.getIdentifier(),next);
                     }
                 }
                 //添加联系人
                 IntranetChatApplication.setsGroupContactList(groupContactEntities);
                 IntranetChatApplication.initContactList(contactEntities);
-                Iterator<LatestChatHistoryEntity> historyIterator = allHistory.iterator();
+
+                Iterator<LatestChatHistoryEntity> historyIterator = allHistory.iterator();      //便利数据库的聊天消息
+                List<String> history = new ArrayList<>();
                 int total = 0;
                 while (historyIterator.hasNext()){
                     LatestChatHistoryEntity next = historyIterator.next();
@@ -153,10 +132,12 @@ public class StartAnimationActivity extends AppCompatActivity {
                     if (next.getContentTimeMill() != 0 && ChatRoomActivity.initMillToTmie(next.getContentTimeMill())){
                         next.setContentTime(ChatRoomActivity.millToFullTime(next.getContentTimeMill()));
                     }
+                    history.add(next.getUserIdentifier());
+                    IntranetChatApplication.sLatestChatHistoryMap.put(next.getUserIdentifier(),next);
                 }
                 //设置总的未读数
                 IntranetChatApplication.setmTotalUnReadNumber(total);
-                IntranetChatApplication.initLatestChatHistoryList(allHistory);
+                IntranetChatApplication.initLatestChatHistoryList(history);     //初始化消息界面
                 Log.d(TAG, "run: allHistory.size() = " + allHistory.size() + ", allContact.size() = " + allContact.size());
                 //获取拒绝接收群名单
                 List<RefuseGroupEntity> all = MyDataBase.getInstance().getRefuseGroupDao().getAll();

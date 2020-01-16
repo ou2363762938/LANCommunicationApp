@@ -17,25 +17,29 @@ import java.util.List;
 
 public class MessageListSort {
 
-    public static boolean Today(List<LatestChatHistoryEntity> myBeanList){
+    public static boolean Today(List<String> myBeanList){
         int i = 0;
         for (; i < myBeanList.size(); i++){
+            LatestChatHistoryEntity historyEntity = IntranetChatApplication.sLatestChatHistoryMap.get(myBeanList.get(i));
             SimpleDateFormat dateformat = new SimpleDateFormat("yyyy-MM-dd");
-            String dateStr = dateformat.format(myBeanList.get(i).getContentTimeMill());
+            String dateStr = dateformat.format(historyEntity.getContentTimeMill());
             Log.d("dateformat", "onCreateView:  " + dateStr);
-            myBeanList.get(i).setContentTime(dateStr);
-            Log.d("ContentTimeMill", "onCreateView:  " + myBeanList.get(i).getContentTimeMill());
+            historyEntity.setContentTime(dateStr);
+            Log.d("ContentTimeMill", "onCreateView:  " + historyEntity.getContentTimeMill());
         }
         return true;
     }
-    public static void CollectionsList(List<LatestChatHistoryEntity> myBeanList) {
+    public static void CollectionsList(List<String> myBeanList) {
         Today(myBeanList);
-        Collections.sort(myBeanList, new Comparator<LatestChatHistoryEntity>() {
+        Collections.sort(myBeanList, new Comparator<String>() {
             @Override
-            public int compare(LatestChatHistoryEntity o1, LatestChatHistoryEntity o2) {
-                int i = o1.getTop() - o2.getTop();
+            public int compare(String o1, String o2) {
+                LatestChatHistoryEntity historyEntity1 = IntranetChatApplication.sLatestChatHistoryMap.get(o1);
+                LatestChatHistoryEntity historyEntity2 = IntranetChatApplication.sLatestChatHistoryMap.get(o2);
+                int i = historyEntity1.getTop()
+                        - historyEntity2.getTop();
                 if(i == 0){
-                    return o1.getContentTimeMill() - o2.getContentTimeMill() > 0 ? -1 : 1;
+                    return historyEntity1.getContentTimeMill() - historyEntity2.getContentTimeMill() > 0 ? -1 : 1;
                 }
                 return -i;
             }

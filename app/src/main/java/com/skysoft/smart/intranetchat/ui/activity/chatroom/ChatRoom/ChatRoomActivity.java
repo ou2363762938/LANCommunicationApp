@@ -304,7 +304,6 @@ public class ChatRoomActivity extends AppCompatActivity implements View.OnClickL
         GroupMembersBean bean = new GroupMembersBean();
         bean.setmMemberName(receiverName);
         bean.setmMemberAvatarPath(receiverAvatarPath);
-        adapter.setAvatars(receiverIdentifier, bean);
         adapter.setHasStableIds(true);
         adapter.setOnScrollToPosition(onScrollToPosition);
         recyclerView.setAdapter(adapter);
@@ -337,49 +336,41 @@ public class ChatRoomActivity extends AppCompatActivity implements View.OnClickL
         };
         getWindow().getDecorView().getViewTreeObserver().addOnGlobalLayoutListener(mLayoutChangeListener);
 
-        Iterator<LatestChatHistoryEntity> iterator = IntranetChatApplication.getMessageList().iterator();
         //刷新未读消息数
-        while (iterator.hasNext()){
-            LatestChatHistoryEntity item = iterator.next();
-            if (item.getUserIdentifier().equals(receiverIdentifier)){
-                int number = IntranetChatApplication.getmTotalUnReadNumber() - item.getUnReadNumber();
-                item.setUnReadNumber(0);
-                if (number == 0){
-                    //B: [PT-80][Intranet Chat] [APP][UI] TextBadgeItem 一直为红色,Allen Luo,2019/11/12
-                    IntranetChatApplication.getmTextBadgeItem().hide();
-                }else {
-                    IntranetChatApplication.getmTextBadgeItem().show().setText(String.valueOf(number));
-                    //E: [PT-80][Intranet Chat] [APP][UI] TextBadgeItem 一直为红色,Allen Luo,2019/11/12
-                }
-                IntranetChatApplication.setmTotalUnReadNumber(number);
-                if (IntranetChatApplication.getsMessageListAdapter() != null){
-                    IntranetChatApplication.getsMessageListAdapter().notifyDataSetChanged();
-                }
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        MyDataBase.getInstance().getLatestChatHistoryDao().update(item);
-                    }
-                }).start();
-                break;
+        LatestChatHistoryEntity item = IntranetChatApplication.sLatestChatHistoryMap.get(receiverIdentifier);
+        if (null != item){
+            int number = IntranetChatApplication.getmTotalUnReadNumber() - item.getUnReadNumber();
+            item.setUnReadNumber(0);
+            if (number == 0){
+                //B: [PT-80][Intranet Chat] [APP][UI] TextBadgeItem 一直为红色,Allen Luo,2019/11/12
+                IntranetChatApplication.getmTextBadgeItem().hide();
+            }else {
+                IntranetChatApplication.getmTextBadgeItem().show().setText(String.valueOf(number));
+                //E: [PT-80][Intranet Chat] [APP][UI] TextBadgeItem 一直为红色,Allen Luo,2019/11/12
             }
+            IntranetChatApplication.setmTotalUnReadNumber(number);
+            if (IntranetChatApplication.getsMessageListAdapter() != null){
+                IntranetChatApplication.getsMessageListAdapter().notifyDataSetChanged();
+            }
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    MyDataBase.getInstance().getLatestChatHistoryDao().update(item);
+                }
+            }).start();
         }
 
         //删除存在的通知
-        Iterator<ContactEntity> contactIterator = null;
+        ContactEntity next = null;
         if (isGroup){
-            contactIterator = IntranetChatApplication.getsGroupContactList().iterator();
+            next = IntranetChatApplication.sGroupContactMap.get(receiverIdentifier);
         }else {
-            contactIterator = IntranetChatApplication.getsContactList().iterator();
+            next = IntranetChatApplication.sContactMap.get(receiverIdentifier);
         }
-        while (contactIterator.hasNext()){
-            ContactEntity next = contactIterator.next();
-            if (next.getIdentifier().equals(receiverIdentifier)){
-                mNotifyId = next.getNotifyId();
-                if (IntranetChatApplication.getsNotificationManager() != null){
-                    IntranetChatApplication.getsNotificationManager().cancel(mNotifyId);
-                }
-                break;
+        if (null != next){
+            mNotifyId = next.getNotifyId();
+            if (IntranetChatApplication.getsNotificationManager() != null){
+                IntranetChatApplication.getsNotificationManager().cancel(mNotifyId);
             }
         }
 

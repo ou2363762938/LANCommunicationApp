@@ -111,9 +111,12 @@ public class IntranetChatApplication extends Application {
     //B:[Intranet Chat] [APP][UI] Chat Room Oliver Ou 2019/11/1
     public static String sMineAvatarPath;
     //E:[Intranet Chat] [APP][UI] Chat Room Oliver Ou 2019/11/1
-    private static List<LatestChatHistoryEntity> sLatestChatHistoryList = new ArrayList<>();
-    private static List<ContactEntity> sContactList = new ArrayList<>();
-    private static List<ContactEntity> sGroupContactList = new ArrayList<>();
+    private static List<String> sLatestChatHistoryList = new ArrayList<>();
+    private static List<String> sContactList = new ArrayList<>();
+    private static List<String> sGroupContactList = new ArrayList<>();
+    public static Map<String, LatestChatHistoryEntity> sLatestChatHistoryMap = new HashMap<>();
+    public static Map<String, ContactEntity> sContactMap = new HashMap<>();
+    public static Map<String, ContactEntity> sGroupContactMap = new HashMap<>();
     private static MessageListAdapter sMessageListAdapter;
     private static ContactListAdapter sContactListAdapter;
     private static ChatRoomMessageAdapter sChatRoomMessageAdapter;
@@ -292,11 +295,11 @@ public class IntranetChatApplication extends Application {
     public static void setmDatasQueue(ArrayBlockingQueue<byte[]> mDatasQueue) {
         IntranetChatApplication.mDatasQueue = mDatasQueue;
     }
-    public static List<LatestChatHistoryEntity> getMessageList() {
+    public static List<String> getMessageList() {
         return sLatestChatHistoryList;
     }
 
-    public static List<ContactEntity> getsContactList() {
+    public static List<String> getsContactList() {
         return sContactList;
     }
 
@@ -324,11 +327,11 @@ public class IntranetChatApplication extends Application {
         IntranetChatApplication.sChatRoomMessageAdapter = sChatRoomMessageAdapter;
     }
 
-    public static List<ContactEntity> getsGroupContactList() {
+    public static List<String> getsGroupContactList() {
         return sGroupContactList;
     }
 
-    public static void setsGroupContactList(List<ContactEntity> sGroupContactList) {
+    public static void setsGroupContactList(List<String> sGroupContactList) {
         if (sGroupContactList != null) {
             IntranetChatApplication.sGroupContactList = sGroupContactList;
         }
@@ -393,109 +396,104 @@ public class IntranetChatApplication extends Application {
             return;
         } else {
             int i = 0;
-            for (; i < sContactList.size(); i++) {
-                ContactEntity temp = sContactList.get(i);
-                if (temp.getIdentifier().equals(contactEntity.getIdentifier())){
-                    //设置联系人IP
-                    temp.setHost(contactEntity.getHost());
-                    //设置联系人状态
-                    if (temp.getStatus() == Config.STATUS_OUT_LINE){
-                        if (contactEntity.getStatus() != Config.STATUS_OUT_LINE){
-                            temp.setStatus(contactEntity.getStatus());
-                            sContactList.remove(temp);
-                            sContactList.add(0,temp);
-                        }
-                    }else {
+            ContactEntity temp = sContactMap.get(contactEntity.getIdentifier());
+            if (null != temp){
+                //设置联系人IP
+                temp.setHost(contactEntity.getHost());
+                //设置联系人状态
+                if (temp.getStatus() == Config.STATUS_OUT_LINE){
+                    if (contactEntity.getStatus() != Config.STATUS_OUT_LINE){
                         temp.setStatus(contactEntity.getStatus());
+                        sContactList.remove(temp.getIdentifier());
+                        sContactList.add(0,temp.getIdentifier());
                     }
+                }else {
+                    temp.setStatus(contactEntity.getStatus());
+                }
 
-                    //在查看联系人信息时才刷新名字和头像
-                    if (!TextUtils.isEmpty(sFilterIdentifier) && sFilterIdentifier.equals(contactEntity.getIdentifier())) {
-                        if (sShowUserState != null){
+                //在查看联系人信息时才刷新名字和头像
+                if (!TextUtils.isEmpty(sFilterIdentifier) && sFilterIdentifier.equals(contactEntity.getIdentifier())) {
+                    if (sShowUserState != null){
 
-                        }
-                        if (!contactEntity.getAvatarIdentifier().equals(temp.getAvatarIdentifier())) {
-                            temp.setAvatarIdentifier(contactEntity.getAvatarIdentifier());
-                            if (contactEntity.getAvatarIdentifier().equals(defaultAvatarIdentifier)) {
-                                temp.setAvatarPath(null);
-                                updateContactAvatarInChatRoom(temp.getIdentifier(),null);
-                                Glide.with(this).load(R.drawable.default_head).into(sShowUserInfoAvatar);
-                            }
-                        }
-                        //更换联系人名字
-                        Log.d(TAG, "setContactList: name = " + contactEntity.getName());
-                        if (!temp.getName().equals(contactEntity.getName())){
-                            temp.setName(contactEntity.getName());
-                            //更换聊天室中联系人的头像
-                            updateContactNameInChatRoom(temp.getIdentifier(),temp.getName());
-                        }
-                        if (sShowUserInfoName != null){
-                            sShowUserInfoName.setText(temp.getName());
+                    }
+                    if (!contactEntity.getAvatarIdentifier().equals(temp.getAvatarIdentifier())) {
+                        temp.setAvatarIdentifier(contactEntity.getAvatarIdentifier());
+                        if (contactEntity.getAvatarIdentifier().equals(defaultAvatarIdentifier)) {
+                            temp.setAvatarPath(null);
+                            updateContactAvatarInChatRoom(temp.getIdentifier(),null);
+                            Glide.with(this).load(R.drawable.default_head).into(sShowUserInfoAvatar);
                         }
                     }
+                    //更换联系人名字
+                    Log.d(TAG, "setContactList: name = " + contactEntity.getName());
+                    if (!temp.getName().equals(contactEntity.getName())){
+                        temp.setName(contactEntity.getName());
+                        //更换聊天室中联系人的头像
+                        updateContactNameInChatRoom(temp.getIdentifier(),temp.getName());
+                    }
+                    if (sShowUserInfoName != null){
+                        sShowUserInfoName.setText(temp.getName());
+                    }
+                }
 
-                    //刷新联系人列表
-                    if (sContactListAdapter != null) {
-                        sContactListAdapter.notifyDataSetChanged();
+                //刷新联系人列表
+                if (sContactListAdapter != null) {
+                    sContactListAdapter.notifyDataSetChanged();
+                }
+
+                //更新联系人数据库
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        ContactDao contactDao = MyDataBase.getInstance().getContactDao();
+                        ContactEntity contact = contactDao.getContact(temp.getIdentifier());
+                        if (contact == null) {
+                            contactDao.insert(contactEntity);
+                        } else {
+                            contactDao.update(temp);
+                        }
+                    }
+                }).start();
+                //更新消息列表
+                LatestChatHistoryEntity next = sLatestChatHistoryMap.get(temp.getIdentifier());
+                if (null != next){
+                    next.setStatus(temp.getStatus());
+                    next.setHost(temp.getHost());
+
+                    boolean change = false;
+                    if (temp.getAvatarPath() == null && !TextUtils.isEmpty(next.getUserHeadPath()) && temp.getAvatarIdentifier().equals(defaultAvatarIdentifier)){
+                        if (!next.getUserIdentifier().equals(defaultAvatarIdentifier) && temp.getAvatarIdentifier().equals(defaultAvatarIdentifier)){
+                            next.setUserHeadPath(null);
+                            next.setUserHeadIdentifier(defaultAvatarIdentifier);
+                            change = true;
+                        }
                     }
 
-                    //更新联系人数据库
-                    new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                            ContactDao contactDao = MyDataBase.getInstance().getContactDao();
-                            ContactEntity contact = contactDao.getContact(temp.getIdentifier());
-                            if (contact == null) {
-                                contactDao.insert(contactEntity);
-                            } else {
-                                contactDao.update(temp);
-                            }
+                    if (!temp.getName().equals(next.getUserName())){
+                        next.setUserName(temp.getName());
+                        change = true;
+                    }
+
+                    if (change){
+
+                        if (sMessageListAdapter != null) {
+                            sMessageListAdapter.notifyDataSetChanged();
                         }
-                    }).start();
-                    //更新消息列表
-                    Iterator<LatestChatHistoryEntity> iterator = sLatestChatHistoryList.iterator();
-                    while (iterator.hasNext()) {
-                        LatestChatHistoryEntity next = iterator.next();
-                        if (next.getUserIdentifier().equals(temp.getIdentifier())){
-                            next.setStatus(temp.getStatus());
-                            next.setHost(temp.getHost());
 
-                            boolean change = false;
-                            if (temp.getAvatarPath() == null && !TextUtils.isEmpty(next.getUserHeadPath()) && temp.getAvatarIdentifier().equals(defaultAvatarIdentifier)){
-                                if (!next.getUserIdentifier().equals(defaultAvatarIdentifier) && temp.getAvatarIdentifier().equals(defaultAvatarIdentifier)){
-                                    next.setUserHeadPath(null);
-                                    next.setUserHeadIdentifier(defaultAvatarIdentifier);
-                                    change = true;
-                                }
-                            }
-
-                            if (!temp.getName().equals(next.getUserName())){
-                                next.setUserName(temp.getName());
-                                change = true;
-                            }
-
-                            if (change){
-
-                                if (sMessageListAdapter != null) {
-                                    sMessageListAdapter.notifyDataSetChanged();
-                                }
-
-                                if (sContactListAdapter != null) {
-                                    sContactListAdapter.notifyDataSetChanged();
-                                }
-
-                                new Thread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        MyDataBase.getInstance().getLatestChatHistoryDao().update(next);
-                                    }
-                                }).start();
-                            }
-                            return;
+                        if (sContactListAdapter != null) {
+                            sContactListAdapter.notifyDataSetChanged();
                         }
+
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                MyDataBase.getInstance().getLatestChatHistoryDao().update(next);
+                            }
+                        }).start();
                     }
                     return;
                 }
+                return;
             }
             if (i == sContactList.size()) {
                 avatarDifferentDefault(contactEntity, false);
@@ -523,7 +521,8 @@ public class IntranetChatApplication extends Application {
         if (!contain) {
             contactEntity.setAvatarIdentifier(defaultAvatarIdentifier);
             contactEntity.setNotifyId((int) (System.currentTimeMillis() - sBaseTimeLine));
-            sContactList.add(contactEntity);
+            sContactList.add(contactEntity.getIdentifier());
+            sContactMap.put(contactEntity.getIdentifier(),contactEntity);
             if (sContactListAdapter != null) {
                 sContactListAdapter.notifyDataSetChanged();
             }
@@ -586,30 +585,30 @@ public class IntranetChatApplication extends Application {
         messageBean.setMsg(latestChatHistoryEntity.getContent());
 
         //刷新消息记录
-        Iterator<LatestChatHistoryEntity> iterator = sLatestChatHistoryList.iterator();
-        while (iterator.hasNext()) {
-            LatestChatHistoryEntity next = iterator.next();
-            if (next.getUserIdentifier().equals(latestChatHistoryEntity.getUserIdentifier())) {
-                next.setHost(latestChatHistoryEntity.getHost());
-                next.setStatus(latestChatHistoryEntity.getStatus());
-                next.setContent(latestChatHistoryEntity.getContent());
-                next.setContentTimeMill(System.currentTimeMillis());
-                next.setContentTime(ChatRoomActivity.millsToTime(next.getContentTimeMill()));
-                MessageListSort.CollectionsList(sLatestChatHistoryList);
+        LatestChatHistoryEntity next = sLatestChatHistoryMap.get(latestChatHistoryEntity.getUserIdentifier());
+        if (null != next) {
+            next.setHost(latestChatHistoryEntity.getHost());
+            next.setStatus(latestChatHistoryEntity.getStatus());
+            next.setContent(latestChatHistoryEntity.getContent());
+            next.setContentTimeMill(System.currentTimeMillis());
+            next.setContentTime(ChatRoomActivity.millsToTime(next.getContentTimeMill()));
+            MessageListSort.CollectionsList(sLatestChatHistoryList);
 
-                setUnReadNumber(next,latestChatHistoryEntity,messageBean);
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        MyDataBase.getInstance().getLatestChatHistoryDao().update(next);
-                    }
-                }).start();
-                return;
-            }
+            setUnReadNumber(next,latestChatHistoryEntity,messageBean);
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    MyDataBase.getInstance().getLatestChatHistoryDao().update(next);
+                }
+            }).start();
+            return;
         }
+        //添加新收到的消息
         latestChatHistoryEntity.setContentTimeMill(System.currentTimeMillis());
-        sLatestChatHistoryList.add(latestChatHistoryEntity);
-        MessageListSort.CollectionsList(sLatestChatHistoryList);
+        sLatestChatHistoryList.add(latestChatHistoryEntity.getUserIdentifier());
+        sLatestChatHistoryMap.put(latestChatHistoryEntity.getUserIdentifier(),latestChatHistoryEntity);
+
+        MessageListSort.CollectionsList(sLatestChatHistoryList);    //对消息排序
         setUnReadNumber(latestChatHistoryEntity,latestChatHistoryEntity,messageBean);
         new Thread(new Runnable() {
             @Override
@@ -645,79 +644,74 @@ public class IntranetChatApplication extends Application {
         //刷新心跳数据
         updateHeartbeat(receiveAndSaveFileBean.getSender());
         Log.d(TAG, "onReceiveAndSaveFile: " + receiveAndSaveFileBean.toString());
-        Iterator<ContactEntity> iterator = sContactList.iterator();
 
         //刷新头像
-        while (iterator.hasNext()) {
-            ContactEntity next = iterator.next();
-            if (next.getAvatarIdentifier().equals(receiveAndSaveFileBean.getIdentifier())) {
-                //确认是否在查看联系人界面
-                if (TextUtils.isEmpty(sFilterIdentifier) || !sFilterIdentifier.equals(next.getIdentifier())) {
-                    return;
+        ContactEntity next = sContactMap.get(receiveAndSaveFileBean.getSender());
+        Log.d(TAG, "onReceiveAndSaveFile: " + next.toString());
+        if (null != next) {
+            //确认是否在查看联系人界面
+            if (TextUtils.isEmpty(sFilterIdentifier) || !sFilterIdentifier.equals(next.getIdentifier())) {
+                return;
+            }
+
+            //刷新联系人展示界面的头像
+            if (sShowUserInfoAvatar != null) {
+                Log.d(TAG, "onReceiveAndSaveFile: path = " + receiveAndSaveFileBean.getPath());
+                Glide.with(this).load(receiveAndSaveFileBean.getPath()).into(sShowUserInfoAvatar);
+            }
+
+
+            //更换聊天室中联系人的头像
+            updateContactAvatarInChatRoom(receiveAndSaveFileBean.getSender(),receiveAndSaveFileBean.getPath());
+
+            //刷新联系人列表的头像
+            next.setAvatarPath(receiveAndSaveFileBean.getPath());
+            if (sContactListAdapter != null) {
+                sContactListAdapter.notifyDataSetChanged();
+            }
+
+            if (sEstablishGroupAdapter != null){
+                sEstablishGroupAdapter.notifyDataSetChanged();
+            }
+
+            //刷新最近消息列表的头像
+            LatestChatHistoryEntity historyEntity = sLatestChatHistoryMap.get(next.getIdentifier());
+            if (null != historyEntity) {
+                Log.d(TAG, "onReceiveAndSaveFile: history.content = " + historyEntity.getContent());
+                historyEntity.setUserHeadPath(receiveAndSaveFileBean.getPath());
+                if (sMessageListAdapter != null) {
+                    sMessageListAdapter.notifyDataSetChanged();
                 }
-
-                //刷新联系人展示界面的头像
-                if (sShowUserInfoAvatar != null) {
-                    Log.d(TAG, "onReceiveAndSaveFile: path = " + receiveAndSaveFileBean.getPath());
-                    Glide.with(this).load(receiveAndSaveFileBean.getPath()).into(sShowUserInfoAvatar);
-                }
-
-
-                //更换聊天室中联系人的头像
-                updateContactAvatarInChatRoom(receiveAndSaveFileBean.getSender(),receiveAndSaveFileBean.getPath());
-
-                //刷新联系人列表的头像
-                next.setAvatarPath(receiveAndSaveFileBean.getPath());
-                if (sContactListAdapter != null) {
-                    sContactListAdapter.notifyDataSetChanged();
-                }
-
-                if (sEstablishGroupAdapter != null){
-                    sEstablishGroupAdapter.notifyDataSetChanged();
-                }
-
-                //刷新最近消息列表的头像
-                Iterator<LatestChatHistoryEntity> historyEntityIterator = sLatestChatHistoryList.iterator();
-                while (historyEntityIterator.hasNext()) {
-                    LatestChatHistoryEntity historyEntity = historyEntityIterator.next();
-                    if (historyEntity.getUserIdentifier().equals(next.getIdentifier())) {
-                        Log.d(TAG, "onReceiveAndSaveFile: history.content = " + historyEntity.getContent());
-                        historyEntity.setUserHeadPath(receiveAndSaveFileBean.getPath());
-                        if (sMessageListAdapter != null) {
-                            sMessageListAdapter.notifyDataSetChanged();
-                        }
-                        //更新最近消息数据表
-                        new Thread(new Runnable() {
-                            @Override
-                            public void run() {
-                                LatestChatHistoryDao historyDao = MyDataBase.getInstance().getLatestChatHistoryDao();
-                                historyDao.update(historyEntity);
-                            }
-                        }).start();
-                        break;
-                    }
-                }
-                //更新联系人数据表
+                //更新最近消息数据表
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        ContactDao contactDao = MyDataBase.getInstance().getContactDao();
-                        ContactEntity contact = contactDao.getContact(next.getIdentifier());
-                        if (contact == null) {
-                            contactDao.insert(next);
-                        } else {
-                            contact.setAvatarPath(next.getAvatarPath());
-                            contactDao.update(contact);
-                        }
+                        LatestChatHistoryDao historyDao = MyDataBase.getInstance().getLatestChatHistoryDao();
+                        historyDao.update(historyEntity);
                     }
                 }).start();
-
-                if (!sInShowUserInfoActivity){
-                    sFilterIdentifier = null;
-                }
-                sRequestAvatar = false;
-                return;
             }
+
+            //更新联系人数据表
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    ContactDao contactDao = MyDataBase.getInstance().getContactDao();
+                    ContactEntity contact = contactDao.getContact(next.getIdentifier());
+                    if (contact == null) {
+                        contactDao.insert(next);
+                    } else {
+                        contact.setAvatarPath(next.getAvatarPath());
+                        contactDao.update(contact);
+                    }
+                }
+            }).start();
+
+            if (!sInShowUserInfoActivity){
+                sFilterIdentifier = null;
+            }
+            sRequestAvatar = false;
+            return;
         }
 
         Log.d(TAG, "onReceiveAndSaveFile: file");
@@ -739,29 +733,26 @@ public class IntranetChatApplication extends Application {
                     }
 
                     //接收完视频后刷新消息列表
-                    Iterator<ContactEntity> contactEntityIterator = null;
+                    ContactEntity next = null;
                     int isGroup = 0;
                     if (receiveAndSaveFileBean.getSender().equals(receiveAndSaveFileBean.getReceiver())){
-                        contactEntityIterator = sContactList.iterator();
+                        next = sContactMap.get(receiveAndSaveFileBean.getReceiver());
                     }else {
                         isGroup = 1;
-                        contactEntityIterator = sGroupContactList.iterator();
+                        next = sGroupContactMap.get(receiveAndSaveFileBean.getReceiver());
                     }
 
-                    while (contactEntityIterator.hasNext()){
-                        ContactEntity next = contactEntityIterator.next();
-                        if (next.getIdentifier().equals(receiveAndSaveFileBean.getReceiver())){
-                            LatestChatHistoryEntity historyEntity = new LatestChatHistoryEntity();
-                            historyEntity.setType(recordByFileIdentifier.getType());
-                            historyEntity.setUserIdentifier(recordByFileIdentifier.getReceiver());
-                            historyEntity.setHost(receiveAndSaveFileBean.getHost());
-                            historyEntity.setUserName(next.getName());
-                            historyEntity.setUserHeadIdentifier(next.getAvatarIdentifier());
-                            historyEntity.setUserHeadPath(next.getAvatarPath());
-                            historyEntity.setGroup(isGroup);
-                            historyEntity.setSenderIdentifier(receiveAndSaveFileBean.getSender());
-                            EventBus.getDefault().post(historyEntity);
-                        }
+                    if (null != next){
+                        LatestChatHistoryEntity historyEntity = new LatestChatHistoryEntity();
+                        historyEntity.setType(recordByFileIdentifier.getType());
+                        historyEntity.setUserIdentifier(recordByFileIdentifier.getReceiver());
+                        historyEntity.setHost(receiveAndSaveFileBean.getHost());
+                        historyEntity.setUserName(next.getName());
+                        historyEntity.setUserHeadIdentifier(next.getAvatarIdentifier());
+                        historyEntity.setUserHeadPath(next.getAvatarPath());
+                        historyEntity.setGroup(isGroup);
+                        historyEntity.setSenderIdentifier(receiveAndSaveFileBean.getSender());
+                        EventBus.getDefault().post(historyEntity);
                     }
 
                     chatRecordDao.update(recordByFileIdentifier);
@@ -853,20 +844,16 @@ public class IntranetChatApplication extends Application {
         boolean groupExist = false;
         boolean latestChatExist = false;
         //查看群是否存在
-        Iterator<ContactEntity> iterator = sGroupContactList.iterator();
-        while (iterator.hasNext()) {
-            ContactEntity next = iterator.next();
-            if (next.getIdentifier().equals(establishGroupBean.getmGroupIdentifier())) {
-                next.setName(establishGroupBean.getmGroupName());
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        MyDataBase.getInstance().getContactDao().update(next);
-                    }
-                }).start();
-                groupExist = true;
-                break;
-            }
+        ContactEntity next = sGroupContactMap.get(establishGroupBean.getmGroupIdentifier());
+        if (null != next) {
+            next.setName(establishGroupBean.getmGroupName());
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    MyDataBase.getInstance().getContactDao().update(next);
+                }
+            }).start();
+            groupExist = true;
         }
 
         //设置LatestChatHistoryEntity的内容
@@ -878,25 +865,21 @@ public class IntranetChatApplication extends Application {
         }
 
         //查看最近聊天消息是否存在
-        Iterator<LatestChatHistoryEntity> latestIterator = sLatestChatHistoryList.iterator();
-        while (latestIterator.hasNext()) {
-            LatestChatHistoryEntity historyEntity = latestIterator.next();
-            if (historyEntity.getUserIdentifier().equals(establishGroupBean.getmGroupIdentifier())) {
-                historyEntity.setUserName(establishGroupBean.getmGroupName());
-                historyEntity.setContent(content);
-                historyEntity.setContentTimeMill(System.currentTimeMillis());
-                historyEntity.setContentTime(ChatRoomActivity.millsToTime(historyEntity.getContentTimeMill()));
-                MessageListSort.CollectionsList(sLatestChatHistoryList);
-                sMessageListAdapter.notifyDataSetChanged();
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        MyDataBase.getInstance().getLatestChatHistoryDao().update(historyEntity);
-                    }
-                }).start();
-                latestChatExist = true;
-                break;
-            }
+        LatestChatHistoryEntity historyEntity = sLatestChatHistoryMap.get(establishGroupBean.getmGroupIdentifier());
+        if (null != historyEntity) {
+            historyEntity.setUserName(establishGroupBean.getmGroupName());
+            historyEntity.setContent(content);
+            historyEntity.setContentTimeMill(System.currentTimeMillis());
+            historyEntity.setContentTime(ChatRoomActivity.millsToTime(historyEntity.getContentTimeMill()));
+            MessageListSort.CollectionsList(sLatestChatHistoryList);
+            sMessageListAdapter.notifyDataSetChanged();
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    MyDataBase.getInstance().getLatestChatHistoryDao().update(historyEntity);
+                }
+            }).start();
+            latestChatExist = true;
         }
 
         if (groupExist && latestChatExist) {
@@ -908,7 +891,8 @@ public class IntranetChatApplication extends Application {
         latestChatHistoryEntity.setGroup(1);
         latestChatHistoryEntity.setUnReadNumber(1);
         addTotalUnReadNumber();
-        sLatestChatHistoryList.add(latestChatHistoryEntity);
+        sLatestChatHistoryList.add(latestChatHistoryEntity.getUserIdentifier());
+        sLatestChatHistoryMap.put(latestChatHistoryEntity.getUserIdentifier(),latestChatHistoryEntity);
         MessageListSort.CollectionsList(sLatestChatHistoryList);
         if (sMessageListAdapter != null) {
             sMessageListAdapter.notifyDataSetChanged();
@@ -932,14 +916,14 @@ public class IntranetChatApplication extends Application {
     //E:[Intranet Chat] [APP][UI] Chat Room Oliver Ou 2019/10/31
 
 
-    public static void initContactList(List<ContactEntity> contactBeans) {
+    public static void initContactList(List<String> contactBeans) {
         if (contactBeans == null) {
             return;
         }
         sContactList.addAll(contactBeans);
     }
 
-    public static void initLatestChatHistoryList(List<LatestChatHistoryEntity> latestChatHistoryEntities) {
+    public static void initLatestChatHistoryList(List<String> latestChatHistoryEntities) {
         if (latestChatHistoryEntities == null) {
             return;
         }
@@ -1107,26 +1091,23 @@ public class IntranetChatApplication extends Application {
         if (sNotificationManager == null) {
             sNotificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         }
-        Iterator<ContactEntity> iterator = null;
+        ContactEntity next = null;
         boolean group = false;
         if (message.getReceiver().equals(message.getSender())) {
-            iterator = IntranetChatApplication.getsContactList().iterator();
+            next = sContactMap.get(message.getReceiver());
         } else {
             group = true;
-            iterator = IntranetChatApplication.getsGroupContactList().iterator();
+            next = sGroupContactMap.get(message.getReceiver());
         }
 
         String name = null;
         String avatar = null;
         int notifyId = 0;
         Log.d(TAG, "notification: notifyId " + message.getReceiver());
-        while (iterator.hasNext()) {
-            ContactEntity next = iterator.next();
-            if (next.getIdentifier().equals(message.getReceiver())) {
-                name = next.getName();
-                avatar = next.getAvatarPath();
-                notifyId = next.getNotifyId();
-            }
+        if (null != next) {
+            name = next.getName();
+            avatar = next.getAvatarPath();
+            notifyId = next.getNotifyId();
         }
         Intent mainIntent = new Intent(IntranetChatApplication.this, ChatRoomActivity.class);
         Bundle bundle = new Bundle();
@@ -1302,67 +1283,62 @@ public class IntranetChatApplication extends Application {
         messageBean.setMsg(content);
         messageBean.setTimeStamp(System.currentTimeMillis());
 
-        Iterator<LatestChatHistoryEntity> latestIterator = sLatestChatHistoryList.iterator();
-        while (latestIterator.hasNext()) {
-            LatestChatHistoryEntity next = latestIterator.next();
-            if (next.getUserIdentifier().equals(identifier)) {
-                next.setContent(content);
-                next.setContentTimeMill(System.currentTimeMillis());
-                next.setContentTime(ChatRoomActivity.millsToTime(next.getContentTimeMill()));
-                if (sChatRoomMessageAdapter != null && !TextUtils.isEmpty(sChatRoomMessageAdapter.getReceiverIdentifier()) && sChatRoomMessageAdapter.getReceiverIdentifier().equals(next.getUserIdentifier())) {
-                    next.setUnReadNumber(0);
-                } else {
-                    next.setUnReadNumber(next.getUnReadNumber() + 1);
-                    addTotalUnReadNumber();
-                    notification(messageBean, next.getHost());
-                }
-                MessageListSort.CollectionsList(sLatestChatHistoryList);
-                sMessageListAdapter.notifyDataSetChanged();
-
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        MyDataBase.getInstance().getLatestChatHistoryDao().update(next);
-                    }
-                }).start();
-                return;
+        LatestChatHistoryEntity next = sLatestChatHistoryMap.get(identifier);
+        if (null != next) {
+            next.setContent(content);
+            next.setContentTimeMill(System.currentTimeMillis());
+            next.setContentTime(ChatRoomActivity.millsToTime(next.getContentTimeMill()));
+            if (sChatRoomMessageAdapter != null && !TextUtils.isEmpty(sChatRoomMessageAdapter.getReceiverIdentifier()) && sChatRoomMessageAdapter.getReceiverIdentifier().equals(next.getUserIdentifier())) {
+                next.setUnReadNumber(0);
+            } else {
+                next.setUnReadNumber(next.getUnReadNumber() + 1);
+                addTotalUnReadNumber();
+                notification(messageBean, next.getHost());
             }
+            MessageListSort.CollectionsList(sLatestChatHistoryList);
+            sMessageListAdapter.notifyDataSetChanged();
+
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    MyDataBase.getInstance().getLatestChatHistoryDao().update(next);
+                }
+            }).start();
+            return;
         }
 
-        Iterator<ContactEntity> iterator = sContactList.iterator();
-        while (iterator.hasNext()) {
-            ContactEntity next = iterator.next();
-            if (next.getIdentifier().equals(identifier)) {
-                LatestChatHistoryEntity entity = new LatestChatHistoryEntity();
-                entity.setContent(content);
-                entity.setHost(host);
-                //默认
-                entity.setStatus(next.getStatus());
-                entity.setGroup(0);
-                entity.setContentTimeMill(System.currentTimeMillis());
-                entity.setContentTime(ChatRoomActivity.millsToTime(entity.getContentTimeMill()));
-                entity.setUserIdentifier(identifier);
-                entity.setSenderIdentifier(identifier);
-                entity.setUserHeadIdentifier(next.getAvatarIdentifier());
-                entity.setUserHeadPath(next.getAvatarPath());
-                entity.setUserName(next.getName());
-                if (sChatRoomMessageAdapter != null && !TextUtils.isEmpty(sChatRoomMessageAdapter.getReceiverIdentifier()) && sChatRoomMessageAdapter.getReceiverIdentifier().equals(identifier)) {
-                    entity.setUnReadNumber(0);
-                } else {
-                    entity.setUnReadNumber(1);
-                    addTotalUnReadNumber();
-                    notification(messageBean, next.getHost());
-                }
-                sLatestChatHistoryList.add(entity);
-                MessageListSort.CollectionsList(sLatestChatHistoryList);
-                sMessageListAdapter.notifyDataSetChanged();
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        MyDataBase.getInstance().getLatestChatHistoryDao().insert(entity);
-                    }
-                }).start();
+        ContactEntity nextContact = sContactMap.get(identifier);
+        if (null != next) {
+            LatestChatHistoryEntity entity = new LatestChatHistoryEntity();
+            entity.setContent(content);
+            entity.setHost(host);
+            //默认
+            entity.setStatus(next.getStatus());
+            entity.setGroup(0);
+            entity.setContentTimeMill(System.currentTimeMillis());
+            entity.setContentTime(ChatRoomActivity.millsToTime(entity.getContentTimeMill()));
+            entity.setUserIdentifier(identifier);
+            entity.setSenderIdentifier(identifier);
+            entity.setUserHeadIdentifier(nextContact.getAvatarIdentifier());
+            entity.setUserHeadPath(nextContact.getAvatarPath());
+            entity.setUserName(nextContact.getName());
+            if (sChatRoomMessageAdapter != null && !TextUtils.isEmpty(sChatRoomMessageAdapter.getReceiverIdentifier()) && sChatRoomMessageAdapter.getReceiverIdentifier().equals(identifier)) {
+                entity.setUnReadNumber(0);
+            } else {
+                entity.setUnReadNumber(1);
+                addTotalUnReadNumber();
+                notification(messageBean, next.getHost());
             }
+            sLatestChatHistoryList.add(entity.getUserIdentifier());
+            sLatestChatHistoryMap.put(entity.getUserIdentifier(),entity);
+            MessageListSort.CollectionsList(sLatestChatHistoryList);
+            sMessageListAdapter.notifyDataSetChanged();
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    MyDataBase.getInstance().getLatestChatHistoryDao().insert(entity);
+                }
+            }).start();
         }
     }
 
@@ -1376,21 +1352,17 @@ public class IntranetChatApplication extends Application {
                 for (Map.Entry<String,Long> entry : sHeartbeatDetection.entrySet()){
                     if (entry.getValue() < System.currentTimeMillis() - time){
                         Log.d(TAG, "run: entry.getKey() = " + entry.getKey());
-                        Iterator<ContactEntity> iterator = sContactList.iterator();
-                        while (iterator.hasNext()){
-                            ContactEntity next = iterator.next();
-                            if (next.getIdentifier().equals(entry.getKey())){
-                                Log.d(TAG, "run: " + next.toString());
-                                next.setStatus(Config.STATUS_OUT_LINE);
-                                if ((entry.getValue() < System.currentTimeMillis() - time + 2*1000) && !TextUtils.isEmpty(next.getHost())){
-                                    Login.requestUserInfo(next.getHost());
-                                    break;
-                                }
-                                sContactList.remove(next);
-                                sContactList.add(next);
-                                outLine = true;
+                        ContactEntity next = sContactMap.get(entry.getKey());
+                        if (next.getIdentifier().equals(entry.getKey())){
+                            Log.d(TAG, "run: " + next.toString());
+                            next.setStatus(Config.STATUS_OUT_LINE);
+                            if ((entry.getValue() < System.currentTimeMillis() - time + 2*1000) && !TextUtils.isEmpty(next.getHost())){
+                                Login.requestUserInfo(next.getHost());
                                 break;
                             }
+                            sContactList.remove(next.getIdentifier());
+                            sContactList.add(next.getIdentifier());
+                            outLine = true;
                         }
                     }
                 }
@@ -1419,9 +1391,9 @@ public class IntranetChatApplication extends Application {
 
     public void updateContactNameInChatRoom(String identifier,String name){
         if (sChatRoomMessageAdapter != null){
-            GroupMembersBean groupMembersBean = sChatRoomMessageAdapter.getAvatars().get(identifier);
-            if (groupMembersBean != null){
-                groupMembersBean.setmMemberName(name);
+            ContactEntity contactEntity = sGroupContactMap.get(identifier);
+            if (null != contactEntity){
+                contactEntity.setName(name);
                 sChatRoomMessageAdapter.notifyDataSetChanged();
             }
         }
@@ -1429,10 +1401,12 @@ public class IntranetChatApplication extends Application {
 
     public void updateContactAvatarInChatRoom(String identifier,String avatarPath){
         if (sChatRoomMessageAdapter != null){
-            GroupMembersBean groupMembersBean = sChatRoomMessageAdapter.getAvatars().get(identifier);
-            if (groupMembersBean != null){
-                groupMembersBean.setmMemberAvatarPath(avatarPath);
+            ContactEntity contactEntity = sGroupContactMap.get(identifier);
+            if (null != contactEntity){
+                contactEntity.setAvatarPath(avatarPath);
                 sChatRoomMessageAdapter.notifyDataSetChanged();
+            }else {
+                Log.d(TAG, "updateContactAvatarInChatRoom: 没有找到用户");
             }
         }
     }

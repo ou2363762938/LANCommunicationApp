@@ -65,7 +65,6 @@ public class ChatRoomMessageAdapter extends RecyclerView.Adapter<ChatRoomMessage
     private static String TAG = ChatRoomMessageAdapter.class.getSimpleName();
     private Context context;
     private List<ChatRecordEntity> messageBeanList = new ArrayList<>();
-    private Map<String, GroupMembersBean> avatars = new HashMap<>();
     private String mineAvatarPath;
     private OnScrollToPosition onScrollToPosition;
     private ChatRoomMessageViewHolder holder;
@@ -103,14 +102,6 @@ public class ChatRoomMessageAdapter extends RecyclerView.Adapter<ChatRoomMessage
 
     public void setTopPosition(int mTopPosition) {
         this.mTopPosition = mTopPosition;
-    }
-
-    public Map<String, GroupMembersBean> getAvatars() {
-        return avatars;
-    }
-
-    public void setAvatars(String sender, GroupMembersBean bean) {
-        this.avatars.put(sender, bean);
     }
 
     public OnScrollToPosition getOnScrollToPosition() {
@@ -396,40 +387,28 @@ public class ChatRoomMessageAdapter extends RecyclerView.Adapter<ChatRoomMessage
 
     private void bindAvatar(ChatRoomMessageViewHolder holder, ChatRecordEntity bean,  boolean sender){
         if (sender){
-            GroupMembersBean membersBean = avatars.get(bean.getSender());
-            if (membersBean == null){
-                Iterator<ContactEntity> iterator = IntranetChatApplication.getsContactList().iterator();
-                while (iterator.hasNext()){
-                    ContactEntity next = iterator.next();
-                    if (next.getIdentifier().equals(bean.getSender())){
-                        membersBean = new GroupMembersBean();
-                        membersBean.setmMemberAvatarPath(next.getAvatarPath());
-                        membersBean.setmMemberName(next.getName());
-                        avatars.put(bean.getSender(),membersBean);
-                        holder.getSenderName().setText(next.getName());
-                    }
-                }
+            ContactEntity next = IntranetChatApplication.sContactMap.get(bean.getSender());
+            if (null == next){
+                throw new NullPointerException("can not found this contact");
             }
-            if(membersBean == null){
-                membersBean = new GroupMembersBean();
-                membersBean.setmMemberName("not found contact");
-            }
-            if (!TextUtils.isEmpty(membersBean.getmMemberAvatarPath())){
-                Glide.with(context).load(membersBean.getmMemberAvatarPath()).into(holder.getSenderAvatar());
+            //填充头像
+            if (!TextUtils.isEmpty(next.getAvatarPath())){
+                Glide.with(context).load(next.getAvatarPath()).into(holder.getSenderAvatar());
             }else {
                 Glide.with(context).load(R.drawable.default_head).into(holder.getSenderAvatar());
             }
-            if (!TextUtils.isEmpty(membersBean.getmMemberName())){
-                holder.getSenderName().setText(membersBean.getmMemberName());
+            //填充用户名
+            if (!TextUtils.isEmpty(next.getName())){
+                holder.getSenderName().setText(next.getName());
             }
             holder.getSenderName().setVisibility(View.VISIBLE);
             holder.getSenderAvatar().setVisibility(View.VISIBLE);
-            final GroupMembersBean temp = membersBean;
+            //单击事件
             holder.getSenderAvatar().setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     if (isUpLongClickAvatar && QuickClickListener.isFastClick()){       //防止长按后立即触发单击事件
-                        UserInfoShowActivity.go(context,temp.getmMemberName(),temp.getmMemberAvatarPath(),bean.getSender());
+                        UserInfoShowActivity.go(context,next.getName(),next.getAvatarPath(),bean.getSender());
                     }
                 }
             });

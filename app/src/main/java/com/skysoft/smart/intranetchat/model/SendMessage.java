@@ -90,32 +90,32 @@ public class SendMessage {
      *  receiverIdentifier 聊天室的唯一标识符
      *  receiverName 聊天室的名字*/
     public static void refreshMessageFragment(SendMessageBean sendMessageBean) {
-        List<LatestChatHistoryEntity> messageList = IntranetChatApplication.getMessageList();
-        Iterator<LatestChatHistoryEntity> iterator = messageList.iterator();
-        while (iterator.hasNext()) {
-            LatestChatHistoryEntity next = iterator.next();
-            if (next.getUserIdentifier().equals(sendMessageBean.getReciever())) {
-                next.setContent(sendMessageBean.getMessage());
-                next.setHost(sendMessageBean.getHost());
-                next.setUnReadNumber(0);
-                next.setContentTime(ChatRoomActivity.millsToTime(System.currentTimeMillis()));
-                next.setContentTimeMill(System.currentTimeMillis());
-                next.setStatus(com.skysoft.smart.intranetchat.model.network.Config.STATUS_ONLINE);
-                next.setUserName(sendMessageBean.getName());
-                next.setUserHeadPath(sendMessageBean.getAvatar());
-                MessageListSort.CollectionsList(IntranetChatApplication.getMessageList());
-                IntranetChatApplication.getsMessageListAdapter().notifyDataSetChanged();
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        MyDataBase.getInstance().getLatestChatHistoryDao().update(next);
-                    }
-                }).start();
-                return;
-            }
+        LatestChatHistoryEntity next = IntranetChatApplication.sLatestChatHistoryMap.get(sendMessageBean.getReciever());
+        if (null != next) {
+            next.setContent(sendMessageBean.getMessage());
+            next.setHost(sendMessageBean.getHost());
+            next.setUnReadNumber(0);
+            next.setContentTime(ChatRoomActivity.millsToTime(System.currentTimeMillis()));
+            next.setContentTimeMill(System.currentTimeMillis());
+            next.setStatus(com.skysoft.smart.intranetchat.model.network.Config.STATUS_ONLINE);
+            next.setUserName(sendMessageBean.getName());
+            next.setUserHeadPath(sendMessageBean.getAvatar());
+            MessageListSort.CollectionsList(IntranetChatApplication.getMessageList());
+            IntranetChatApplication.getsMessageListAdapter().notifyDataSetChanged();
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    MyDataBase.getInstance().getLatestChatHistoryDao().update(next);
+                }
+            }).start();
+            return;
         }
+
+        //既有的记录中没有找到对应记录，创建记录，增加记录
         LatestChatHistoryEntity latestChatHistoryEntity = adapterToLatest(sendMessageBean);
-        messageList.add(latestChatHistoryEntity);
+        IntranetChatApplication.getMessageList().add(latestChatHistoryEntity.getUserIdentifier());
+        IntranetChatApplication.sLatestChatHistoryMap.put(latestChatHistoryEntity.getUserIdentifier(),latestChatHistoryEntity);
+
         MessageListSort.CollectionsList(IntranetChatApplication.getMessageList());
         IntranetChatApplication.getsMessageListAdapter().notifyDataSetChanged();
         new Thread(new Runnable() {

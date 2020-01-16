@@ -17,6 +17,7 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.bumptech.glide.Glide;
 import com.skysoft.smart.intranetchat.R;
+import com.skysoft.smart.intranetchat.app.IntranetChatApplication;
 import com.skysoft.smart.intranetchat.database.table.ContactEntity;
 import com.skysoft.smart.intranetchat.tools.QuickClickListener;
 import com.skysoft.smart.intranetchat.ui.activity.chatroom.ChatRoom.ChatRoomActivity;
@@ -30,10 +31,10 @@ public class ContactListAdapter extends BaseAdapter {
     private final String TAG = "ContactListAdapter";
 
     private LayoutInflater inflater;
-    private List<ContactEntity> contactBeanList = null;
+    private List<String> contactBeanList = null;
     //B:[Intranet Chat] [APP][UI] Chat Room Oliver Ou 2019/10/31
     private Context context;
-    public ContactListAdapter(List<ContactEntity> contactBeanList, Context context) {
+    public ContactListAdapter(List<String> contactBeanList, Context context) {
         this.context = context;
         this.contactBeanList = contactBeanList;
         inflater = LayoutInflater.from(context);
@@ -48,7 +49,7 @@ public class ContactListAdapter extends BaseAdapter {
 
     @Override
     public Object getItem(int position) {
-        return contactBeanList.get(position);
+        return IntranetChatApplication.sContactMap.get(contactBeanList.get(position));
     }
 
     @Override
@@ -86,7 +87,7 @@ public class ContactListAdapter extends BaseAdapter {
         }
 
         //B:[Intranet Chat] [APP][UI] Chat Room Oliver Ou 2019/10/31
-        switch (contactBeanList.get(position).getStatus()){
+        switch (IntranetChatApplication.sContactMap.get(contactBeanList.get(position)).getStatus()){
             case 3:
                 //B: [PT-77][Intranet Chat] [APP][UI] 联系人离线后状态图标颜色错误,Allen Luo,2019/11/12
                 holder.userState.setBackgroundResource(R.drawable.bg_circle_gray);

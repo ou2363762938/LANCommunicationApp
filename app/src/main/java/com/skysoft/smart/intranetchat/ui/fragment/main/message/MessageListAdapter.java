@@ -37,9 +37,9 @@ public class MessageListAdapter extends BaseAdapter {
     private List<SwipeLayout> openList=new ArrayList<SwipeLayout>();
     private LayoutInflater inflater;
     //B:[PG1-Smart Team-CT] [PT-59] [Intranet Chat] [APP][UI] Chat Room,Oliver Ou,2019/10/30
-    private List<LatestChatHistoryEntity> myBeanList = null;
+    private List<String> myBeanList = null;
     private Context context;
-    public MessageListAdapter(List<LatestChatHistoryEntity> myBeanList,Context context) {
+    public MessageListAdapter(List<String> myBeanList,Context context) {
         this.myBeanList = myBeanList;
         inflater = LayoutInflater.from(context);
         this.notifyDataSetChanged();
@@ -54,7 +54,8 @@ public class MessageListAdapter extends BaseAdapter {
 
     @Override
     public Object getItem(int position) {
-        return myBeanList.get(position);
+        Log.d(TAG, "getItem: " + myBeanList.get(position));
+        return IntranetChatApplication.sLatestChatHistoryMap.get(myBeanList.get(position));
     }
 
     @Override
@@ -157,7 +158,7 @@ public class MessageListAdapter extends BaseAdapter {
 //E: 去掉消息列表展示联系人状态，Allen Luo，2019/11/13
 
     public void initView(int position, ViewHolder holder, View convertView){
-        if (myBeanList.get(position).getTop() == 0) {
+        if (IntranetChatApplication.sLatestChatHistoryMap.get(myBeanList.get(position)).getTop() == 0) {
             holder.top.setText("置顶");
             holder.messageItem.setBackground(convertView.getResources().getDrawable(R.drawable.fragment_message_list_item_selector_default));
         }else {
@@ -187,7 +188,7 @@ public class MessageListAdapter extends BaseAdapter {
                 holder.delete.setOnClickListener(new View.OnClickListener(){
 
                     public void onClick(View view){
-                        LatestChatHistoryEntity historyEntity = myBeanList.get(position);
+                        LatestChatHistoryEntity historyEntity = IntranetChatApplication.sLatestChatHistoryMap.get(myBeanList.get(position));
                         new Thread(new Runnable() {
                             @Override
                             public void run() {
@@ -206,7 +207,8 @@ public class MessageListAdapter extends BaseAdapter {
                             //E: [PT-80][Intranet Chat] [APP][UI] TextBadgeItem 一直为红色,Allen Luo,2019/11/12
                         }
                         IntranetChatApplication.setmTotalUnReadNumber(number);
-                        myBeanList.remove(position);
+                        String remove = myBeanList.remove(position);
+                        IntranetChatApplication.sLatestChatHistoryMap.remove(remove);
                         onStartOpen(mSwipeLayout);
                         //删除一条数据记录
                         MessageListAdapter.this.notifyDataSetChanged();
@@ -215,7 +217,7 @@ public class MessageListAdapter extends BaseAdapter {
                 holder.top.setOnClickListener(new View.OnClickListener() {
                     public void onClick(View v) {
                         if (QuickClickListener.isFastClick()) {
-                            LatestChatHistoryEntity messageBean = myBeanList.get(position);
+                            LatestChatHistoryEntity messageBean = IntranetChatApplication.sLatestChatHistoryMap.get(myBeanList.get(position));
                             if (messageBean.getTop() == 0) {
                                 messageBean.setTop(1);
                             } else {

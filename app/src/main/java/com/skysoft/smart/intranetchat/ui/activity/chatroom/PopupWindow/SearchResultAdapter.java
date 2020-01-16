@@ -49,14 +49,19 @@ public class SearchResultAdapter extends BaseAdapter {
         }
 
         List<TransmitBean> list = new ArrayList<>();
-        Iterator<ContactEntity> contactIterator = IntranetChatApplication.getsContactList().iterator();
-        Iterator<ContactEntity> groupIterator = IntranetChatApplication.getsGroupContactList().iterator();
+        Iterator<String> contactIterator = IntranetChatApplication.getsContactList().iterator();
+        Iterator<String> groupIterator = IntranetChatApplication.getsGroupContactList().iterator();
 
         while (contactIterator.hasNext()){
-            ContactEntity contactEntity = contactIterator.next();
-            if (contactEntity.getIdentifier().equals(mCurrentRoomIdentifier)){
+            ContactEntity contactEntity = IntranetChatApplication.sContactMap.get(contactIterator.next());
+            if (null == contactEntity){
+                throw new NullPointerException();
+            }
+
+            if (contactEntity.getIdentifier().equals(mCurrentRoomIdentifier)){      //搜索结果不包含自己
                 continue;
             }
+
             TransmitBean bean = matchingContactEntity(key, contactEntity);
             if (null != bean){
                 list.add(bean);
@@ -64,10 +69,15 @@ public class SearchResultAdapter extends BaseAdapter {
         }
 
         while (groupIterator.hasNext()){
-            ContactEntity contactEntity = groupIterator.next();
-            if (contactEntity.getIdentifier().equals(mCurrentRoomIdentifier)){
+            ContactEntity contactEntity = IntranetChatApplication.sGroupContactMap.get(groupIterator.next());
+            if (null == contactEntity){
+                throw new NullPointerException();
+            }
+
+            if (contactEntity.getIdentifier().equals(mCurrentRoomIdentifier)){      //搜索结果不包含自己
                 continue;
             }
+
             TransmitBean bean = matchingContactEntity(key, contactEntity);
             if (null != bean){
                 bean.setGroup(true);

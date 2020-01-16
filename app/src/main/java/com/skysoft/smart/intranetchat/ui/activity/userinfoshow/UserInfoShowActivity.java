@@ -50,30 +50,26 @@ public class UserInfoShowActivity extends AppCompatActivity {
 
         String host = null;
         Log.d(TAG, "onCreate: identifier = " + identifier + ", avatarPath = " + avatarPath);
-        Iterator<ContactEntity> iterator = IntranetChatApplication.getsContactList().iterator();
-        while (iterator.hasNext()){
-            ContactEntity next = iterator.next();
-            if (next.getIdentifier().equals(identifier)){
-                switch (next.getStatus()){
-                    case Config.STATUS_ONLINE:
-                        holder.state.setText(getString(R.string.user_state_online));
-                        holder.state.setTextColor(getResources().getColor(R.color.color_green));
-                        break;
-                    case Config.STATUS_BUSY:
-                        holder.state.setText(getString(R.string.user_state_busy));
-                        holder.state.setTextColor(getResources().getColor(R.color.color_red));
-                        break;
-                    case Config.STATUS_OUT_LINE:
-                        holder.state.setText(getString(R.string.user_state_out_line));
-                        holder.state.setTextColor(getResources().getColor(R.color.color_gray));
-                        break;
-                    default:
-                        Log.d(TAG, "onCreate: next.status() = " + next.getStatus());
-                        break;
-                }
-                host = next.getHost();
-                break;
+        ContactEntity next = IntranetChatApplication.sContactMap.get(identifier);
+        if (null != next){
+            switch (next.getStatus()){
+                case Config.STATUS_ONLINE:
+                    holder.state.setText(getString(R.string.user_state_online));
+                    holder.state.setTextColor(getResources().getColor(R.color.color_green));
+                    break;
+                case Config.STATUS_BUSY:
+                    holder.state.setText(getString(R.string.user_state_busy));
+                    holder.state.setTextColor(getResources().getColor(R.color.color_red));
+                    break;
+                case Config.STATUS_OUT_LINE:
+                    holder.state.setText(getString(R.string.user_state_out_line));
+                    holder.state.setTextColor(getResources().getColor(R.color.color_gray));
+                    break;
+                default:
+                    Log.d(TAG, "onCreate: next.status() = " + next.getStatus());
+                    break;
             }
+            host = next.getHost();
         }
         Log.d(TAG, "onCreate: host = " + host);
         if (!TextUtils.isEmpty(host)){

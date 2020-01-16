@@ -109,31 +109,27 @@ public class IntranetChatCallback extends IIntranetChatAidlInterfaceCallback.Stu
         if (messageBean.getSender().equals(IntranetChatApplication.getsMineUserInfo().getIdentifier())){
             return;
         }
-        Iterator<ContactEntity> iterator = null;
+        ContactEntity next = null;
         int group = 0;
         //单聊
         if (messageBean.getReceiver().equals(messageBean.getSender())){
-            List<ContactEntity> contactList = IntranetChatApplication.getsContactList();
-            iterator = contactList.iterator();
+            next = IntranetChatApplication.sContactMap.get(messageBean.getReceiver());
         }else {
-            iterator = IntranetChatApplication.getsGroupContactList().iterator();
+            next = IntranetChatApplication.sGroupContactMap.get(messageBean.getReceiver());
             group = 1;
         }
         Log.d(TAG, "notification: group = " + group);
-        while (iterator.hasNext()){
-            ContactEntity next = iterator.next();
-            if (next.getIdentifier().equals(messageBean.getReceiver())){
-                LatestChatHistoryEntity latestChatHistoryEntity = generateLatestChatHistoryEntity(messageBean.getTimeStamp(),messageBean.getMsg(),next.getAvatarIdentifier(),
-                        next.getAvatarPath(),messageBean.getReceiver(),messageBean.getSender(),next.getName(),host);
-                latestChatHistoryEntity.setType(ChatRoomConfig.RECORD_TEXT);
-                latestChatHistoryEntity.setGroup(group);
-                latestChatHistoryEntity.setContentTimeMill(messageBean.getTimeStamp());
-                EventBus.getDefault().post(latestChatHistoryEntity);
-                if (onReceiveMessage != null){
-                    onReceiveMessage.onReceiveMessage(messageBean,host);
-                }
-                return;
+        if (null != next){
+            LatestChatHistoryEntity latestChatHistoryEntity = generateLatestChatHistoryEntity(messageBean.getTimeStamp(),messageBean.getMsg(),next.getAvatarIdentifier(),
+                    next.getAvatarPath(),messageBean.getReceiver(),messageBean.getSender(),next.getName(),host);
+            latestChatHistoryEntity.setType(ChatRoomConfig.RECORD_TEXT);
+            latestChatHistoryEntity.setGroup(group);
+            latestChatHistoryEntity.setContentTimeMill(messageBean.getTimeStamp());
+            EventBus.getDefault().post(latestChatHistoryEntity);
+            if (onReceiveMessage != null){
+                onReceiveMessage.onReceiveMessage(messageBean,host);
             }
+            return;
         }
         //本地没有这个群的记录
         Iterator<RefuseGroupEntity> refuseIterator = IntranetChatApplication.getsRefuseGroupList().iterator();
@@ -386,31 +382,23 @@ public class IntranetChatCallback extends IIntranetChatAidlInterfaceCallback.Stu
                     establishGroupBean.setmHolderIdentifier(groupEntity.getGroupHolder());
                     establishGroupBean.setmGroupIdentifier(groupEntity.getGroupIdentifier());
                     //填充群名字和头像
-                    Iterator<ContactEntity> iterator = IntranetChatApplication.getsGroupContactList().iterator();
-                    while (iterator.hasNext()){
-                        ContactEntity next = iterator.next();
-                        if (next.getIdentifier().equals(groupEntity.getGroupIdentifier())){
-                            establishGroupBean.setmName(next.getName());
-                            establishGroupBean.setmGroupAvatarIdentifier(next.getAvatarIdentifier());
-                            break;
-                        }
+                    ContactEntity next = IntranetChatApplication.sGroupContactMap.get(groupEntity.getGroupIdentifier());
+                    if (null != next){
+                        establishGroupBean.setmName(next.getName());
+                        establishGroupBean.setmGroupAvatarIdentifier(next.getAvatarIdentifier());
                     }
                     List<GroupMemberEntity> allGroupMember = MyDataBase.getInstance().getGroupMemberDao().getAllGroupMember(groupEntity.getGroupIdentifier());
                     Iterator<GroupMemberEntity> memberIterator = allGroupMember.iterator();
                     //填充群成员信息
                     while (memberIterator.hasNext()){
-                        GroupMemberEntity next = memberIterator.next();
+                        GroupMemberEntity nextGroupMember = memberIterator.next();
                         UserInfoBean userInfoBean = new UserInfoBean();
-                        userInfoBean.setIdentifier(next.getGroupMemberIdentifier());
-                        Iterator<ContactEntity> contactIterator = IntranetChatApplication.getsContactList().iterator();
-                        while (contactIterator.hasNext()){
-                            ContactEntity contactEntity = contactIterator.next();
-                            if (contactEntity.getIdentifier().equals(next.getGroupMemberIdentifier())){
-                                userInfoBean.setStatus(1);
-                                userInfoBean.setName(contactEntity.getName());
-                                userInfoBean.setAvatarIdentifier(contactEntity.getAvatarIdentifier());
-                                break;
-                            }
+                        userInfoBean.setIdentifier(nextGroupMember.getGroupMemberIdentifier());
+                        ContactEntity contactEntity = IntranetChatApplication.sGroupContactMap.get(nextGroupMember.getGroupMemberIdentifier());
+                        if (null != contactEntity){
+                            userInfoBean.setStatus(1);
+                            userInfoBean.setName(contactEntity.getName());
+                            userInfoBean.setAvatarIdentifier(contactEntity.getAvatarIdentifier());
                         }
                         members.add(userInfoBean);
                     }

@@ -60,7 +60,7 @@ public class TransmitActivity extends BaseActivity implements View.OnClickListen
     private TextView mClose;
     private ConstraintLayout mSearchBox;
     private LinearLayout mRecentlyChat;
-    private List<TransmitBean> mTransmitUsers;
+    private List<TransmitBean> mTransmitUsers;      //转发界面的最近聊天列表
     private String mMessage;
     private int mRecordType;        //转发消息的内型
     private String mTransmitRoomIdentifier;     //转发消息的聊天室Identifier
@@ -155,10 +155,9 @@ public class TransmitActivity extends BaseActivity implements View.OnClickListen
     private void initData() {
         mTransmitUsers = new ArrayList<>();
         //获得显示内容
-        List<LatestChatHistoryEntity> messageList = IntranetChatApplication.getMessageList();
-        Iterator<LatestChatHistoryEntity> iterator = messageList.iterator();
+        Iterator<String> iterator = IntranetChatApplication.getMessageList().iterator();
         while (iterator.hasNext()){
-            LatestChatHistoryEntity next = iterator.next();
+            LatestChatHistoryEntity next = IntranetChatApplication.sLatestChatHistoryMap.get(iterator.next());
             //不转发给自己
             if (next.getUserIdentifier().equals(mTransmitRoomIdentifier)){
                 continue;
@@ -166,13 +165,6 @@ public class TransmitActivity extends BaseActivity implements View.OnClickListen
             TransmitBean transmitBean = new TransmitBean(next.getUserHeadPath(), next.getUserName(), next.getUserIdentifier(), next.getGroup() == 1 ? true : false, next.getHost());
             //消息列表的host是空值
             transmitBean.setmHost(next.getHost());
-//            Iterator<ContactEntity> contactIterator = IntranetChatApplication.getsContactList().iterator();
-//            while (contactIterator.hasNext()){
-//                ContactEntity contactEntity = contactIterator.next();
-//                if (next.getUserIdentifier().equals(contactEntity.getIdentifier())){
-//                    transmitBean.setmHost(contactEntity.getHost());
-//                }
-//            }
             mTransmitUsers.add(transmitBean);
         }
 

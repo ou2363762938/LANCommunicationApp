@@ -235,15 +235,12 @@ public class MainActivity extends AppCompatActivity{
             }
             EventBus.getDefault().post(new EventMessage(null,CALL_FROM_OTHER));
             IntranetChatApplication.setInCall(true);
-            Iterator<ContactEntity> iterator = IntranetChatApplication.getsContactList().iterator();
-            while (iterator.hasNext()){
-                ContactEntity next = iterator.next();
-                if(next.getIdentifier().equals(userInfoBean.getIdentifier())){
-                    String name = next.getName();
-                    String avatarPath = next.getAvatarPath();
-                    AnswerVoiceCallActivity.go(MainActivity.this,host,name,avatarPath,userInfoBean.getIdentifier());
-                    return;
-                }
+            ContactEntity next = IntranetChatApplication.sContactMap.get(userInfoBean.getIdentifier());
+            if(null != next){
+                String name = next.getName();
+                String avatarPath = next.getAvatarPath();
+                AnswerVoiceCallActivity.go(MainActivity.this,host,name,avatarPath,userInfoBean.getIdentifier());
+                return;
             }
         }
 
@@ -256,15 +253,12 @@ public class MainActivity extends AppCompatActivity{
             }
             EventBus.getDefault().post(new EventMessage(null,CALL_FROM_OTHER));
             IntranetChatApplication.setInCall(true);
-            Iterator<ContactEntity> iterator = IntranetChatApplication.getsContactList().iterator();
-            while (iterator.hasNext()){
-                ContactEntity next = iterator.next();
-                if(next.getIdentifier().equals(userInfoBean.getIdentifier())){
-                    String name = next.getName();
-                    String avatarPath = next.getAvatarPath();
-                    AnswerVideoCallActivity.go(MainActivity.this,host,name,avatarPath,userInfoBean.getIdentifier());
-                    return;
-                }
+            ContactEntity next = IntranetChatApplication.sContactMap.get(userInfoBean.getIdentifier());
+            if(null != next){
+                String name = next.getName();
+                String avatarPath = next.getAvatarPath();
+                AnswerVideoCallActivity.go(MainActivity.this,host,name,avatarPath,userInfoBean.getIdentifier());
+                return;
             }
         }
 
