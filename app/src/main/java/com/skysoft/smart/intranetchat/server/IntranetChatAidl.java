@@ -195,6 +195,11 @@ public class IntranetChatAidl extends IIntranetChatAidlInterface.Stub {
         MonitorUdpReceivePortThread.setMyHost(host);
     }
 
+    @Override
+    public void broadcastUserOutLine(String identifier) throws RemoteException {
+        send(identifier,Config.CODE_USER_OUT_LINE,BROADCAST_HOST);
+    }
+
     public RemoteCallbackList<IIntranetChatAidlInterfaceCallback> getRemoteCallbackList() {
         return remoteCallbackList;
     }

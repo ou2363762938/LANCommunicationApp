@@ -30,6 +30,8 @@ import com.skysoft.smart.intranetchat.database.table.LatestChatHistoryEntity;
 import com.skysoft.smart.intranetchat.database.table.RefuseGroupEntity;
 import com.skysoft.smart.intranetchat.model.EstablishGroup;
 import com.skysoft.smart.intranetchat.model.Login;
+import com.skysoft.smart.intranetchat.model.SendRequest;
+import com.skysoft.smart.intranetchat.model.SendResponse;
 import com.skysoft.smart.intranetchat.model.network.Config;
 import com.skysoft.smart.intranetchat.model.network.bean.AskBean;
 import com.skysoft.smart.intranetchat.model.network.bean.AskResourceBean;
@@ -47,6 +49,7 @@ import com.skysoft.smart.intranetchat.ui.activity.chatroom.ChatRoom.ChatRoomActi
 import org.greenrobot.eventbus.EventBus;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
@@ -95,6 +98,24 @@ public class IntranetChatCallback extends IIntranetChatAidlInterfaceCallback.Stu
             return;
         }
         UserInfoBean userInfoBean = (UserInfoBean) GsonTools.formJson(userInfoJson,UserInfoBean.class);
+        if (IntranetChatApplication.sMonitor.size() < 4
+                && userInfoBean.getBeMonitored() < 4
+                && !IntranetChatApplication.sMonitor.containsKey(userInfoBean.getIdentifier())){        //最多被4人监听
+            //请求对方同意被我监听
+            IntranetChatApplication.sMonitor.put(userInfoBean.getIdentifier(),System.currentTimeMillis());
+            SendRequest.sendMonitorRequest(Config.REQUEST_MONITOR,
+                    IntranetChatApplication.getsMineUserInfo().getIdentifier(),
+                    host);
+        }
+        if (IntranetChatApplication.sBeMonitored.size() < 4
+                && userInfoBean.getMonitor() < 4
+                && !IntranetChatApplication.sBeMonitored.containsKey(userInfoBean.getIdentifier())){
+            //请求对方监听我
+            IntranetChatApplication.sBeMonitored.put(userInfoBean.getIdentifier(),System.currentTimeMillis());
+            SendRequest.sendMonitorRequest(Config.REQUEST_BE_MONITOR,
+                    IntranetChatApplication.getsMineUserInfo().getIdentifier(),
+                    host);
+        }
         HandleReceivedUserInfo.handleReceivedUserInfo(userInfoBean,host);
     }
 
@@ -155,6 +176,8 @@ public class IntranetChatCallback extends IIntranetChatAidlInterfaceCallback.Stu
         switch (askBean.getRequestType()){
             case Config.REQUEST_USERINFO:
                 UserInfoBean userInfoBean = IntranetChatApplication.getsMineUserInfo();
+                userInfoBean.setMonitor(IntranetChatApplication.sMonitor.size());
+                userInfoBean.setBeMonitored(IntranetChatApplication.sBeMonitored.size());
                 userInfoBean.setRemark(null);
                 if (userInfoBean != null){
                     IntranetChatApplication.sAidlInterface.sendUserInfo(GsonTools.toJson(userInfoBean),host);
@@ -227,6 +250,34 @@ public class IntranetChatCallback extends IIntranetChatAidlInterfaceCallback.Stu
         switch (askResourceBean.getResourceType()){
             case Config.RESOURCE_AVATAR:
                 Login.notifyChangeAvatar(host);
+                break;
+            case Config.REQUEST_MONITOR:
+                if (IntranetChatApplication.sBeMonitored.size() < 4){
+                    IntranetChatApplication.sBeMonitored.put(askResourceBean.getResourceUniqueIdentifier(),
+                            System.currentTimeMillis());
+                }else {
+                    SendResponse.sendMonitorResponse(Config.RESPONSE_REFUSE_MONITOR,
+                            IntranetChatApplication.getsMineUserInfo().getIdentifier(),
+                            host);
+                }
+                break;
+            case Config.REQUEST_BE_MONITOR:
+                if (IntranetChatApplication.sMonitor.size() < 4){
+                    IntranetChatApplication.sMonitor.put(askResourceBean.getResourceUniqueIdentifier(),
+                            System.currentTimeMillis());
+                }else {
+                    SendResponse.sendMonitorResponse(Config.RESPONSE_REFUSE_BE_MONITOR,
+                            IntranetChatApplication.getsMineUserInfo().getIdentifier(),
+                            host);
+                }
+                break;
+            case Config.HEARTBEAT:
+                Log.d(TAG, "onReceiveAskResource: heartbeat " + askResourceBean.getResourceUniqueIdentifier());
+                IntranetChatApplication.sMonitor.put(askResourceBean.getResourceUniqueIdentifier(),System.currentTimeMillis());
+                break;
+            case Config.REQUEST_HEARTBEAT:
+                Log.d(TAG, "onReceiveAskResource: request heartbeat " + askResourceBean.getResourceUniqueIdentifier());
+                SendRequest.sendHeartbeat(IntranetChatApplication.getsMineUserInfo().getIdentifier(),host);
                 break;
         }
     }
@@ -441,6 +492,17 @@ public class IntranetChatCallback extends IIntranetChatAidlInterfaceCallback.Stu
     }
 
     @Override
+    public void receiveMonitorResponse(int monitorResponse, String identifier) throws RemoteException {
+        if (monitorResponse == Config.RESPONSE_REFUSE_MONITOR &&
+                IntranetChatApplication.sMonitor.containsKey(identifier)){
+            IntranetChatApplication.sMonitor.remove(identifier);
+        }else if (monitorResponse == Config.RESPONSE_REFUSE_BE_MONITOR &&
+                IntranetChatApplication.sBeMonitored.containsKey(identifier)){
+            IntranetChatApplication.sBeMonitored.remove(identifier);
+        }
+    }
+
+    @Override
     public void receiveNotifyMessageBean(String notifyMessageJson, String host) throws RemoteException {
 
     }
@@ -448,6 +510,16 @@ public class IntranetChatCallback extends IIntranetChatAidlInterfaceCallback.Stu
     @Override
     public void receiveReplayMessageBean(String notifyMessageJson, String host) throws RemoteException {
 
+    }
+
+    @Override
+    public void receiveUserOutLine(String identifier) throws RemoteException {
+        Log.d(TAG, "receiveUserOutLine: " + identifier);
+
+        ContactEntity contactEntity = IntranetChatApplication.sContactMap.get(identifier);
+        if (null != contactEntity){
+            Log.d(TAG, "receiveUserOutLine: " + contactEntity.getName());
+        }
     }
 
     /**记录文件接收情况*/

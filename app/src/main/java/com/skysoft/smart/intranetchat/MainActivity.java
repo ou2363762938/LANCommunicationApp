@@ -102,6 +102,7 @@ public class MainActivity extends AppCompatActivity{
             }
             int pid = android.os.Process.myPid();
             android.os.Process.killProcess(pid);
+            Login.broadcastUserOutLine(IntranetChatApplication.getsMineUserInfo().getIdentifier());
         }else{
             time = System.currentTimeMillis();
             ToastUtil.timingToast(MainActivity.this,getString(R.string.quitApp_toast_text),1000);

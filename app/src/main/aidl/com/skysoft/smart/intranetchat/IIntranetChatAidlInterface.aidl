@@ -87,4 +87,7 @@ interface IIntranetChatAidlInterface {
      void killProgress();
 
      void hostChanged(in String host);
+
+     /*广播identifier用户离线*/
+     void broadcastUserOutLine(String identifier);
 }

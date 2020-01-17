@@ -17,6 +17,24 @@ public class UserInfoBean implements Parcelable {
     /*用户状态*/
     private int status;
     private String remark;
+    private int monitor;
+    private int beMonitored;
+
+    public int getMonitor() {
+        return monitor;
+    }
+
+    public void setMonitor(int monitor) {
+        this.monitor = monitor;
+    }
+
+    public int getBeMonitored() {
+        return beMonitored;
+    }
+
+    public void setBeMonitored(int beMonitored) {
+        this.beMonitored = beMonitored;
+    }
 
     public String getIdentifier() {
         return identifier;
@@ -84,6 +102,8 @@ public class UserInfoBean implements Parcelable {
         dest.writeString(this.avatarIdentifier);
         dest.writeInt(this.status);
         dest.writeString(this.remark);
+        dest.writeInt(this.monitor);
+        dest.writeInt(this.beMonitored);
     }
 
     protected UserInfoBean(Parcel in) {
@@ -92,6 +112,8 @@ public class UserInfoBean implements Parcelable {
         this.avatarIdentifier = in.readString();
         this.status = in.readInt();
         this.remark = in.readString();
+        this.monitor = in.readInt();
+        this.beMonitored = in.readInt();
     }
 
     public static final Creator<UserInfoBean> CREATOR = new Creator<UserInfoBean>() {

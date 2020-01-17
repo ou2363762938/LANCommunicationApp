@@ -56,6 +56,8 @@ import com.skysoft.smart.intranetchat.database.table.MineInfoEntity;
 import com.skysoft.smart.intranetchat.database.table.RefuseGroupEntity;
 import com.skysoft.smart.intranetchat.model.EstablishGroup;
 import com.skysoft.smart.intranetchat.model.Login;
+import com.skysoft.smart.intranetchat.model.SendRequest;
+import com.skysoft.smart.intranetchat.model.SendResponse;
 import com.skysoft.smart.intranetchat.tools.listsort.MessageListSort;
 import com.skysoft.smart.intranetchat.model.network.Config;
 import com.skysoft.smart.intranetchat.model.network.bean.AskResourceBean;
@@ -84,9 +86,11 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -137,13 +141,14 @@ public class IntranetChatApplication extends Application {
     private static String sFilterIdentifier;
     private static CircleImageView sShowUserInfoAvatar;
     private static TextView sShowUserInfoName;
-    private static Map<String,Long> sHeartbeatDetection = new HashMap<>();
     private static boolean sRequestAvatar = false;
     private static boolean sInShowUserInfoActivity = false;
     private static TextView sShowUserState;
     private static EstablishGroupAdapter sEstablishGroupAdapter;
     private static String sHostIp;
     private static Map<String ,FileEntity> sMonitorReceiveFile = new HashMap<>();
+    public static Map<String,Long> sMonitor = new HashMap<>();
+    public static Map<String,Long> sBeMonitored = new HashMap<>();
 
     public static Context getContext() {
         return mAppContext;
@@ -974,7 +979,6 @@ public class IntranetChatApplication extends Application {
         super.onCreate();
         EventBus.getDefault().register(this);
         MyDataBase.init(this);
-        listeningToContactSurvive();
         sBaseTimeLine = initBaseTimeLine();
         boolean isCurrentProcess = getApplicationContext().getPackageName().equals
                 (getCurrentProcessName());
@@ -992,6 +996,10 @@ public class IntranetChatApplication extends Application {
 //            startForegroundService(intent);
             bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
             sCurrentProgress = pid;
+            Timer senderMyHeartbeat = new Timer();
+            senderMyHeartbeat.schedule(mSendMyHeartbeat,2000,500);
+            Timer confirmMonitorHeartbeat = new Timer();
+            confirmMonitorHeartbeat.schedule(mConfirmMonitorHeartbeat,2000,500);
         }
     }
 
@@ -1342,44 +1350,10 @@ public class IntranetChatApplication extends Application {
         }
     }
 
-    public void listeningToContactSurvive(){
-        Timer listening = new Timer();
-        int time = 5*60*1000;
-        TimerTask listeningTask = new TimerTask() {
-            @Override
-            public void run() {
-                boolean outLine = false;
-                for (Map.Entry<String,Long> entry : sHeartbeatDetection.entrySet()){
-                    if (entry.getValue() < System.currentTimeMillis() - time){
-                        Log.d(TAG, "run: entry.getKey() = " + entry.getKey());
-                        ContactEntity next = sContactMap.get(entry.getKey());
-                        if (next.getIdentifier().equals(entry.getKey())){
-                            Log.d(TAG, "run: " + next.toString());
-                            next.setStatus(Config.STATUS_OUT_LINE);
-                            if ((entry.getValue() < System.currentTimeMillis() - time + 2*1000) && !TextUtils.isEmpty(next.getHost())){
-                                Login.requestUserInfo(next.getHost());
-                                break;
-                            }
-                            sContactList.remove(next.getIdentifier());
-                            sContactList.add(next.getIdentifier());
-                            outLine = true;
-                        }
-                    }
-                }
-                if (outLine){
-                    NotifyContactOutLine notifyContactOutLine = new NotifyContactOutLine();
-                    EventBus.getDefault().post(notifyContactOutLine);
-                }
-            }
-        };
-        listening.schedule(listeningTask,time,time);
-    }
-
     public void updateHeartbeat(String identifier){
-        if (sHeartbeatDetection.containsKey(identifier)){
-            sHeartbeatDetection.remove(identifier);
+        if (sMonitor.containsKey(identifier)){
+            sMonitor.put(identifier,System.currentTimeMillis());
         }
-        sHeartbeatDetection.put(identifier,System.currentTimeMillis());
     }
 
     @Subscribe
@@ -1410,4 +1384,49 @@ public class IntranetChatApplication extends Application {
             }
         }
     }
+
+    private TimerTask mSendMyHeartbeat = new TimerTask() {
+        @Override
+        public void run() {
+            Iterator<Map.Entry<String, Long>> iterator = sBeMonitored.entrySet().iterator();
+            while (iterator.hasNext()){
+                Map.Entry<String, Long> monitor = iterator.next();
+                SendRequest.sendHeartbeat(monitor.getKey(),sContactMap.get(monitor.getKey()).getHost());
+                monitor.setValue(System.currentTimeMillis());
+            }
+        }
+    };
+
+    private TimerTask mConfirmMonitorHeartbeat = new TimerTask() {
+        @Override
+        public void run() {
+            Iterator<Map.Entry<String, Long>> iterator = sMonitor.entrySet().iterator();
+            List<String> outLineUser = null;
+
+            while (iterator.hasNext()){
+                Map.Entry<String, Long> monitor = iterator.next();
+                Long heartbeatTime = System.currentTimeMillis()-monitor.getValue();
+                if (heartbeatTime > 2000){
+                    Login.broadcastUserOutLine(monitor.getKey());
+                    if (null == outLineUser){
+                        outLineUser = new ArrayList<>();
+                    }
+                    outLineUser.add(monitor.getKey());
+                }else if (heartbeatTime > 1300){
+                    ContactEntity contactEntity = sContactMap.get(monitor.getKey());
+                    if (null == contactEntity){
+                        Log.d(TAG, "run: null " + monitor.getKey() + ", " + sMineUserInfo.getIdentifier());
+                        continue;
+                    }
+                    SendRequest.sendRequestHeartbeat(monitor.getKey(),contactEntity.getHost());
+                }
+            }
+
+            if (null != outLineUser){
+                for (int i = 0;i < outLineUser.size(); i++){
+                    sMonitor.remove(outLineUser.get(i));
+                }
+            }
+        }
+    };
 }

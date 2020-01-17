@@ -92,7 +92,13 @@ public class ParseDataPacketThread extends Thread {
             case Config.CODE_ESTABLISH_GROUP:
                 onReceiveEstablishGroupBean(dataPacketBean,host);
                 break;
+            case Config.CODE_USER_OUT_LINE:
+                onReceiveUserOutLine(dataPacketBean,host);
         }
+    }
+
+    private void onReceiveUserOutLine(DataPacketBean dataPacketBean, String host) {
+        MonitorUdpReceivePortThread.broadcastReceive(Config.CODE_USER_OUT_LINE,dataPacketBean.getData(),host);
     }
 
     private void onReceiveReplayMessageBean(DataPacketBean dataPacketBean, String host) {
@@ -169,6 +175,15 @@ public class ParseDataPacketThread extends Thread {
         AskResourceBean askResourceBean = (AskResourceBean) GsonTools.formJson(dataPacketBean.getData(),AskResourceBean.class);
         if (askResourceBean == null){
             return;
+        }
+
+        switch (askResourceBean.getResourceType()){
+            case Config.REQUEST_MONITOR:
+            case Config.REQUEST_BE_MONITOR:
+            case Config.HEARTBEAT:
+            case Config.REQUEST_HEARTBEAT:
+                MonitorUdpReceivePortThread.broadcastReceive(Config.CODE_ASK_RESOURCE,dataPacketBean.getData(),host);
+                return;
         }
 
         Log.d(TAG, "onReceiveAskResourceBean: found resource");

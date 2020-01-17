@@ -39,10 +39,15 @@ public class Config {
     public static final int CODE_VOICE_CALL = 16;
     public static final int CODE_VIDEO_CALL = 17;
     public static final int CODE_ESTABLISH_GROUP = 18;
+    public static final int CODE_USER_OUT_LINE = 19;
 
     //request
     public static final int REQUEST_USERINFO = 20;
     public static final int REQUEST_CONSENT_CALL = 21;
+    public static final int REQUEST_MONITOR = 22;
+    public static final int REQUEST_BE_MONITOR = 23;
+    public static final int REQUEST_HEARTBEAT = 24;
+    public static final int HEARTBEAT = 25;
 
     //resource type
     public static final int RESOURCE_FILE = 30;
@@ -79,6 +84,8 @@ public class Config {
     public static final int RESPONSE_WAITING_CONSENT = 64;
     public static final int RESPONSE_CONSENT_OUT_TIME = 65;
     public static final int RESPONSE_IN_CALL = 66;
+    public static final int RESPONSE_REFUSE_MONITOR = 67;
+    public static final int RESPONSE_REFUSE_BE_MONITOR = 68;
 
     public static final int ON_ESTABLISH_CALL_CONNECT = 70;
     public static final int NOT_FOUND_RESOURCE = 71;

@@ -132,6 +132,15 @@ public class MonitorUdpReceivePortThread extends Thread {
                         case Config.STEP_DOWN_LOAD_FAILURE:
                             broadcastItem.receiveFileFailure(data);
                             break;
+                        case Config.RESPONSE_REFUSE_BE_MONITOR:
+                            broadcastItem.receiveMonitorResponse(Config.RESPONSE_REFUSE_BE_MONITOR,data);
+                            break;
+                        case Config.RESPONSE_REFUSE_MONITOR:
+                            broadcastItem.receiveMonitorResponse(Config.RESPONSE_REFUSE_MONITOR,data);
+                            break;
+                        case Config.CODE_USER_OUT_LINE:
+                            broadcastItem.receiveUserOutLine(data);
+                            break;
                     }
                 } catch (RemoteException e) {
                     e.printStackTrace();

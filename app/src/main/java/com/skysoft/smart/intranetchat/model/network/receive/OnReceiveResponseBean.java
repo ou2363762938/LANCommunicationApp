@@ -94,6 +94,12 @@ public class OnReceiveResponseBean {
             case Config.RESPONSE_IN_CALL:
                 MonitorUdpReceivePortThread.broadcastReceive(Config.RESPONSE_IN_CALL,null,host);
                 break;
+            case Config.RESPONSE_REFUSE_MONITOR:
+                MonitorUdpReceivePortThread.broadcastReceive(Config.RESPONSE_REFUSE_MONITOR,responseBean.getIdentifier(),null);
+                break;
+            case Config.RESPONSE_REFUSE_BE_MONITOR:
+                MonitorUdpReceivePortThread.broadcastReceive(Config.RESPONSE_REFUSE_BE_MONITOR,responseBean.getIdentifier(),null);
+                break;
         }
     }
 

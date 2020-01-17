@@ -83,4 +83,12 @@ public class Login {
             e.printStackTrace();
         }
     }
+
+    public static void broadcastUserOutLine(String identifier){
+        try {
+            IntranetChatApplication.sAidlInterface.broadcastUserOutLine(identifier);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+    }
 }
