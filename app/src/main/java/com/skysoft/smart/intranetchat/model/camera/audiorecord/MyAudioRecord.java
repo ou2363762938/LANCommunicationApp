@@ -11,7 +11,7 @@ import android.media.AudioRecord;
 import android.media.MediaRecorder;
 import android.util.Log;
 
-import com.skysoft.smart.intranetchat.model.VoiceCall;
+import com.skysoft.smart.intranetchat.model.net_model.VoiceCall;
 import com.skysoft.smart.intranetchat.model.camera.mediacodec.AudioEncoder;
 
 import java.io.File;

@@ -3,7 +3,7 @@
  * Created by Oliver Ou on 2019/10/14
  * Description: [Intranet Chat] [APP] [Communication]Voice or video communication function
  */
-package com.skysoft.smart.intranetchat.model;
+package com.skysoft.smart.intranetchat.model.net_model;
 
 import android.os.RemoteException;
 

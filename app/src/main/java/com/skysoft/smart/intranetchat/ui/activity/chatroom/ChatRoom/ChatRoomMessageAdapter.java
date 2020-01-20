@@ -33,20 +33,18 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.ImageViewTarget;
 import com.skysoft.smart.intranetchat.R;
 import com.skysoft.smart.intranetchat.database.dao.ChatRecordDao;
-import com.skysoft.smart.intranetchat.model.SendFile;
+import com.skysoft.smart.intranetchat.model.net_model.SendFile;
 import com.skysoft.smart.intranetchat.model.network.Config;
 import com.skysoft.smart.intranetchat.tools.QuickClickListener;
 import com.skysoft.smart.intranetchat.ui.activity.camera.PictureShowActivity;
 import com.skysoft.smart.intranetchat.ui.activity.camera.VideoPlayActivity;
 
 import com.skysoft.smart.intranetchat.app.IntranetChatApplication;
-import com.skysoft.smart.intranetchat.bean.GroupMembersBean;
 import com.skysoft.smart.intranetchat.model.camera.manager.MyMediaPlayerManager;
 import com.skysoft.smart.intranetchat.database.MyDataBase;
 import com.skysoft.smart.intranetchat.database.table.ChatRecordEntity;
 import com.skysoft.smart.intranetchat.database.table.ContactEntity;
 import com.skysoft.smart.intranetchat.database.table.FileEntity;
-import com.skysoft.smart.intranetchat.model.network.bean.ReceiveAndSaveFileBean;
 import com.skysoft.smart.intranetchat.ui.activity.chatroom.PopupWindow.PopupWindowAdapter;
 import com.skysoft.smart.intranetchat.ui.activity.userinfoshow.UserInfoShowActivity;
 
@@ -54,10 +52,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import static com.skysoft.smart.intranetchat.ui.activity.chatroom.ChatRoom.ChatRoomActivity.sIsAudioRecording;
 

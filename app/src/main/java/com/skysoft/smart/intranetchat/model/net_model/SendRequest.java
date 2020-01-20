@@ -1,4 +1,4 @@
-package com.skysoft.smart.intranetchat.model;
+package com.skysoft.smart.intranetchat.model.net_model;
 
 import android.os.RemoteException;
 

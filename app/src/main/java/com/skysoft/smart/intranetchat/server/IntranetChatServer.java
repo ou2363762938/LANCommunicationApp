@@ -20,6 +20,7 @@ import android.util.Log;
 
 import com.skysoft.smart.intranetchat.R;
 import com.skysoft.smart.intranetchat.app.IntranetChatApplication;
+import com.skysoft.smart.intranetchat.model.network.bean.UserInfoBean;
 import com.skysoft.smart.intranetchat.model.network.receive.MonitorCallThread;
 import com.skysoft.smart.intranetchat.model.network.receive.MonitorTcpReceivePortThread;
 import com.skysoft.smart.intranetchat.model.network.receive.MonitorUdpReceivePortThread;
@@ -37,6 +38,7 @@ public class IntranetChatServer extends Service {
 
     private String TAG = IntranetChatServer.class.getSimpleName();
     private IntranetChatAidl mBinder = new IntranetChatAidl();
+    public static UserInfoBean sUserInfo;
 
     @Nullable
     @Override

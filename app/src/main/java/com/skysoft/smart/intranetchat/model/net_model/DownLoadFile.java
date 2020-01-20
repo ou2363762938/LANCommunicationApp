@@ -3,7 +3,7 @@
  * Created by Oliver Ou on 2019/10/14
  * Description: [Intranet Chat] [APP] [Communication]Create a file service for file recipients to download files.
  */
-package com.skysoft.smart.intranetchat.model;
+package com.skysoft.smart.intranetchat.model.net_model;
 
 import android.os.RemoteException;
 

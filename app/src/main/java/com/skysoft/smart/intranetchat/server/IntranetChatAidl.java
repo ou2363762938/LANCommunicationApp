@@ -200,6 +200,12 @@ public class IntranetChatAidl extends IIntranetChatAidlInterface.Stub {
         send(identifier,Config.CODE_USER_OUT_LINE,BROADCAST_HOST);
     }
 
+    @Override
+    public void initUserInfoBean(String userInfoJson) throws RemoteException {
+        IntranetChatServer.sUserInfo = (UserInfoBean) GsonTools.formJson(userInfoJson,UserInfoBean.class);
+        userInfoBean = IntranetChatServer.sUserInfo;
+    }
+
     public RemoteCallbackList<IIntranetChatAidlInterfaceCallback> getRemoteCallbackList() {
         return remoteCallbackList;
     }

@@ -3,7 +3,7 @@
  * Created by Oliver Ou on 2019/11/1
  * Description: [Intranet Chat] [APP][UI] Chat Room
  */
-package com.skysoft.smart.intranetchat.model;
+package com.skysoft.smart.intranetchat.model.net_model;
 
 import android.os.RemoteException;
 import android.text.TextUtils;
@@ -29,8 +29,6 @@ import com.skysoft.smart.intranetchat.ui.activity.chatroom.ChatRoom.ChatRoomConf
 import com.skysoft.smart.intranetchat.ui.activity.chatroom.ChatRoom.ChatRoomMessageAdapter;
 
 import java.io.File;
-import java.util.Iterator;
-import java.util.List;
 
 public class SendMessage {
     private static String TAG = SendMessage.class.getSimpleName();

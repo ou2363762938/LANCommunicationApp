@@ -8,7 +8,7 @@ package com.skysoft.smart.intranetchat.model.network.file;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.skysoft.smart.intranetchat.model.SendFile;
+import com.skysoft.smart.intranetchat.model.net_model.SendFile;
 import com.skysoft.smart.intranetchat.model.network.Config;
 import com.skysoft.smart.intranetchat.model.network.bean.FileBean;
 import com.skysoft.smart.intranetchat.model.network.bean.ResourceManagerBean;

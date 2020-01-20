@@ -7,7 +7,7 @@ package com.skysoft.smart.intranetchat.model.camera.videocall;
 
 import android.util.Log;
 
-import com.skysoft.smart.intranetchat.model.VoiceCall;
+import com.skysoft.smart.intranetchat.model.net_model.VoiceCall;
 
 import java.util.concurrent.ArrayBlockingQueue;
 

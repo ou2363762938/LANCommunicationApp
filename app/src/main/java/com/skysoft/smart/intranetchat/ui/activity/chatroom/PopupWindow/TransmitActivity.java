@@ -32,7 +32,7 @@ import com.skysoft.smart.intranetchat.app.IntranetChatApplication;
 import com.skysoft.smart.intranetchat.bean.SendMessageBean;
 import com.skysoft.smart.intranetchat.database.MyDataBase;
 import com.skysoft.smart.intranetchat.database.dao.ChatRecordDao;
-import com.skysoft.smart.intranetchat.model.SendMessage;
+import com.skysoft.smart.intranetchat.model.net_model.SendMessage;
 import com.skysoft.smart.intranetchat.bean.TransmitBean;
 import com.skysoft.smart.intranetchat.database.table.ChatRecordEntity;
 import com.skysoft.smart.intranetchat.database.table.LatestChatHistoryEntity;
@@ -41,8 +41,6 @@ import com.skysoft.smart.intranetchat.ui.activity.chatroom.ChatRoom.ChatRoomConf
 import com.skysoft.smart.intranetchat.ui.activity.chatroom.ChatRoom.ChatRoomMessageAdapter;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 

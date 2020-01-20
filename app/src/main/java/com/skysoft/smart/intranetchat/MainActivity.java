@@ -27,8 +27,8 @@ import com.ashokvarma.bottomnavigation.BottomNavigationBar;
 import com.ashokvarma.bottomnavigation.BottomNavigationItem;
 import com.ashokvarma.bottomnavigation.TextBadgeItem;
 import com.skysoft.smart.intranetchat.app.IntranetChatApplication;
-import com.skysoft.smart.intranetchat.model.Login;
-import com.skysoft.smart.intranetchat.model.VoiceCall;
+import com.skysoft.smart.intranetchat.model.net_model.Login;
+import com.skysoft.smart.intranetchat.model.net_model.VoiceCall;
 import com.skysoft.smart.intranetchat.app.impl.HandleInfo;
 import com.skysoft.smart.intranetchat.model.camera.entity.EventMessage;
 import com.skysoft.smart.intranetchat.database.table.ContactEntity;
@@ -44,8 +44,6 @@ import com.skysoft.smart.intranetchat.ui.fragment.main.mine.MineFragment;
 import com.skysoft.smart.intranetchat.ui.fragment.main.tool.ToolsFragment;
 
 import org.greenrobot.eventbus.EventBus;
-
-import java.util.Iterator;
 
 
 public class MainActivity extends AppCompatActivity{

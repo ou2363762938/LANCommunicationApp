@@ -47,7 +47,7 @@ import com.skysoft.smart.intranetchat.MainActivity;
 import com.skysoft.smart.intranetchat.R;
 import com.skysoft.smart.intranetchat.app.IntranetChatApplication;
 import com.skysoft.smart.intranetchat.bean.SendMessageBean;
-import com.skysoft.smart.intranetchat.model.SendMessage;
+import com.skysoft.smart.intranetchat.model.net_model.SendMessage;
 import com.skysoft.smart.intranetchat.app.impl.OnReceiveMessage;
 import com.skysoft.smart.intranetchat.bean.GroupMembersBean;
 import com.skysoft.smart.intranetchat.bean.LoadResourceBean;

@@ -27,6 +27,7 @@ import com.skysoft.smart.intranetchat.model.network.manager.ResponseSender;
 import com.skysoft.smart.intranetchat.model.network.manager.Sender;
 import com.skysoft.smart.intranetchat.model.network.manager.SocketManager;
 import com.skysoft.smart.intranetchat.server.IntranetChatAidl;
+import com.skysoft.smart.intranetchat.server.IntranetChatServer;
 import com.skysoft.smart.intranetchat.tools.GsonTools;
 
 public class ParseDataPacketThread extends Thread {
@@ -176,6 +177,8 @@ public class ParseDataPacketThread extends Thread {
         if (askResourceBean == null){
             return;
         }
+
+        Log.d(TAG, "onReceiveAskResourceBean: " +  askResourceBean.getResourceUniqueIdentifier().equals(IntranetChatServer.sUserInfo.getIdentifier()));
 
         switch (askResourceBean.getResourceType()){
             case Config.REQUEST_MONITOR:

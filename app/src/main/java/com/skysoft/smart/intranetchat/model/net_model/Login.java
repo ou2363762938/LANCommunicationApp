@@ -3,7 +3,7 @@
  * Created by Oliver Ou on 2019/10/18
  * Description:  [Communication]Document information collection
  */
-package com.skysoft.smart.intranetchat.model;
+package com.skysoft.smart.intranetchat.model.net_model;
 
 import android.os.RemoteException;
 
@@ -32,7 +32,10 @@ public class Login {
 
     public static void broadcastUserInfo(){
         try {
-            IntranetChatApplication.sAidlInterface.broadcastUserInfo(GsonTools.toJson(IntranetChatApplication.getsMineUserInfo()));
+            UserInfoBean userInfoBean = IntranetChatApplication.getsMineUserInfo();
+            userInfoBean.setMonitor(IntranetChatApplication.sMonitor.size());
+            userInfoBean.setBeMonitored(IntranetChatApplication.sBeMonitored.size());
+            IntranetChatApplication.sAidlInterface.broadcastUserInfo(GsonTools.toJson(userInfoBean));
         } catch (RemoteException e) {
             e.printStackTrace();
         }

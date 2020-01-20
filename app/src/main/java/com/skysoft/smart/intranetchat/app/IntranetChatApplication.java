@@ -28,6 +28,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.text.TextUtils;
+import android.util.EventLog;
 import android.util.Log;
 import android.widget.RemoteViews;
 import android.widget.TextView;
@@ -39,7 +40,7 @@ import com.bumptech.glide.Glide;
 import com.skysoft.smart.intranetchat.IIntranetChatAidlInterface;
 import com.skysoft.smart.intranetchat.R;
 import com.skysoft.smart.intranetchat.app.impl.OnReceiveCallBean;
-import com.skysoft.smart.intranetchat.bean.GroupMembersBean;
+import com.skysoft.smart.intranetchat.bean.FoundUserOutLineBean;
 import com.skysoft.smart.intranetchat.bean.LoadResourceBean;
 import com.skysoft.smart.intranetchat.bean.NotifyContactOutLine;
 import com.skysoft.smart.intranetchat.bean.RecordCallBean;
@@ -54,10 +55,10 @@ import com.skysoft.smart.intranetchat.database.table.FileEntity;
 import com.skysoft.smart.intranetchat.database.table.LatestChatHistoryEntity;
 import com.skysoft.smart.intranetchat.database.table.MineInfoEntity;
 import com.skysoft.smart.intranetchat.database.table.RefuseGroupEntity;
-import com.skysoft.smart.intranetchat.model.EstablishGroup;
-import com.skysoft.smart.intranetchat.model.Login;
-import com.skysoft.smart.intranetchat.model.SendRequest;
-import com.skysoft.smart.intranetchat.model.SendResponse;
+import com.skysoft.smart.intranetchat.model.net_model.EstablishGroup;
+import com.skysoft.smart.intranetchat.model.net_model.Login;
+import com.skysoft.smart.intranetchat.model.net_model.SendRequest;
+import com.skysoft.smart.intranetchat.tools.listsort.ContactListSort;
 import com.skysoft.smart.intranetchat.tools.listsort.MessageListSort;
 import com.skysoft.smart.intranetchat.model.network.Config;
 import com.skysoft.smart.intranetchat.model.network.bean.AskResourceBean;
@@ -86,11 +87,9 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -147,8 +146,8 @@ public class IntranetChatApplication extends Application {
     private static EstablishGroupAdapter sEstablishGroupAdapter;
     private static String sHostIp;
     private static Map<String ,FileEntity> sMonitorReceiveFile = new HashMap<>();
-    public static Map<String,Long> sMonitor = new HashMap<>();
-    public static Map<String,Long> sBeMonitored = new HashMap<>();
+    public static Map<String,Long> sMonitor = new HashMap<>();          //我监视的设备
+    public static Map<String,Long> sBeMonitored = new HashMap<>();      //监视我的设备
 
     public static Context getContext() {
         return mAppContext;
@@ -957,6 +956,7 @@ public class IntranetChatApplication extends Application {
             sAidlInterface = IIntranetChatAidlInterface.Stub.asInterface(service);
             try {
                 sAidlInterface.registerCallback(sCallback);
+                sAidlInterface.initUserInfoBean(GsonTools.toJson(sMineUserInfo));
                 sCallback.setOnReceiveCallBean(onReceiveCallBean);
             } catch (RemoteException e) {
                 e.printStackTrace();
@@ -997,9 +997,86 @@ public class IntranetChatApplication extends Application {
             bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
             sCurrentProgress = pid;
             Timer senderMyHeartbeat = new Timer();
-            senderMyHeartbeat.schedule(mSendMyHeartbeat,2000,500);
+            senderMyHeartbeat.schedule(mSendMyHeartbeat,2000,800);
             Timer confirmMonitorHeartbeat = new Timer();
-            confirmMonitorHeartbeat.schedule(mConfirmMonitorHeartbeat,2000,500);
+            confirmMonitorHeartbeat.schedule(mConfirmMonitorHeartbeat,2300,800);
+        }
+    }
+
+    /**
+     * 向监视我的设备发送心跳包*/
+    private TimerTask mSendMyHeartbeat = new TimerTask() {
+        @Override
+        public void run() {
+            Iterator<Map.Entry<String, Long>> iterator = sBeMonitored.entrySet().iterator();
+            while (iterator.hasNext()){
+                Map.Entry<String, Long> monitor = iterator.next();
+                //发送心跳
+                SendRequest.sendHeartbeat(IntranetChatApplication.getsMineUserInfo().getIdentifier()
+                        ,sContactMap.get(monitor.getKey()).getHost());
+                monitor.setValue(System.currentTimeMillis());
+            }
+        }
+    };
+
+    /**
+     * 确认我监视的设备的心跳*/
+    private TimerTask mConfirmMonitorHeartbeat = new TimerTask() {
+        @Override
+        public void run() {
+            Iterator<Map.Entry<String, Long>> iterator = sMonitor.entrySet().iterator();
+            List<String> outLineUser = null;        //需要移出监视列表的设备名单
+
+            while (iterator.hasNext()){     //确认每个设备的心跳
+                Map.Entry<String, Long> monitor = iterator.next();
+                Long heartbeatTime = System.currentTimeMillis()-monitor.getValue();
+                if (heartbeatTime > 3000){      //超过3秒没有心跳，认为设备已死亡，发送死亡通知，同时移出监视列表
+                    Login.broadcastUserOutLine(monitor.getKey());       //发送死亡广播
+                    Log.d(TAG, "sendUserOutLine: " + IntranetChatApplication.sContactMap.get(monitor.getKey()).getName());
+                    if (null == outLineUser){
+                        outLineUser = new ArrayList<>();
+                    }
+                    outLineUser.add(monitor.getKey());
+                    EventBus.getDefault().post(new FoundUserOutLineBean(monitor.getKey(),1));
+                }else if (heartbeatTime > 2400){        //超过2.4秒没有心跳，认为设备假死亡，向设备请求心跳
+                    ContactEntity contactEntity = sContactMap.get(monitor.getKey());
+                    if (null == contactEntity){
+                        Log.d(TAG, "run: null " + monitor.getKey() + ", " + sMineUserInfo.getIdentifier());
+                        outLineUser.add(monitor.getKey());
+                        continue;
+                    }
+                    SendRequest.sendRequestHeartbeat(IntranetChatApplication.getsMineUserInfo().getIdentifier()
+                            ,contactEntity.getHost());
+                }
+                Log.d(TAG, "run: heartbeatTime = " + heartbeatTime + ", identifier = " + monitor.getKey());
+            }
+
+            if (null != outLineUser){
+                for (int i = 0;i < outLineUser.size(); i++){
+                    sMonitor.remove(outLineUser.get(i));
+                }
+            }
+        }
+    };
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void foundUserOutLine(FoundUserOutLineBean foundUserOutLineBean){
+        userOutLine(foundUserOutLineBean.getIdentifier());
+    }
+
+    private void userOutLine(String identifier){
+        ContactEntity contactEntity = IntranetChatApplication.sContactMap.get(identifier);
+        contactEntity.setStatus(Config.STATUS_OUT_LINE);
+        if (null != IntranetChatApplication.sContactListAdapter){
+            ContactListSort.contactListSort(IntranetChatApplication.sContactList);
+            IntranetChatApplication.sContactListAdapter.notifyDataSetChanged();
+        }
+
+        LatestChatHistoryEntity historyEntity = IntranetChatApplication.sLatestChatHistoryMap.get(identifier);
+        historyEntity.setStatus(Config.STATUS_OUT_LINE);
+        if (null != IntranetChatApplication.sMessageListAdapter){
+            MessageListSort.CollectionsList(IntranetChatApplication.sLatestChatHistoryList);
+            IntranetChatApplication.sMessageListAdapter.notifyDataSetChanged();
         }
     }
 
@@ -1094,6 +1171,10 @@ public class IntranetChatApplication extends Application {
         }
     };
 
+    /**
+     * 通知栏通知用户
+     * @param message 通知的消息
+     * @param host 对方IP地址*/
     public void notification(MessageBean message, String host) {
         Log.d(TAG, "notification: " + message.toString());
         if (sNotificationManager == null) {
@@ -1186,6 +1267,9 @@ public class IntranetChatApplication extends Application {
         recordCall(recordCallBean.getIdentifier(), recordCallBean.getType(), recordCallBean.getHost(), recordCallBean.isVoice());
     }
 
+    /**
+     * 将time转String类型
+     * @param time 毫秒数时间*/
     public String chatTime(long time) {
         time /= 1000;
         int hour = (int) (time / 3600);
@@ -1207,46 +1291,53 @@ public class IntranetChatApplication extends Application {
         return sb.toString();
     }
 
+    /**
+     * 记录通话
+     * @param identifier 用户唯一标识符
+     * @param type 通话类型
+     * @param host 通话地址
+     * @param voice true:语音通话，false:视频通话*/
     public void recordCall(String identifier, int type, String host, boolean voice) {
         StringBuilder sb = new StringBuilder();
         boolean isReceive = true;
-        switch (type) {
+        switch (type) {         //记录通话类型
             case ChatRoomConfig.CALL_END_LAUNCH:
-            case ChatRoomConfig.CALL_END_ANSWER:
+            case ChatRoomConfig.CALL_END_ANSWER:    //结束通话
                 sb.append(getString(R.string.call_time));
                 sb.append(chatTime(sEndCallTime - sStartCallTime));
                 isReceive = type == ChatRoomConfig.CALL_END_ANSWER;
                 break;
-            case ChatRoomConfig.CALL_REFUSE_LAUNCH:
+            case ChatRoomConfig.CALL_REFUSE_LAUNCH:     //对方拒绝接听
                 sb.append(getString(R.string.call_refuse_launch));
                 isReceive = false;
                 break;
-            case ChatRoomConfig.CALL_REFUSE_LAUNCH_MINE:
+            case ChatRoomConfig.CALL_REFUSE_LAUNCH_MINE:    //自己取消拨打
                 sb.append(getString(R.string.call_refuse_launch_mine));
                 isReceive = false;
                 break;
-            case ChatRoomConfig.CALL_IN_CALL:
+            case ChatRoomConfig.CALL_IN_CALL:       //通话中
                 sb.append(getString(R.string.call_in_call));
                 isReceive = false;
                 break;
-            case ChatRoomConfig.CALL_OUT_TIME_ANSWER:
-            case ChatRoomConfig.CALL_REFUSE_ANSWER:
+            case ChatRoomConfig.CALL_OUT_TIME_ANSWER:       //自己超时未接听
+            case ChatRoomConfig.CALL_REFUSE_ANSWER:         //拒绝接听
                 sb.append(getString(R.string.call_refuse_answer));
                 break;
-            case ChatRoomConfig.CALL_REFUSE_ANSWER_MINE:
+            case ChatRoomConfig.CALL_REFUSE_ANSWER_MINE:        //拒绝接听
                 sb.append(getString(R.string.call_refuse_answer_mine));
                 isReceive = false;
                 break;
-            case ChatRoomConfig.CALL_OUT_TIME_LAUNCH:
+            case ChatRoomConfig.CALL_OUT_TIME_LAUNCH:       //对方超时未接听
                 sb.append(getString(R.string.call_out_time));
                 isReceive = false;
                 break;
             case ChatRoomConfig.CALL_DIE_ANSWER:
-            case ChatRoomConfig.CALL_DIE_LAUNCH:
+            case ChatRoomConfig.CALL_DIE_LAUNCH:            //对方离线
                 sb.append(getString(R.string.call_die));
                 isReceive = type == ChatRoomConfig.CALL_DIE_ANSWER;
                 break;
         }
+        //填充记录值
         String content = sb.toString();
         ChatRecordEntity recordEntity = new ChatRecordEntity();
         recordEntity.setTime(System.currentTimeMillis());
@@ -1254,6 +1345,7 @@ public class IntranetChatApplication extends Application {
         recordEntity.setReceiver(identifier);
         recordEntity.setSender(identifier);
         recordEntity.setContent(content);
+        //记录record的type
         if (voice && isReceive) {
             recordEntity.setIsReceive(ChatRoomConfig.RECEIVE_VOICE_CALL);
         } else if (voice && !isReceive) {
@@ -1266,6 +1358,7 @@ public class IntranetChatApplication extends Application {
         if (type == ChatRoomConfig.CALL_END_ANSWER) {
             recordEntity.setLength(-1);
         }
+        //向数据库写入记录
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -1281,10 +1374,12 @@ public class IntranetChatApplication extends Application {
             }
         }).start();
 
+        //如果在当前聊天室，刷新聊天室
         if (sChatRoomMessageAdapter != null && !TextUtils.isEmpty(sChatRoomMessageAdapter.getReceiverIdentifier()) && sChatRoomMessageAdapter.getReceiverIdentifier().equals(identifier)) {
             sChatRoomMessageAdapter.add(recordEntity);
         }
 
+        //刷新消息界面
         MessageBean messageBean = new MessageBean();
         messageBean.setReceiver(identifier);
         messageBean.setSender(identifier);
@@ -1315,6 +1410,7 @@ public class IntranetChatApplication extends Application {
             return;
         }
 
+        //消息列表中没有对应的消息，添加新的消息
         ContactEntity nextContact = sContactMap.get(identifier);
         if (null != next) {
             LatestChatHistoryEntity entity = new LatestChatHistoryEntity();
@@ -1350,19 +1446,26 @@ public class IntranetChatApplication extends Application {
         }
     }
 
+    /**
+     * 更新用户心跳
+     * @param identifier 用户唯一标识符*/
     public void updateHeartbeat(String identifier){
         if (sMonitor.containsKey(identifier)){
             sMonitor.put(identifier,System.currentTimeMillis());
         }
     }
 
-    @Subscribe
+    @Subscribe(threadMode = ThreadMode.MAIN)
     public void notifyContactOutLine(NotifyContactOutLine outLine){
         if (sContactListAdapter != null){
             sContactListAdapter.notifyDataSetChanged();
         }
     }
 
+    /**
+     * 更新联系人在聊天室的名字
+     * @param identifier 联系人唯一标识符
+     * @param name 联系人新名字*/
     public void updateContactNameInChatRoom(String identifier,String name){
         if (sChatRoomMessageAdapter != null){
             ContactEntity contactEntity = sGroupContactMap.get(identifier);
@@ -1373,6 +1476,10 @@ public class IntranetChatApplication extends Application {
         }
     }
 
+    /**
+     * 更新联系人在聊天室中的头像
+     * @param identifier 联系人唯一标识符
+     * @param avatarPath 联系人新头像地址*/
     public void updateContactAvatarInChatRoom(String identifier,String avatarPath){
         if (sChatRoomMessageAdapter != null){
             ContactEntity contactEntity = sGroupContactMap.get(identifier);
@@ -1385,48 +1492,4 @@ public class IntranetChatApplication extends Application {
         }
     }
 
-    private TimerTask mSendMyHeartbeat = new TimerTask() {
-        @Override
-        public void run() {
-            Iterator<Map.Entry<String, Long>> iterator = sBeMonitored.entrySet().iterator();
-            while (iterator.hasNext()){
-                Map.Entry<String, Long> monitor = iterator.next();
-                SendRequest.sendHeartbeat(monitor.getKey(),sContactMap.get(monitor.getKey()).getHost());
-                monitor.setValue(System.currentTimeMillis());
-            }
-        }
-    };
-
-    private TimerTask mConfirmMonitorHeartbeat = new TimerTask() {
-        @Override
-        public void run() {
-            Iterator<Map.Entry<String, Long>> iterator = sMonitor.entrySet().iterator();
-            List<String> outLineUser = null;
-
-            while (iterator.hasNext()){
-                Map.Entry<String, Long> monitor = iterator.next();
-                Long heartbeatTime = System.currentTimeMillis()-monitor.getValue();
-                if (heartbeatTime > 2000){
-                    Login.broadcastUserOutLine(monitor.getKey());
-                    if (null == outLineUser){
-                        outLineUser = new ArrayList<>();
-                    }
-                    outLineUser.add(monitor.getKey());
-                }else if (heartbeatTime > 1300){
-                    ContactEntity contactEntity = sContactMap.get(monitor.getKey());
-                    if (null == contactEntity){
-                        Log.d(TAG, "run: null " + monitor.getKey() + ", " + sMineUserInfo.getIdentifier());
-                        continue;
-                    }
-                    SendRequest.sendRequestHeartbeat(monitor.getKey(),contactEntity.getHost());
-                }
-            }
-
-            if (null != outLineUser){
-                for (int i = 0;i < outLineUser.size(); i++){
-                    sMonitor.remove(outLineUser.get(i));
-                }
-            }
-        }
-    };
 }
