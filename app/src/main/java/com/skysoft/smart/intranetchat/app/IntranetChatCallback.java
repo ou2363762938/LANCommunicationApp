@@ -7,7 +7,6 @@ package com.skysoft.smart.intranetchat.app;
 
 import android.os.RemoteException;
 import android.text.TextUtils;
-import android.util.Log;
 
 import com.skysoft.smart.intranetchat.IIntranetChatAidlInterfaceCallback;
 import com.skysoft.smart.intranetchat.app.impl.OnEstablishCallConnect;
@@ -44,6 +43,7 @@ import com.skysoft.smart.intranetchat.model.network.bean.UserInfoBean;
 import com.skysoft.smart.intranetchat.model.network.bean.VoiceCallDataBean;
 import com.skysoft.smart.intranetchat.tools.GsonTools;
 import com.skysoft.smart.intranetchat.tools.HandleReceivedUserInfo;
+import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 import com.skysoft.smart.intranetchat.ui.activity.chatroom.ChatRoom.ChatRoomConfig;
 import com.skysoft.smart.intranetchat.ui.activity.chatroom.ChatRoom.ChatRoomActivity;
 
@@ -93,7 +93,7 @@ public class IntranetChatCallback extends IIntranetChatAidlInterfaceCallback.Stu
 
     @Override
     public void onReceiveUserInfo(String userInfoJson, String host) throws RemoteException {
-        Log.d(TAG, "onReceiveUserInfo: userInfoJson: " + userInfoJson + ", host: " + host);
+        TLog.d(TAG, "onReceiveUserInfo: userInfoJson: " + userInfoJson + ", host: " + host);
         if (host.equals(IntranetChatApplication.getHostIp())){
             return;
         }
@@ -130,7 +130,7 @@ public class IntranetChatCallback extends IIntranetChatAidlInterfaceCallback.Stu
 
     @Override
     public void onReceiveMessage(String messageJson, String host) throws RemoteException {
-        Log.d(TAG, "notification: messageJson: " + messageJson + ", host: " + host);
+        TLog.d(TAG, "notification: messageJson: " + messageJson + ", host: " + host);
         if (host.equals(IntranetChatApplication.getHostIp())){
             return;
         }
@@ -148,7 +148,7 @@ public class IntranetChatCallback extends IIntranetChatAidlInterfaceCallback.Stu
             next = IntranetChatApplication.sGroupContactMap.get(messageBean.getReceiver());
             group = 1;
         }
-        Log.d(TAG, "notification: group = " + group);
+        TLog.d(TAG, "notification: group = " + group);
         if (null != next){
             LatestChatHistoryEntity latestChatHistoryEntity = generateLatestChatHistoryEntity(messageBean.getTimeStamp(),messageBean.getMsg(),next.getAvatarIdentifier(),
                     next.getAvatarPath(),messageBean.getReceiver(),messageBean.getSender(),next.getName(),host);
@@ -177,7 +177,7 @@ public class IntranetChatCallback extends IIntranetChatAidlInterfaceCallback.Stu
 
     @Override
     public void onReceiveRequest(String requestJson, String host) throws RemoteException {
-        Log.d(TAG, "onReceiveRequest: requestJson: " + requestJson + ", host: " + host);
+        TLog.d(TAG, "onReceiveRequest: requestJson: " + requestJson + ", host: " + host);
         if (host.equals(IntranetChatApplication.getHostIp())){
             return;
         }
@@ -202,7 +202,7 @@ public class IntranetChatCallback extends IIntranetChatAidlInterfaceCallback.Stu
 
     @Override
     public void onReceiveFile(String fileJson, String host) throws RemoteException {
-        Log.d(TAG, "onReceiveFile: fileJson" + fileJson + ",host: " + host);
+        TLog.d(TAG, "onReceiveFile: fileJson" + fileJson + ",host: " + host);
 //        Login.requestUserInfo(host);
         //向host请求文件
         if (host.equals(IntranetChatApplication.getHostIp())){
@@ -250,7 +250,7 @@ public class IntranetChatCallback extends IIntranetChatAidlInterfaceCallback.Stu
 
     @Override
     public void onReceiveAskResource(String askResourceJson, String host) throws RemoteException {
-        Log.d(TAG, "onReceiveAskResource: askResourceJson" + askResourceJson + ",host: " + host);
+        TLog.d(TAG, "onReceiveAskResource: askResourceJson" + askResourceJson + ",host: " + host);
         if (host.equals(IntranetChatApplication.getHostIp())){
             return;
         }
@@ -281,12 +281,10 @@ public class IntranetChatCallback extends IIntranetChatAidlInterfaceCallback.Stu
                 }
                 break;
             case Config.HEARTBEAT:      //收到对方发送的心跳
-                Log.d(TAG, "onReceiveAskResource: heartbeat ");
                 //更新心跳
                 IntranetChatApplication.sMonitor.put(askResourceBean.getResourceUniqueIdentifier(),System.currentTimeMillis());
                 break;
             case Config.REQUEST_HEARTBEAT:      //对方认为我假死，向我请求心跳
-                Log.d(TAG, "onReceiveAskResource: request heartbeat ");
                 SendRequest.sendHeartbeat(IntranetChatApplication.getsMineUserInfo().getIdentifier(),host);
                 if (null == IntranetChatApplication.sBeMonitored.get(askResourceBean.getResourceUniqueIdentifier())){
                     SendResponse.sendMonitorResponse(Config.RESPONSE_REFUSE_BE_MONITOR,
@@ -299,7 +297,7 @@ public class IntranetChatCallback extends IIntranetChatAidlInterfaceCallback.Stu
 
     @Override
     public void onReceiveAndSaveFile(String sender,String receiver,String identifier,String path,String host) throws RemoteException {
-        Log.d(TAG, "onReceiveAndSaveFile: sender: " + sender + ",receiver: " + receiver + ",identifier: " + identifier + ",path: " + path);
+        TLog.d(TAG, "onReceiveAndSaveFile: sender: " + sender + ",receiver: " + receiver + ",identifier: " + identifier + ",path: " + path);
         if (host.equals(IntranetChatApplication.getHostIp())){
             return;
         }
@@ -318,7 +316,7 @@ public class IntranetChatCallback extends IIntranetChatAidlInterfaceCallback.Stu
 
     @Override
     public void onReceiveVoiceCall(String userInfoJson, String host) throws RemoteException {
-        Log.d(TAG, "onReceiveVoiceCall: userInfoJson: " + userInfoJson + ",host: " + host);
+        TLog.d(TAG, "onReceiveVoiceCall: userInfoJson: " + userInfoJson + ",host: " + host);
 //        Login.requestUserInfo(host);
         if (handleInfo != null){
             handleInfo.onReceiveVoiceCall((UserInfoBean) GsonTools.formJson(userInfoJson,UserInfoBean.class),host);
@@ -328,7 +326,7 @@ public class IntranetChatCallback extends IIntranetChatAidlInterfaceCallback.Stu
     @Override
     public void onReceiveVideoCall(String userInfoJson, String host) throws RemoteException {
 //        Login.requestUserInfo(host);
-        Log.d(TAG, "onReceiveVideoCall: userInfoJson = " + userInfoJson + ", host = " + host);
+        TLog.d(TAG, "onReceiveVideoCall: userInfoJson = " + userInfoJson + ", host = " + host);
         if (handleInfo != null){
             handleInfo.onReceiveVideoCall((UserInfoBean) GsonTools.formJson(userInfoJson,UserInfoBean.class),host);
         }
@@ -360,7 +358,7 @@ public class IntranetChatCallback extends IIntranetChatAidlInterfaceCallback.Stu
 
     @Override
     public void onReceiveHungUpVoiceCall(String host) throws RemoteException {
-        Log.d(TAG, "onReceiveHungUpVoiceCall: " + host);
+        TLog.d(TAG, "onReceiveHungUpVoiceCall: " + host);
 //        Login.requestUserInfo(host);
         if (hungUpInAnswer != null){
             hungUpInAnswer.onReceiveHungUpVoiceCall(host);
@@ -390,7 +388,7 @@ public class IntranetChatCallback extends IIntranetChatAidlInterfaceCallback.Stu
 
     @Override
     public void onReceiveEstablishBeanJson(String establishBeanJson, String host) throws RemoteException {
-        Log.d(TAG, "onReceiveEstablishBeanJson: establishBeanJson = " + establishBeanJson + ", host = " + host);
+        TLog.d(TAG, "onReceiveEstablishBeanJson: establishBeanJson = " + establishBeanJson + ", host = " + host);
         if (host.equals(IntranetChatApplication.getHostIp())){
             return;
         }
@@ -430,7 +428,7 @@ public class IntranetChatCallback extends IIntranetChatAidlInterfaceCallback.Stu
 
     @Override
     public void onReceiveAskResourceNotFound(String askResourceJson, String host) throws RemoteException {
-        Log.d(TAG, "onReceiveAskResourceNotFound: askResourceJson = " + askResourceJson + ", host = " + host);
+        TLog.d(TAG, "onReceiveAskResourceNotFound: askResourceJson = " + askResourceJson + ", host = " + host);
         if (host.equals(IntranetChatApplication.getHostIp())){
             return;
         }
@@ -438,7 +436,7 @@ public class IntranetChatCallback extends IIntranetChatAidlInterfaceCallback.Stu
         if (askResourceBean.getResourceType() == Config.RESOURCE_AVATAR){
             Login.notifyChangeAvatar(host);
         }else if (askResourceBean.getResourceType() == Config.RESOURCE_GROUP){
-            Log.d(TAG, "onReceiveAskResource: ask resource group");
+            TLog.d(TAG, "onReceiveAskResource: ask resource group");
             new Thread(new Runnable() {
                 @Override
                 public void run() {
@@ -477,7 +475,7 @@ public class IntranetChatCallback extends IIntranetChatAidlInterfaceCallback.Stu
 
     @Override
     public void onReceiveInCall(String host) throws RemoteException {
-        Log.d(TAG, "onReceiveInCall: host = " + host);
+        TLog.d(TAG, "onReceiveInCall: host = " + host);
         if (handleVoiceCallResponse != null){
             handleVoiceCallResponse.onReceiveInCall(host);
         }
@@ -486,7 +484,7 @@ public class IntranetChatCallback extends IIntranetChatAidlInterfaceCallback.Stu
 
     @Override
     public void notifyClearQueue() throws RemoteException {
-        Log.d(TAG, "notifyClearQueue: size = " + IntranetChatApplication.getmDatasQueue().size());
+        TLog.d(TAG, "notifyClearQueue: size = " + IntranetChatApplication.getmDatasQueue().size());
         IntranetChatApplication.getmDatasQueue().clear();
     }
 
@@ -494,7 +492,7 @@ public class IntranetChatCallback extends IIntranetChatAidlInterfaceCallback.Stu
      * 记录开始下载文件*/
     @Override
     public void askFile(String identifier, String path) throws RemoteException {
-        Log.d(TAG, "askFile: identifier = " + identifier + ", path = " + path);
+        TLog.d(TAG, "askFile: identifier = " + identifier + ", path = " + path);
         setMonitorReceiveFile(identifier,path,Config.STEP_ASK_FILE);
     }
 
@@ -502,7 +500,7 @@ public class IntranetChatCallback extends IIntranetChatAidlInterfaceCallback.Stu
      * 记录文件下载失败*/
     @Override
     public void receiveFileFailure(String identifier) throws RemoteException {
-        Log.d(TAG, "askFile: identifier = " + identifier);
+        TLog.d(TAG, "askFile: identifier = " + identifier);
         setMonitorReceiveFile(identifier,null,Config.STEP_DOWN_LOAD_FAILURE);
     }
 
@@ -532,7 +530,7 @@ public class IntranetChatCallback extends IIntranetChatAidlInterfaceCallback.Stu
 
         ContactEntity contactEntity = IntranetChatApplication.sContactMap.get(identifier);
         if (null != contactEntity){
-            Log.d(TAG, "receiveUserOutLine: " + contactEntity.getName());
+            TLog.d(TAG, "receiveUserOutLine: " + contactEntity.getName());
             if (IntranetChatApplication.sMonitor.containsKey(identifier)){
                 IntranetChatApplication.sMonitor.remove(identifier);
             }
@@ -547,7 +545,6 @@ public class IntranetChatCallback extends IIntranetChatAidlInterfaceCallback.Stu
             EventBus.getDefault().post(new FoundUserOutLineBean(identifier,1));
         }else if (identifier.equals(IntranetChatApplication.getsMineUserInfo().getIdentifier())){
             Login.broadcastUserInfo();
-            Log.d(TAG, "receiveUserOutLine: me~~~~~~~~~~~~~~~~~~");
         }
     }
 
