@@ -257,10 +257,10 @@ public class IntranetChatCallback extends IIntranetChatAidlInterfaceCallback.Stu
 //        Login.requestUserInfo(host);
         AskResourceBean askResourceBean = (AskResourceBean) GsonTools.formJson(askResourceJson,AskResourceBean.class);
         switch (askResourceBean.getResourceType()){
-            case Config.RESOURCE_AVATAR:
+            case Config.RESOURCE_AVATAR:        //某个用户向我请求头像数据
                 Login.notifyChangeAvatar(host);
                 break;
-            case Config.REQUEST_MONITOR:
+            case Config.REQUEST_MONITOR:        //某个用户请求做我的监视者
                 if (IntranetChatApplication.sBeMonitored.size() < 4){
                     IntranetChatApplication.sBeMonitored.put(askResourceBean.getResourceUniqueIdentifier(),
                             System.currentTimeMillis());
@@ -286,10 +286,17 @@ public class IntranetChatCallback extends IIntranetChatAidlInterfaceCallback.Stu
                 break;
             case Config.REQUEST_HEARTBEAT:      //对方认为我假死，向我请求心跳
                 SendRequest.sendHeartbeat(IntranetChatApplication.getsMineUserInfo().getIdentifier(),host);
+                //如果对方不在我的监视者列表中
                 if (null == IntranetChatApplication.sBeMonitored.get(askResourceBean.getResourceUniqueIdentifier())){
-                    SendResponse.sendMonitorResponse(Config.RESPONSE_REFUSE_BE_MONITOR,
-                            IntranetChatApplication.getsMineUserInfo().getIdentifier(),
-                            host);
+                    if (IntranetChatApplication.sBeMonitored.size() < 4){       //如果我的监视者小于4人
+                        //接收对方为监视者
+                        IntranetChatApplication.sBeMonitored.put(askResourceBean.getResourceUniqueIdentifier(),System.currentTimeMillis());
+                    }else {
+                        //否则拒绝对方成为我的监视者
+                        SendResponse.sendMonitorResponse(Config.RESPONSE_REFUSE_BE_MONITOR,
+                                IntranetChatApplication.getsMineUserInfo().getIdentifier(),
+                                host);
+                    }
                 }
                 break;
         }
@@ -531,20 +538,21 @@ public class IntranetChatCallback extends IIntranetChatAidlInterfaceCallback.Stu
         ContactEntity contactEntity = IntranetChatApplication.sContactMap.get(identifier);
         if (null != contactEntity){
             TLog.d(TAG, "receiveUserOutLine: " + contactEntity.getName());
-            if (IntranetChatApplication.sMonitor.containsKey(identifier)){
+            if (IntranetChatApplication.sMonitor.containsKey(identifier)){      //如果在监视列表中，从列表中移除
                 IntranetChatApplication.sMonitor.remove(identifier);
             }
 
-            if (IntranetChatApplication.sBeMonitored.containsKey(identifier)){
+            if (IntranetChatApplication.sBeMonitored.containsKey(identifier)){  //如果在监视者（监视我的人）列表中，从列表中移出
                 IntranetChatApplication.sBeMonitored.remove(identifier);
             }
 
+            //如果监视列表和监视者列表其中一项为空，广播我的信息，重新与其他用户建立链接
             if (IntranetChatApplication.sMonitor.size() == 0 || IntranetChatApplication.sBeMonitored.size() == 0){
                 Login.broadcastUserInfo();
             }
-            EventBus.getDefault().post(new FoundUserOutLineBean(identifier,1));
+            EventBus.getDefault().post(new FoundUserOutLineBean(identifier,1));     //刷新联系人界面
         }else if (identifier.equals(IntranetChatApplication.getsMineUserInfo().getIdentifier())){
-            Login.broadcastUserInfo();
+            Login.broadcastUserInfo();      //别人以为我下线，广播我的信息，告知其他用户我在线
         }
     }
 
