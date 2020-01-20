@@ -9,7 +9,7 @@ import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
-import android.util.Log;
+import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 
 import com.skysoft.smart.intranetchat.model.camera.entity.EventMessage;
 
@@ -92,18 +92,18 @@ public class BitmapUtil {
                 .setCompressListener(new OnCompressListener() {
                     @Override
                     public void onStart() {
-                        Log.d(TAG, "start luban");
+                        TLog.d(TAG, "start luban");
                     }
 
                     @Override
                     public void onSuccess(File file) {
                         EventBus.getDefault().post(new EventMessage(file.getAbsolutePath(), 0, TAKE_PICTURE_URL));
-                        Log.d(TAG, "luban success");
+                        TLog.d(TAG, "luban success");
                     }
 
                     @Override
                     public void onError(Throwable e) {
-                        Log.e(TAG, "luban error" + e.getMessage());
+                        TLog.e(TAG, "luban error" + e.getMessage());
                     }
                 }).launch();
 

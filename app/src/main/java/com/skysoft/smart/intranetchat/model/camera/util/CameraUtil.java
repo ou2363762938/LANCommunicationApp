@@ -17,7 +17,7 @@ import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.Image;
 import android.net.Uri;
-import android.util.Log;
+import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 import android.util.Size;
 import android.view.Surface;
 
@@ -82,7 +82,7 @@ public class CameraUtil {
         } else if (notBigEnough.size() > 0) {
             return Collections.max(notBigEnough, new CompareSizesByArea());
         } else {
-            Log.e(TAG, "Couldn't find any suitable preview size");
+            TLog.e(TAG, "Couldn't find any suitable preview size");
             return choices[0];
         }
     }

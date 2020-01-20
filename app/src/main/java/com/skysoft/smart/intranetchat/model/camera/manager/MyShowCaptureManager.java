@@ -21,7 +21,7 @@ import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.os.Handler;
 import android.os.HandlerThread;
-import android.util.Log;
+import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 import android.util.Size;
 import android.view.Surface;
 import android.view.TextureView;
@@ -111,7 +111,7 @@ public class MyShowCaptureManager {
                         @Override
                         public void onConfigured(@NonNull CameraCaptureSession cameraCaptureSession) {
                             if (null == mCameraDevice) {
-                                Log.d(TAG, " mCameraDevice null");
+                                TLog.d(TAG, " mCameraDevice null");
                                 return;
                             }
                             try {
@@ -128,7 +128,7 @@ public class MyShowCaptureManager {
                         @Override
                         public void onConfigureFailed(
                                 @NonNull CameraCaptureSession cameraCaptureSession) {
-                            Log.d(TAG, "onConfigureFailed fail");
+                            TLog.d(TAG, "onConfigureFailed fail");
                         }
                     }, null
             );

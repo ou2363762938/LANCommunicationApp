@@ -9,7 +9,7 @@ import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
+import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 import android.view.View;
 import android.view.animation.AccelerateInterpolator;
 import android.widget.ImageView;
@@ -72,7 +72,7 @@ public class StartAnimationActivity extends AppCompatActivity {
             public void run() {
                 MineInfoEntity mineInfoEntity = MyDataBase.getInstance().getMineInfoDao().Query();
                 if (mineInfoEntity != null){
-                    Log.d(TAG, "run: " + mineInfoEntity.toString());
+                    TLog.d(TAG, "run: " + mineInfoEntity.toString());
                     IntranetChatApplication.setMineUserInfo(mineInfoEntity,mineInfoEntity.getMineName());
                     Login.login(IntranetChatApplication.getsMineUserInfo());
                     MainActivity.go(StartAnimationActivity.this);
@@ -93,7 +93,7 @@ public class StartAnimationActivity extends AppCompatActivity {
                 EquipmentInfoEntity equipmentInfo = MyDataBase.getInstance().getEquipmentInfoDaoDao().getEquipmentInfo();
                 if (equipmentInfo != null){
                     IntranetChatApplication.setsEquipmentInfoEntity(equipmentInfo);
-                    Log.d(TAG, "run: equipmentInfo = " + equipmentInfo.toString());
+                    TLog.d(TAG, "run: equipmentInfo = " + equipmentInfo.toString());
                 }
                 List<LatestChatHistoryEntity> allHistory = MyDataBase.getInstance().getLatestChatHistoryDao().getAllHistory();
                 List<ContactEntity> allContact = MyDataBase.getInstance().getContactDao().getAllContact();
@@ -137,7 +137,7 @@ public class StartAnimationActivity extends AppCompatActivity {
                 //设置总的未读数
                 IntranetChatApplication.setmTotalUnReadNumber(total);
                 IntranetChatApplication.initLatestChatHistoryList(history);     //初始化消息界面
-                Log.d(TAG, "run: allHistory.size() = " + allHistory.size() + ", allContact.size() = " + allContact.size());
+                TLog.d(TAG, "run: allHistory.size() = " + allHistory.size() + ", allContact.size() = " + allContact.size());
                 //获取拒绝接收群名单
                 List<RefuseGroupEntity> all = MyDataBase.getInstance().getRefuseGroupDao().getAll();
                 IntranetChatApplication.setsRefuseGroupList(all);
@@ -145,7 +145,7 @@ public class StartAnimationActivity extends AppCompatActivity {
                 if (deleteContact.size() != 0){
                     Iterator<ContactEntity> deletes = deleteContact.iterator();
                     while (deletes.hasNext()){
-                        Log.d(TAG, "run: delete: " + deletes.next().toString());
+                        TLog.d(TAG, "run: delete: " + deletes.next().toString());
                     }
                     MyDataBase.getInstance().getContactDao().delete(deleteContact);
                 }

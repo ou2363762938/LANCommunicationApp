@@ -11,6 +11,8 @@ import android.media.MediaCodecInfo;
 import android.media.MediaFormat;
 import android.os.Handler;
 import android.os.HandlerThread;
+import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
+
 import android.util.Log;
 import android.view.Surface;
 
@@ -46,7 +48,7 @@ public class VCDecoder {
                 if (dataSources != null) {
                     inputBuffer.put(dataSources);
                     length = dataSources.length;
-                    Log.d(TAG, "video call data VCDecoder length " + dataSources.length);
+                    TLog.d(TAG, "video call data VCDecoder length " + dataSources.length);
                 }
                 mediaCodec.queueInputBuffer(id, 0, length, 0, 0);
             } catch (IllegalStateException e) {
@@ -84,7 +86,7 @@ public class VCDecoder {
         try {
             mMediaCodec = MediaCodec.createDecoderByType("video/avc");
         } catch (IOException e) {
-            Log.e(TAG, Log.getStackTraceString(e));
+            TLog.e(TAG, Log.getStackTraceString(e));
             mMediaCodec = null;
             return;
         }
@@ -111,7 +113,7 @@ public class VCDecoder {
             mMediaCodec.setCallback(mCallback, mVCDecoderHandler);
             mMediaCodec.configure(mMediaFormat, mSurface, null, CONFIGURE_FLAG_DECODE);
             mMediaCodec.start();
-            Log.d(TAG, "startDecoder: ");
+            TLog.d(TAG, "startDecoder: ");
         } else {
             throw new IllegalArgumentException("startDecoder failed");
         }

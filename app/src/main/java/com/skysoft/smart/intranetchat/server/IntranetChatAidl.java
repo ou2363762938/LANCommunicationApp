@@ -7,7 +7,7 @@ package com.skysoft.smart.intranetchat.server;
 
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
-import android.util.Log;
+import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 
 import com.skysoft.smart.intranetchat.IIntranetChatAidlInterface;
 import com.skysoft.smart.intranetchat.IIntranetChatAidlInterfaceCallback;
@@ -57,7 +57,7 @@ public class IntranetChatAidl extends IIntranetChatAidlInterface.Stub {
 
     @Override
     public void sendMessage(String messageJson, String host) throws RemoteException {
-        Log.d(TAG, "sendMessage: " + messageJson);
+        TLog.d(TAG, "sendMessage: " + messageJson);
         send(messageJson,Config.CODE_MESSAGE,host);
     }
 
@@ -90,7 +90,7 @@ public class IntranetChatAidl extends IIntranetChatAidlInterface.Stub {
 
     @Override
     public void sendFile(String fileJson,String path, String host) throws RemoteException {
-        Log.d(TAG, "sendFile: path = " + path);
+        TLog.d(TAG, "sendFile: path = " + path);
         send(fileJson,Config.CODE_FILE,host);
         resourceSendRecord(fileJson,path,false,false);
     }
@@ -150,7 +150,7 @@ public class IntranetChatAidl extends IIntranetChatAidlInterface.Stub {
     public void hungUpOnCall(String host) throws RemoteException {
         if (VoiceCallThread.getInstance().isCurrentHost(host)){
             VoiceCallThread.getInstance().close();
-            Log.d(TAG, "hungUpOnCall: ");
+            TLog.d(TAG, "hungUpOnCall: ");
         }
     }
 
@@ -224,7 +224,7 @@ public class IntranetChatAidl extends IIntranetChatAidlInterface.Stub {
 
     /*发送*/
     private void send(String data,int code,String host){
-        Log.d(TAG, "send: host = " + host);
+        TLog.d(TAG, "send: host = " + host);
         Sender.sender(data,code,host);
     }
 
@@ -237,7 +237,7 @@ public class IntranetChatAidl extends IIntranetChatAidlInterface.Stub {
     private void resourceSendRecord(String fileJson, String path,boolean receive,boolean group) {
         FileBean fileBean = (FileBean) GsonTools.formJson(fileJson,FileBean.class);
         if (fileBean == null){
-            Log.d(TAG, "resourceSendRecord: ");
+            TLog.d(TAG, "resourceSendRecord: ");
         }
         boolean exist = ResourceManager.getInstance().exist(fileBean.getFileUniqueIdentifier());
         if (!exist){

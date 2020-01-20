@@ -9,7 +9,7 @@ import android.app.Activity;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
-import android.util.Log;
+import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 
 import com.skysoft.smart.intranetchat.model.net_model.VoiceCall;
 import com.skysoft.smart.intranetchat.model.camera.mediacodec.AudioEncoder;
@@ -42,19 +42,19 @@ public class MyAudioRecord {
     public MyAudioRecord() {
         mBufferSize = AudioRecord.getMinBufferSize(SAMPLE_RATE_INHZ, CHANNEL_CONFIG, AUDIO_FORMAT);
         mAudioRecord = new AudioRecord(MediaRecorder.AudioSource.VOICE_COMMUNICATION, SAMPLE_RATE_INHZ, CHANNEL_CONFIG, AUDIO_FORMAT, mBufferSize);
-        Log.d(TAG, "MyAudioRecord: start");
+        TLog.d(TAG, "MyAudioRecord: start");
     }
 
     public void startRecord(AudioEncoder audioEncoder) {
         byte data[] = new byte[mBufferSize];
         mAudioRecord.startRecording();
         isRecording = true;
-        Log.d(TAG, "MyAudioRocord start");
+        TLog.d(TAG, "MyAudioRocord start");
         new Thread(() -> {
             while (isRecording) {
                 int read = mAudioRecord.read(data, 0, mBufferSize);
                 if (AudioRecord.ERROR_INVALID_OPERATION != read) {
-                    Log.d(TAG, "MyAudioRocord red data");
+                    TLog.d(TAG, "MyAudioRocord red data");
                     audioEncoder.inputFrameToEncoder(data,null);
                 }
             }
@@ -79,14 +79,14 @@ public class MyAudioRecord {
     public void vioceCall(){
         byte[] data = new byte[mBufferSize];
         mAudioRecord.startRecording();
-        Log.d(TAG, "MyAudioRocord start");
+        TLog.d(TAG, "MyAudioRocord start");
         isRecording = true;
         new Thread(() -> {
             while (isRecording) {
                 int read = mAudioRecord.read(data, 0, mBufferSize);
                 if (AudioRecord.ERROR_INVALID_OPERATION != read) {
                     VoiceCall.sendVoiceCallData(data);
-                    Log.d(TAG, "vioceCall send data");
+                    TLog.d(TAG, "vioceCall send data");
                 }
             }
         }).start();
@@ -108,7 +108,7 @@ public class MyAudioRecord {
             mAudioRecord.release();
             mAudioRecord = null;
         }
-        Log.d(TAG, "MyAudioRocord stop");
+        TLog.d(TAG, "MyAudioRocord stop");
     }
 
 }

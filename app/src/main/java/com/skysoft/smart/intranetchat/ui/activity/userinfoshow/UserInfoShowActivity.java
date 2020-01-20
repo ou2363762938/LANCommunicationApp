@@ -4,7 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Log;
+import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
@@ -47,7 +47,7 @@ public class UserInfoShowActivity extends AppCompatActivity {
         IntranetChatApplication.setInShowUserInfoActivity(true);
 
         String host = null;
-        Log.d(TAG, "onCreate: identifier = " + identifier + ", avatarPath = " + avatarPath);
+        TLog.d(TAG, "onCreate: identifier = " + identifier + ", avatarPath = " + avatarPath);
         ContactEntity next = IntranetChatApplication.sContactMap.get(identifier);
         if (null != next){
             switch (next.getStatus()){
@@ -64,14 +64,14 @@ public class UserInfoShowActivity extends AppCompatActivity {
                     holder.state.setTextColor(getResources().getColor(R.color.color_gray));
                     break;
                 default:
-                    Log.d(TAG, "onCreate: next.status() = " + next.getStatus());
+                    TLog.d(TAG, "onCreate: next.status() = " + next.getStatus());
                     break;
             }
             host = next.getHost();
         }
-        Log.d(TAG, "onCreate: host = " + host);
+        TLog.d(TAG, "onCreate: host = " + host);
         if (!TextUtils.isEmpty(host)){
-            Log.d(TAG, "onCreate: host = " + host);
+            TLog.d(TAG, "onCreate: host = " + host);
             Login.requestUserInfo(host);
         }
         holder.name.setText(name);

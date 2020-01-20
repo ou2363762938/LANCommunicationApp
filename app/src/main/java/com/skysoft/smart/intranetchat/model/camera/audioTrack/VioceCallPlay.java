@@ -8,7 +8,7 @@ package com.skysoft.smart.intranetchat.model.camera.audioTrack;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioTrack;
-import android.util.Log;
+import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 
 import com.skysoft.smart.intranetchat.app.IntranetChatApplication;
 
@@ -31,7 +31,7 @@ public class VioceCallPlay extends Thread {
         mBufSize = AudioTrack.getMinBufferSize(mFrequency, mChannel, mSampBit) * 5;
         mAudioTrack = new AudioTrack(AudioManager.STREAM_MUSIC, mFrequency, mChannel, mSampBit, mBufSize, AudioTrack.MODE_STREAM);
         mAudioTrack.play();
-        Log.d(TAG, "init:  play");
+        TLog.d(TAG, "init:  play");
     }
 
     @Override
@@ -56,10 +56,10 @@ public class VioceCallPlay extends Thread {
         mCurrentSize += data.length;
         if (mCurrentSize >= mBufSize) {
             mAudioTrack.flush();
-            Log.d(TAG, "play: flush");
+            TLog.d(TAG, "play: flush");
         }
         mAudioTrack.write(data, 0, data.length);
-        Log.d(TAG, "play: write");
+        TLog.d(TAG, "play: write");
     }
 
     private void release() {
@@ -67,7 +67,7 @@ public class VioceCallPlay extends Thread {
             mAudioTrack.stop();
             mAudioTrack.release();
             mAudioTrack = null;
-            Log.d(TAG, "release: track");
+            TLog.d(TAG, "release: track");
         }
     }
 }

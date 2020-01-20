@@ -7,7 +7,7 @@ package com.skysoft.smart.intranetchat.tools;
 
 import android.os.RemoteException;
 import android.text.TextUtils;
-import android.util.Log;
+import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 
 import com.skysoft.smart.intranetchat.app.IntranetChatApplication;
 import com.skysoft.smart.intranetchat.database.table.ContactEntity;
@@ -59,7 +59,7 @@ public class HandleReceivedUserInfo {
                 }
                 //更换头像
                 if (!contactEntity.getAvatarIdentifier().equals(userInfo.getAvatarIdentifier())){
-                    Log.d(TAG, "handleReceivedUserInfo: change avatar");
+                    TLog.d(TAG, "handleReceivedUserInfo: change avatar");
                     IntranetChatApplication.setRequestAvatar(true);
                     if (!TextUtils.isEmpty(userInfo.getRemark())){
                         //请求头像

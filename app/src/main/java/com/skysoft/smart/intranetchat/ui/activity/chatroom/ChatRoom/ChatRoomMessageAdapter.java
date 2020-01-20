@@ -12,7 +12,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.media.MediaMetadataRetriever;
 import android.text.TextUtils;
-import android.util.Log;
+import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -192,7 +192,7 @@ public class ChatRoomMessageAdapter extends RecyclerView.Adapter<ChatRoomMessage
                 bindCall(holder,bean);
                 break;
             default:
-                Log.d(TAG, "onBindViewHolder: " + bean.getType());
+                TLog.d(TAG, "onBindViewHolder: " + bean.getType());
                 break;
         }
     }
@@ -244,7 +244,7 @@ public class ChatRoomMessageAdapter extends RecyclerView.Adapter<ChatRoomMessage
     private void bindFile(ChatRoomMessageViewHolder holder, ChatRecordEntity bean) {
         ConstraintLayout file = null;
         String size = computingFileSize(bean.getLength());
-        Log.d(TAG, "bindFile: size = " + size);
+        TLog.d(TAG, "bindFile: size = " + size);
         switch (bean.getIsReceive()){
             case ChatRoomConfig.RECEIVE_FILE:
                 holder.getSenderFileName().setText(bean.getFileName());
@@ -275,7 +275,7 @@ public class ChatRoomMessageAdapter extends RecyclerView.Adapter<ChatRoomMessage
                 break;
         }
         if (TextUtils.isEmpty(bean.getPath())){
-            Log.d(TAG, "bindImage: path = null");
+            TLog.d(TAG, "bindImage: path = null");
             //图片路径为空时判断正在下载或者接收已经失败
             onLoading(image,bean);
             return;
@@ -435,7 +435,7 @@ public class ChatRoomMessageAdapter extends RecyclerView.Adapter<ChatRoomMessage
     public boolean onTouch(View v, MotionEvent event) {
         if (v.getId() == R.id.list_view_chat_room_sender_avatar){
             if (event.getAction() == MotionEvent.ACTION_UP){
-                Log.d(TAG, "onTouch: up");
+                TLog.d(TAG, "onTouch: up");
                 isUpLongClickAvatar = true;     //松开长按
                 v.setOnTouchListener(null);     //取消触摸监听
                 QuickClickListener.isFastClick();       //避免松开手指立即触发单击事件
@@ -494,7 +494,7 @@ public class ChatRoomMessageAdapter extends RecyclerView.Adapter<ChatRoomMessage
             ChatRecordEntity temp = messageBeanList.get(messageBeanList.size() - 1);
             ChatRecordEntity recordTime = generatorTimeRecord(mReceiverIdentifier,temp.getTime());
             messageBeanList.add(recordTime);
-            Log.d(TAG, "add: recordTime 4 timeString = " + ChatRoomActivity.millToFullTime(recordTime.getTime()) + ", entity = " + chatRecordEntity.toString());
+            TLog.d(TAG, "add: recordTime 4 timeString = " + ChatRoomActivity.millToFullTime(recordTime.getTime()) + ", entity = " + chatRecordEntity.toString());
             addRecordToList(chatRecordEntity,recordTime,receive);
             return;
         }
@@ -574,13 +574,13 @@ public class ChatRoomMessageAdapter extends RecyclerView.Adapter<ChatRoomMessage
     }
 
     public static String createVideoThumbnailFile(String path) {
-        Log.d(TAG, "createVideoThumbnailFile: onReceiveAndSaveFile 1 path = " + path);
+        TLog.d(TAG, "createVideoThumbnailFile: onReceiveAndSaveFile 1 path = " + path);
         Bitmap bitmap = createVideoThumbnail(path);
         File parentFile = SendFile.getFile(ChatRoomConfig.PATH_VIDEO_FIRST_FRAME);
         if (!parentFile.exists()){
             parentFile.mkdirs();
         }
-        Log.d(TAG, "createVideoThumbnailFile: onReceiveAndSaveFile 2 path = " + path);
+        TLog.d(TAG, "createVideoThumbnailFile: onReceiveAndSaveFile 2 path = " + path);
         String name = new File(path).getName();
         name = name.substring(0,name.lastIndexOf("."));
         File firstFrameFile = new File(parentFile.getPath(),"first_frame" + name + ".jpg");
@@ -707,7 +707,7 @@ public class ChatRoomMessageAdapter extends RecyclerView.Adapter<ChatRoomMessage
                 || chatRecordEntity.getIsReceive() == ChatRoomConfig.SEND_VIDEO_CALL
                 || chatRecordEntity.getIsReceive() == ChatRoomConfig.SEND_VOICE
                 || chatRecordEntity.getIsReceive() == ChatRoomConfig.SEND_VOICE_CALL){
-            Log.d(TAG, "showPopupMenu: right");
+            TLog.d(TAG, "showPopupMenu: right");
             offsetX = -(contentView.getMeasuredWidth() - view.getWidth());
         }
 

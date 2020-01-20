@@ -6,7 +6,7 @@
 package com.skysoft.smart.intranetchat.tools;
 
 import android.text.TextUtils;
-import android.util.Log;
+import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 
 import java.security.MessageDigest;
 

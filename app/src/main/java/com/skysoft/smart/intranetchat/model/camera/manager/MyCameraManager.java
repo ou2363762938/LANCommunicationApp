@@ -27,7 +27,7 @@ import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.ImageReader;
 import android.os.Handler;
 import android.os.HandlerThread;
-import android.util.Log;
+import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 import android.util.Size;
 import android.util.SparseIntArray;
 import android.view.MotionEvent;
@@ -201,7 +201,7 @@ public class MyCameraManager {
             cameraDevice.close();
             mCameraDevice = null;
             if (null != mActivity) {
-                Log.d(TAG, "CameraDevice.StateCallback onError finish");
+                TLog.d(TAG, "CameraDevice.StateCallback onError finish");
                 mActivity.finish();
             }
         }
@@ -214,7 +214,7 @@ public class MyCameraManager {
     @SuppressLint("MissingPermission")
     public void openCamera(int width, int height) {
         if (ContextCompat.checkSelfPermission(mActivity, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-            Log.d(TAG, "permission fail");
+            TLog.d(TAG, "permission fail");
             checkPermissions();
             return;
         }
@@ -249,7 +249,7 @@ public class MyCameraManager {
                         @Override
                         public void onConfigured(@NonNull CameraCaptureSession cameraCaptureSession) {
                             if (null == mCameraDevice) {
-                                Log.d(TAG, " mCameraDevice null");
+                                TLog.d(TAG, " mCameraDevice null");
                                 return;
                             }
 
@@ -268,7 +268,7 @@ public class MyCameraManager {
                         @Override
                         public void onConfigureFailed(
                                 @NonNull CameraCaptureSession cameraCaptureSession) {
-                            Log.d(TAG, "onConfigureFailed fail");
+                            TLog.d(TAG, "onConfigureFailed fail");
                         }
                     }, null
             );
@@ -387,7 +387,7 @@ public class MyCameraManager {
 
                 @Override
                 public void onCaptureCompleted(@NonNull CameraCaptureSession session, @NonNull CaptureRequest request, @NonNull TotalCaptureResult result) {
-                    Log.d(TAG, mFile.toString());
+                    TLog.d(TAG, mFile.toString());
                     unlockFocus();
                 }
             };

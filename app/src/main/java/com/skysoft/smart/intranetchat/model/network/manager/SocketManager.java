@@ -5,7 +5,7 @@
  */
 package com.skysoft.smart.intranetchat.model.network.manager;
 
-import android.util.Log;
+import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 
 public class SocketManager {
     private int socketNumber;
@@ -24,7 +24,7 @@ public class SocketManager {
     public int add(){
         synchronized (sInstance){
             ++socketNumber;
-            Log.d(TAG, "add: socketNumber = " + socketNumber);
+            TLog.d(TAG, "add: socketNumber = " + socketNumber);
             return socketNumber;
         }
     }
@@ -35,7 +35,7 @@ public class SocketManager {
                 return -1;
             }
             --socketNumber;
-            Log.d(TAG, "reduce: socketNumber = " + socketNumber);
+            TLog.d(TAG, "reduce: socketNumber = " + socketNumber);
             return socketNumber;
         }
     }

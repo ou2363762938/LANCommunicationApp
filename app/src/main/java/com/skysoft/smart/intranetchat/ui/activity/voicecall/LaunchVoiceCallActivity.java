@@ -9,7 +9,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Log;
+import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -141,14 +141,14 @@ public class LaunchVoiceCallActivity extends AppCompatActivity {
     private HandleVoiceCallResponse handleVoiceCallResponse = new HandleVoiceCallResponse() {
         @Override
         public void onReceiveConsentVoiceCall(String host) {
-            Log.d(TAG, "onReceiveConsentVoiceCall: " + host);
+            TLog.d(TAG, "onReceiveConsentVoiceCall: " + host);
             VoiceCallActivity.go(LaunchVoiceCallActivity.this, host,name,imgPath,mIdentifier,false);
             finish();
         }
 
         @Override
         public void onReceiveRefuseVoiceCall(String host) {
-            Log.d(TAG, "onReceiveRefuseVoiceCall: " + host);
+            TLog.d(TAG, "onReceiveRefuseVoiceCall: " + host);
             if (!LaunchVoiceCallActivity.this.host.equals(host)){
                 return;
             }
@@ -160,12 +160,12 @@ public class LaunchVoiceCallActivity extends AppCompatActivity {
         @Override
         public void onReceiveWaitingConsentCall() {
             lastWaitingConsentCall = System.currentTimeMillis();
-            Log.d(TAG, "onReceiveWaitingConsentCall: " + lastWaitingConsentCall);
+            TLog.d(TAG, "onReceiveWaitingConsentCall: " + lastWaitingConsentCall);
         }
 
         @Override
         public void onReceiveConsentOutTime() {
-            Log.d(TAG, "onReceiveConsentOutTime: ");
+            TLog.d(TAG, "onReceiveConsentOutTime: ");
             IntranetChatApplication.setInCall(false);
             EventBus.getDefault().post(new RecordCallBean(mIdentifier,ChatRoomConfig.CALL_OUT_TIME_ANSWER,host,true));
             finish();
@@ -173,7 +173,7 @@ public class LaunchVoiceCallActivity extends AppCompatActivity {
 
         @Override
         public void onReceiveInCall(String host) {
-            Log.d(TAG, "onReceiveInCall: " + host);
+            TLog.d(TAG, "onReceiveInCall: " + host);
             if (!LaunchVoiceCallActivity.this.host.equals(host)){
                 return;
             }
@@ -184,7 +184,7 @@ public class LaunchVoiceCallActivity extends AppCompatActivity {
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onReceiveInCall(InCallBean inCallBean){
-        Log.d(TAG, "onReceiveInCall: Main Thread");
+        TLog.d(TAG, "onReceiveInCall: Main Thread");
         hungVoiceCall.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -196,7 +196,7 @@ public class LaunchVoiceCallActivity extends AppCompatActivity {
         TimerTask inCallTask = new TimerTask() {
             @Override
             public void run() {
-                Log.d(TAG, "run: finish");
+                TLog.d(TAG, "run: finish");
                 IntranetChatApplication.setInCall(false);
                 finish();
             }
@@ -228,7 +228,7 @@ public class LaunchVoiceCallActivity extends AppCompatActivity {
     private OnReceiveCallHungUp onReceiveCallHungUp = new OnReceiveCallHungUp() {
         @Override
         public void onReceiveHungUpVoiceCall(String host) {
-            Log.d(TAG, "onReceiveHungUpVoiceCall: " + host);
+            TLog.d(TAG, "onReceiveHungUpVoiceCall: " + host);
             if (!LaunchVoiceCallActivity.this.host.equals(host)){
                 return;
             }

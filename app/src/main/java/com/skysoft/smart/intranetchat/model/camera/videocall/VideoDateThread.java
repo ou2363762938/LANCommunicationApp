@@ -5,7 +5,7 @@
  ***/
 package com.skysoft.smart.intranetchat.model.camera.videocall;
 
-import android.util.Log;
+import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 
 import com.skysoft.smart.intranetchat.app.IntranetChatApplication;
 import com.skysoft.smart.intranetchat.app.impl.OnReceiveCallBean;
@@ -113,7 +113,7 @@ public class VideoDateThread extends Thread {
                     }
                 }
             } catch (IllegalArgumentException e) {
-                Log.d(TAG, "ByteBuffer.allocate: IllegalArgumentException");
+                TLog.d(TAG, "ByteBuffer.allocate: IllegalArgumentException");
                 buffer.clear();
             }
         }

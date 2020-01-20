@@ -9,7 +9,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.util.Log;
+import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 import android.view.View;
 import android.widget.VideoView;
 
@@ -65,7 +65,7 @@ public class ShowVideoActivity extends AppCompatActivity implements View.OnClick
                 break;
             case R.id.activity_show_video_confirm:
                 EventBus.getDefault().post(new EventMessage(mVideoUrl,0, 2));
-                Log.d(TAG, "url " + mVideoUrl);
+                TLog.d(TAG, "url " + mVideoUrl);
                 finish();
                 break;
         }

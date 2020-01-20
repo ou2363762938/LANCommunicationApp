@@ -5,7 +5,7 @@
  */
 package com.skysoft.smart.intranetchat.model.network.file;
 
-import android.util.Log;
+import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 
 import com.skysoft.smart.intranetchat.model.network.Config;
 import com.skysoft.smart.intranetchat.model.network.bean.ResourceManagerBean;
@@ -48,7 +48,7 @@ public class SendFileThread extends Thread {
         if (!file.exists() || !file.isFile()){
             ResponseBean responseBean = new ResponseBean(Config.RESPONSE_NOT_FOUND_FILE,resourceUniqueIdentifier);
             Sender.sender(GsonTools.toJson(responseBean),Config.CODE_RESPONSE,host);
-            Log.d(TAG, "run: 文件不存在");
+            TLog.d(TAG, "run: 文件不存在");
             return;
         }
 
@@ -78,7 +78,7 @@ public class SendFileThread extends Thread {
                 os.write(buf,0,count);
                 os.flush();
             }
-            Log.d(TAG, "run: 发送文件结束");
+            TLog.d(TAG, "run: 发送文件结束");
         } catch (IOException e) {
             e.printStackTrace();
         }finally {

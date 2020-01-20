@@ -3,7 +3,7 @@ package com.skysoft.smart.intranetchat.ui.activity.chatroom.PopupWindow;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
-import android.util.Log;
+import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -78,7 +78,7 @@ public class PopupWindowAdapter extends RecyclerView.Adapter<PopupWindowAdapter.
             @Override
             public void onClick(View v) {
                 String clickContent = mItemList.get(position); //点击内容
-                Log.d(TAG, "onClick: " + clickContent);
+                TLog.d(TAG, "onClick: " + clickContent);
                 if (clickContent.equals(mContext.getResources().getString(R.string.copy))){
                     //点击复制
                     copy();

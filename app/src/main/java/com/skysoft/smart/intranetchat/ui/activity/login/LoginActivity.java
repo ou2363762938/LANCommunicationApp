@@ -10,7 +10,7 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Log;
+import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewTreeObserver;
@@ -113,7 +113,7 @@ public class LoginActivity extends AppCompatActivity {
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void handleEventMessage(EventMessage eventMessage){
-        Log.d(TAG, "handleEventMessage: eventMessage.getMessage() = " + eventMessage.getMessage());
+        TLog.d(TAG, "handleEventMessage: eventMessage.getMessage() = " + eventMessage.getMessage());
         //注册时获得头像
         if (eventMessage.getType() == 4){
             if (!TextUtils.isEmpty(eventMessage.getMessage())){

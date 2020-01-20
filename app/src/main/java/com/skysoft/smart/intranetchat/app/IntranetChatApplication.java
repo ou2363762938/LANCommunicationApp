@@ -29,7 +29,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.text.TextUtils;
 import android.util.EventLog;
-import android.util.Log;
+import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 import android.widget.RemoteViews;
 import android.widget.TextView;
 
@@ -429,7 +429,7 @@ public class IntranetChatApplication extends Application {
                         }
                     }
                     //更换联系人名字
-                    Log.d(TAG, "setContactList: name = " + contactEntity.getName());
+                    TLog.d(TAG, "setContactList: name = " + contactEntity.getName());
                     if (!temp.getName().equals(contactEntity.getName())){
                         temp.setName(contactEntity.getName());
                         //更换聊天室中联系人的头像
@@ -647,11 +647,11 @@ public class IntranetChatApplication extends Application {
     public void onReceiveAndSaveFile(ReceiveAndSaveFileBean receiveAndSaveFileBean){
         //刷新心跳数据
         updateHeartbeat(receiveAndSaveFileBean.getSender());
-        Log.d(TAG, "onReceiveAndSaveFile: " + receiveAndSaveFileBean.toString());
+        TLog.d(TAG, "onReceiveAndSaveFile: " + receiveAndSaveFileBean.toString());
 
         //刷新头像
         ContactEntity next = sContactMap.get(receiveAndSaveFileBean.getSender());
-        Log.d(TAG, "onReceiveAndSaveFile: " + next.toString());
+        TLog.d(TAG, "onReceiveAndSaveFile: " + next.toString());
         if (null != next) {
             //确认是否在查看联系人界面
             if (TextUtils.isEmpty(sFilterIdentifier) || !sFilterIdentifier.equals(next.getIdentifier())) {
@@ -660,7 +660,7 @@ public class IntranetChatApplication extends Application {
 
             //刷新联系人展示界面的头像
             if (sShowUserInfoAvatar != null) {
-                Log.d(TAG, "onReceiveAndSaveFile: path = " + receiveAndSaveFileBean.getPath());
+                TLog.d(TAG, "onReceiveAndSaveFile: path = " + receiveAndSaveFileBean.getPath());
                 Glide.with(this).load(receiveAndSaveFileBean.getPath()).into(sShowUserInfoAvatar);
             }
 
@@ -681,7 +681,7 @@ public class IntranetChatApplication extends Application {
             //刷新最近消息列表的头像
             LatestChatHistoryEntity historyEntity = sLatestChatHistoryMap.get(next.getIdentifier());
             if (null != historyEntity) {
-                Log.d(TAG, "onReceiveAndSaveFile: history.content = " + historyEntity.getContent());
+                TLog.d(TAG, "onReceiveAndSaveFile: history.content = " + historyEntity.getContent());
                 historyEntity.setUserHeadPath(receiveAndSaveFileBean.getPath());
                 if (sMessageListAdapter != null) {
                     sMessageListAdapter.notifyDataSetChanged();
@@ -718,7 +718,7 @@ public class IntranetChatApplication extends Application {
             return;
         }
 
-        Log.d(TAG, "onReceiveAndSaveFile: file");
+        TLog.d(TAG, "onReceiveAndSaveFile: file");
         //接收文件
         new Thread(new Runnable() {
             @Override
@@ -729,7 +729,7 @@ public class IntranetChatApplication extends Application {
                 if (recordByFileIdentifier != null) {
                     recordByFileIdentifier.setPath(receiveAndSaveFileBean.getPath());
                     if (recordByFileIdentifier.getType() == ChatRoomConfig.RECORD_VIDEO) {
-                        Log.d(TAG, "run: onReceiveAndSaveFile path = " + savePath);
+                        TLog.d(TAG, "run: onReceiveAndSaveFile path = " + savePath);
                         String path = ChatRoomMessageAdapter.createVideoThumbnailFile(receiveAndSaveFileBean.getPath());
                         receiveAndSaveFileBean.setPath(path);
                         recordByFileIdentifier.setPath(path);
@@ -778,7 +778,7 @@ public class IntranetChatApplication extends Application {
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onReceiveFileBean(FileEntity fileEntity) {
-        Log.d(TAG, "onReceiveFileBean: ");
+        TLog.d(TAG, "onReceiveFileBean: ");
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -820,10 +820,10 @@ public class IntranetChatApplication extends Application {
                 chatRecordEntity.setFileName(fileBean.getFileName());
                 break;
             default:
-                Log.d(TAG, "handleFile: unknown file type");
+                TLog.d(TAG, "handleFile: unknown file type");
                 return;
         }
-        Log.d(TAG, "handleFile: ");
+        TLog.d(TAG, "handleFile: ");
 
         chatRecordEntity.setLength(fileBean.getFileLength());
         chatRecordEntity.setTime(System.currentTimeMillis());
@@ -844,7 +844,7 @@ public class IntranetChatApplication extends Application {
     public void onReceiveEstablishGroupBean(EstablishGroupBean establishGroupBean){
         //刷新心跳数据
         updateHeartbeat(establishGroupBean.getmHolderIdentifier());
-        Log.d(TAG, "onReceiveEstablishGroupBean: " + establishGroupBean.toString());
+        TLog.d(TAG, "onReceiveEstablishGroupBean: " + establishGroupBean.toString());
         boolean groupExist = false;
         boolean latestChatExist = false;
         //查看群是否存在
@@ -952,7 +952,7 @@ public class IntranetChatApplication extends Application {
     private ServiceConnection mConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            Log.d(TAG, "onServiceConnected: ");
+            TLog.d(TAG, "onServiceConnected: ");
             sAidlInterface = IIntranetChatAidlInterface.Stub.asInterface(service);
             try {
                 sAidlInterface.registerCallback(sCallback);
@@ -965,7 +965,7 @@ public class IntranetChatApplication extends Application {
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
-            Log.d(TAG, "onServiceDisconnected: ");
+            TLog.d(TAG, "onServiceDisconnected: ");
 //            sAidlInterface = null;
             Intent intent = new Intent(IntranetChatApplication.this, IntranetChatServer.class);
 ////            startForegroundService(intent);
@@ -997,9 +997,9 @@ public class IntranetChatApplication extends Application {
             bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
             sCurrentProgress = pid;
             Timer senderMyHeartbeat = new Timer();
-            senderMyHeartbeat.schedule(mSendMyHeartbeat,2000,800);
+            senderMyHeartbeat.schedule(mSendMyHeartbeat,2000,1300);
             Timer confirmMonitorHeartbeat = new Timer();
-            confirmMonitorHeartbeat.schedule(mConfirmMonitorHeartbeat,2300,800);
+            confirmMonitorHeartbeat.schedule(mConfirmMonitorHeartbeat,2300,1300);
         }
     }
 
@@ -1032,7 +1032,7 @@ public class IntranetChatApplication extends Application {
                 Long heartbeatTime = System.currentTimeMillis()-monitor.getValue();
                 if (heartbeatTime > 3000){      //超过3秒没有心跳，认为设备已死亡，发送死亡通知，同时移出监视列表
                     Login.broadcastUserOutLine(monitor.getKey());       //发送死亡广播
-                    Log.d(TAG, "sendUserOutLine: " + IntranetChatApplication.sContactMap.get(monitor.getKey()).getName());
+                    TLog.d(TAG, "sendUserOutLine: " + IntranetChatApplication.sContactMap.get(monitor.getKey()).getName());
                     if (null == outLineUser){
                         outLineUser = new ArrayList<>();
                     }
@@ -1041,14 +1041,14 @@ public class IntranetChatApplication extends Application {
                 }else if (heartbeatTime > 2400){        //超过2.4秒没有心跳，认为设备假死亡，向设备请求心跳
                     ContactEntity contactEntity = sContactMap.get(monitor.getKey());
                     if (null == contactEntity){
-                        Log.d(TAG, "run: null " + monitor.getKey() + ", " + sMineUserInfo.getIdentifier());
+                        TLog.d(TAG, "run: null " + monitor.getKey() + ", " + sMineUserInfo.getIdentifier());
                         outLineUser.add(monitor.getKey());
                         continue;
                     }
                     SendRequest.sendRequestHeartbeat(IntranetChatApplication.getsMineUserInfo().getIdentifier()
                             ,contactEntity.getHost());
                 }
-                Log.d(TAG, "run: heartbeatTime = " + heartbeatTime + ", identifier = " + monitor.getKey());
+                TLog.d(TAG, "run: heartbeatTime = " + heartbeatTime + ", identifier = " + monitor.getKey());
             }
 
             if (null != outLineUser){
@@ -1110,7 +1110,7 @@ public class IntranetChatApplication extends Application {
             e.printStackTrace();
         }
         unbindService(mConnection);
-        Log.d(TAG, "onTerminate: ");
+        TLog.d(TAG, "onTerminate: ");
         EventBus.getDefault().unregister(this);
     }
 
@@ -1176,7 +1176,7 @@ public class IntranetChatApplication extends Application {
      * @param message 通知的消息
      * @param host 对方IP地址*/
     public void notification(MessageBean message, String host) {
-        Log.d(TAG, "notification: " + message.toString());
+        TLog.d(TAG, "notification: " + message.toString());
         if (sNotificationManager == null) {
             sNotificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         }
@@ -1192,7 +1192,7 @@ public class IntranetChatApplication extends Application {
         String name = null;
         String avatar = null;
         int notifyId = 0;
-        Log.d(TAG, "notification: notifyId " + message.getReceiver());
+        TLog.d(TAG, "notification: notifyId " + message.getReceiver());
         if (null != next) {
             name = next.getName();
             avatar = next.getAvatarPath();
@@ -1215,7 +1215,7 @@ public class IntranetChatApplication extends Application {
         if (TextUtils.isEmpty(avatar)) {
             mRemoteViews.setImageViewResource(R.id.notification_avatar, R.drawable.default_head);
         } else {
-            Log.d(TAG, "notification: avatar = " + avatar);
+            TLog.d(TAG, "notification: avatar = " + avatar);
             Bitmap bitmap = BitmapFactory.decodeFile(avatar);
             mRemoteViews.setImageViewBitmap(R.id.notification_avatar, bitmap);
         }
@@ -1258,7 +1258,7 @@ public class IntranetChatApplication extends Application {
         }
         //B: Notification 完善(notifyId),Allen Luo,2019/11/12
         sNotificationManager.notify(notifyId, notification.build());
-        Log.d(TAG, "notification: notifyId 1 = " + notifyId + ", name = " + name);
+        TLog.d(TAG, "notification: notifyId 1 = " + notifyId + ", name = " + name);
         //E: Notification 完善(notifyId),Allen Luo,2019/11/12
     }
 
@@ -1487,7 +1487,7 @@ public class IntranetChatApplication extends Application {
                 contactEntity.setAvatarPath(avatarPath);
                 sChatRoomMessageAdapter.notifyDataSetChanged();
             }else {
-                Log.d(TAG, "updateContactAvatarInChatRoom: 没有找到用户");
+                TLog.d(TAG, "updateContactAvatarInChatRoom: 没有找到用户");
             }
         }
     }

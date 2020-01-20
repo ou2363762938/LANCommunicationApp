@@ -8,7 +8,7 @@ package com.skysoft.smart.intranetchat.model.camera.mediamuxer;
 import android.media.MediaCodec;
 import android.media.MediaFormat;
 import android.media.MediaMuxer;
-import android.util.Log;
+import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 
 import com.skysoft.smart.intranetchat.model.camera.entity.EventMessage;
 import com.skysoft.smart.intranetchat.model.camera.util.FileUtil;
@@ -52,12 +52,12 @@ public class MyMediaMuxer {
             track = mMediaMuxer.addTrack(format);
             videoTrack = track;
             videoReady = true;
-            Log.d(TAG, " video" + isVideo + " videotrack " + track);
+            TLog.d(TAG, " video" + isVideo + " videotrack " + track);
         } else if (!isVideo && !audioReady) {
             track = mMediaMuxer.addTrack(format);
             audioTrack = track;
             audioReady = true;
-            Log.d(TAG, " video" + isVideo + " audioTrack " + track);
+            TLog.d(TAG, " video" + isVideo + " audioTrack " + track);
         }
 
         return audioReady && videoReady;
@@ -67,7 +67,7 @@ public class MyMediaMuxer {
         if (audioTrack != -1 && videoTrack != -1) {
             mMediaMuxer.start();
             nanoTime = System.nanoTime();
-            Log.d(TAG, "muxer start-----");
+            TLog.d(TAG, "muxer start-----");
             isStart = true;
         }
     }
@@ -75,7 +75,7 @@ public class MyMediaMuxer {
     public void writeData(ByteBuffer buffer, MediaCodec.BufferInfo info, boolean isVideo) {
 
         if (audioTrack == -1 || videoTrack == -1) {
-            Log.e(TAG, "音频轨和视频轨没有添加");
+            TLog.e(TAG, "音频轨和视频轨没有添加");
             return;
         }
         if (isStart) {
@@ -84,7 +84,7 @@ public class MyMediaMuxer {
             } else if (info.size != 0) {
                 info.presentationTimeUs = (System.nanoTime() - nanoTime) / 1000;
                 mMediaMuxer.writeSampleData(isVideo ? videoTrack : audioTrack, buffer, info);
-                Log.d(TAG, "write......" + info.size + "  " + isVideo + " videoTrack " + videoTrack + " audioTrack" + audioTrack);
+                TLog.d(TAG, "write......" + info.size + "  " + isVideo + " videoTrack " + videoTrack + " audioTrack" + audioTrack);
 
             }
         }
@@ -101,7 +101,7 @@ public class MyMediaMuxer {
             mMediaMuxer.stop();
             mMediaMuxer.release();
             mMediaMuxer = null;
-            Log.d(TAG, "Muxer release");
+            TLog.d(TAG, "Muxer release");
         }
     }
 }

@@ -6,7 +6,7 @@
 package com.skysoft.smart.intranetchat.model.camera.manager;
 
 import android.media.MediaPlayer;
-import android.util.Log;
+import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 
 import java.io.IOException;
 
@@ -53,7 +53,7 @@ public class MyMediaPlayerManager {
         if (mMediaPlayer != null) {
             mMediaPlayer.stop();
             mMediaPlayer.release();
-            Log.d("MyMediaPlayerManager", "stop: mMediaPlayer");
+            TLog.d("MyMediaPlayerManager", "stop: mMediaPlayer");
             mMediaPlayer = null;
         }
     }

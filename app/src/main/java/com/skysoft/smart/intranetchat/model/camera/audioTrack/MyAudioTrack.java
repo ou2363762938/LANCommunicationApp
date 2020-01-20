@@ -8,7 +8,7 @@ package com.skysoft.smart.intranetchat.model.camera.audioTrack;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioTrack;
-import android.util.Log;
+import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -43,7 +43,7 @@ public class MyAudioTrack {
         mBufSize = getMinBufferSize();
         mAudioTrack = new AudioTrack(AudioManager.STREAM_MUSIC, mFrequency, mChannel, mSampBit, mBufSize, AudioTrack.MODE_STREAM);
         mAudioTrack.play();
-        Log.d(TAG, "init: track play");
+        TLog.d(TAG, "init: track play");
     }
 
     public void release() {
@@ -54,7 +54,7 @@ public class MyAudioTrack {
                 mAudioTrack.release();
                 mAudioTrack = null;
             }
-            Log.d(TAG, "release: track");
+            TLog.d(TAG, "release: track");
         }
     }
 
@@ -69,7 +69,7 @@ public class MyAudioTrack {
                 while (fis.available() > 0) {
                     int readCount = fis.read(buffer);
                     if (readCount == -1) {
-                        Log.e(TAG, "没有更多数据可以读取了");
+                        TLog.e(TAG, "没有更多数据可以读取了");
                         break;
                     }
                     mAudioTrack.write(buffer, 0, readCount);

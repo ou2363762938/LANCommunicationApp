@@ -6,7 +6,7 @@
 package com.skysoft.smart.intranetchat.model.network.file;
 
 import android.text.TextUtils;
-import android.util.Log;
+import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 
 import com.skysoft.smart.intranetchat.model.net_model.SendFile;
 import com.skysoft.smart.intranetchat.model.network.Config;
@@ -69,7 +69,7 @@ public class AskFileThread extends Thread {
                 }
                 ResourceManagerBean resource = ResourceManager.getInstance().getResource(resourceUniqueIdentifier);
                 if (!resource.isReceive()){
-                    Log.d(TAG, "run: resource.isReceive() = false");
+                    TLog.d(TAG, "run: resource.isReceive() = false");
                     return;
                 }
                 resourceMd5 = resource.getFileBean().getMd5();
@@ -104,10 +104,10 @@ public class AskFileThread extends Thread {
             if (TextUtils.isEmpty(md5) || !md5.equals(resourceMd5)){
                 /*接收文件失败*/
                 file.deleteOnExit();
-                Log.d(TAG, "run: receive file failure");
+                TLog.d(TAG, "run: receive file failure");
                 responseBean = new ResponseBean(Config.RESPONSE_RECEIVE_FILE_FAILURE,resourceUniqueIdentifier);
             }else {
-                Log.d(TAG, "run: receive file success");
+                TLog.d(TAG, "run: receive file success");
                 /*call back*/
                 ResourceManagerBean resource = ResourceManager.getInstance().getResource(resourceUniqueIdentifier);
                 FileBean fileBean = resource.getFileBean();

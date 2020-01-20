@@ -13,7 +13,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Log;
+import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ListView;
@@ -64,7 +64,7 @@ public class EstablishGroupActivity extends BaseActivity {
         isGroup = bundle.getBoolean(ChatRoomConfig.GROUP);
         receiverIdentifier = bundle.getString(ChatRoomConfig.IDENTIFIER);
         List<ContactEntity> contactEntityList = new ArrayList<>();
-        Log.d(TAG, "onCreate: isGroup = " + isGroup);
+        TLog.d(TAG, "onCreate: isGroup = " + isGroup);
         if (isGroup){
             //查看群成员
             mConfirm.setVisibility(View.GONE);
@@ -101,13 +101,13 @@ public class EstablishGroupActivity extends BaseActivity {
             public void onClick(View v) {
                 if (QuickClickListener.isFastClick()) {
                     List<ContactEntity> selectContacts = mAdapter.getGroup();
-                    Log.d(TAG, "onClick: selectContacts.size() = " + selectContacts.size());
+                    TLog.d(TAG, "onClick: selectContacts.size() = " + selectContacts.size());
                     if (selectContacts.size() < 2) {
                         ToastUtil.toast(EstablishGroupActivity.this, getString(R.string.build_group_number));
                         return;
                     }
 
-                    Log.d(TAG, "onClick: selectContacts.size() = " + selectContacts.size());
+                    TLog.d(TAG, "onClick: selectContacts.size() = " + selectContacts.size());
                     setGroupName(selectContacts);
                 }
             }

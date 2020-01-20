@@ -6,7 +6,7 @@
 package com.skysoft.smart.intranetchat.model.camera.videocall;
 
 import android.app.Activity;
-import android.util.Log;
+import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 
 import com.skysoft.smart.intranetchat.R;
 import com.skysoft.smart.intranetchat.app.IntranetChatApplication;
@@ -77,7 +77,7 @@ public class Receiver {
 
                         length = getLength(temp);
                         if (temp.length > 7 && tag == 0) {
-                            Log.d(TAG, "first video 2: " + temp[0] + " " + temp[1] + " " + temp[2] + " " + temp[3] + " " + temp[4] + " " + temp[5] + " " + temp[6] + "  count1 " + count + "  count2 " + count2 + " length " + length);
+                            TLog.d(TAG, "first video 2: " + temp[0] + " " + temp[1] + " " + temp[2] + " " + temp[3] + " " + temp[4] + " " + temp[5] + " " + temp[6] + "  count1 " + count + "  count2 " + count2 + " length " + length);
                         }
                         if (length == -1) {
                             rightData = temp;
@@ -89,7 +89,7 @@ public class Receiver {
                         } catch (IllegalArgumentException e) {
                             e.printStackTrace();
                             isError = true;
-                            Log.d(TAG, "ByteBuffer.allocate(length)  " + temp[0] + " " + temp[1] + " " + temp[2] + " " + temp[3] + " " + temp[4] + " " + temp[5] + " " + temp[6] + "  count1 " + count + "  count2 " + count2 + " length " + length);
+                            TLog.d(TAG, "ByteBuffer.allocate(length)  " + temp[0] + " " + temp[1] + " " + temp[2] + " " + temp[3] + " " + temp[4] + " " + temp[5] + " " + temp[6] + "  count1 " + count + "  count2 " + count2 + " length " + length);
                             mActivity.finish();
                             return;
                         }
@@ -117,10 +117,10 @@ public class Receiver {
                             count2++;
                             mVCDecoder.inputFrameToEncoder(data);
                             if (count2 == 1) {
-                                Log.d(TAG, "first video 3: " + data[0] + " " + data[1] + " " + data[2] + " " + data[3] + " " + data[4] + " " + data[5] + " " + data[6] + "  count1 " + count + "  count2 " + count2 + " length " + data.length);
+                                TLog.d(TAG, "first video 3: " + data[0] + " " + data[1] + " " + data[2] + " " + data[3] + " " + data[4] + " " + data[5] + " " + data[6] + "  count1 " + count + "  count2 " + count2 + " length " + data.length);
 
                             }else {
-                                Log.d(TAG, "run: first video 4: "+data.length+ " count "+count2);
+                                TLog.d(TAG, "run: first video 4: "+data.length+ " count "+count2);
                             }
                         } else {
                             mADecoder.inputFrameToEncoder(data);

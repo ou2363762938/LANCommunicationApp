@@ -7,7 +7,7 @@ package com.skysoft.smart.intranetchat.model.net_model;
 
 import android.os.Environment;
 import android.os.RemoteException;
-import android.util.Log;
+import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 
 import com.skysoft.smart.intranetchat.app.IntranetChatApplication;
 import com.skysoft.smart.intranetchat.model.network.Config;
@@ -31,15 +31,15 @@ public class SendFile {
     public int sendFile(ReceiveAndSaveFileBean rafb, String host, int type, int length){
         File file = getFile(rafb.getPath(),type);
         if (file.length() > 1024*1024*50){
-            Log.d(TAG, "sendFile: 文件太大");
+            TLog.d(TAG, "sendFile: 文件太大");
             return Config.SEND_FILE_BIG;
         }else if (file.length() == 0){
-            Log.d(TAG, "sendFile: 文件为0k");
+            TLog.d(TAG, "sendFile: 文件为0k");
             return Config.SEND_FILE_ZEOR;
         }
         FileBean fileBean = generatorFileBean(file,rafb.getIdentifier(),rafb.getReceiver(),rafb.getSender(),type);
         if (fileBean == null){
-            Log.d(TAG, "sendFile: 没有找到文件，文件路径错误");
+            TLog.d(TAG, "sendFile: 没有找到文件，文件路径错误");
             return Config.SEND_FILE_NOT_FOUND;
         }
         if (length != 0){

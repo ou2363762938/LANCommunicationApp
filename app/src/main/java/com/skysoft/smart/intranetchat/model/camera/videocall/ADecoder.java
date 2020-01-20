@@ -15,6 +15,8 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.util.Log;
 
+import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
+
 import androidx.annotation.NonNull;
 
 import java.io.IOException;
@@ -38,7 +40,7 @@ public class ADecoder {
         try {
             mMediaCodec = MediaCodec.createDecoderByType(MediaFormat.MIMETYPE_AUDIO_AAC);
         } catch (IOException e) {
-            Log.e(TAG, Log.getStackTraceString(e));
+            TLog.e(TAG, Log.getStackTraceString(e));
             mMediaCodec = null;
             return;
         }
@@ -73,7 +75,7 @@ public class ADecoder {
                 if (dataSources != null) {
                     inputBuffer.put(dataSources);
                     length = dataSources.length;
-                    Log.d(TAG, "onInputBufferAvailable: decoder--------------- " + length);
+                    TLog.d(TAG, "onInputBufferAvailable: decoder--------------- " + length);
                 }
                 mediaCodec.queueInputBuffer(id, 0, length, 0, 0);
             }catch (IllegalStateException e){
@@ -90,7 +92,7 @@ public class ADecoder {
                     byte[] buffer = new byte[outputBuffer.remaining()];
                     outputBuffer.get(buffer);
                     mOutputDatasQueue.offer(buffer);
-                    Log.d(TAG, "ADcoder: out" + buffer.length);
+                    TLog.d(TAG, "ADcoder: out" + buffer.length);
                 }
                 mediaCodec.releaseOutputBuffer(id, false);
             }catch (IllegalStateException e){
@@ -100,13 +102,13 @@ public class ADecoder {
 
         @Override
         public void onError(@NonNull MediaCodec mediaCodec, @NonNull MediaCodec.CodecException e) {
-            Log.d(TAG, " MediaCodec.Callback onError");
+            TLog.d(TAG, " MediaCodec.Callback onError");
             e.printStackTrace();
         }
 
         @Override
         public void onOutputFormatChanged(@NonNull MediaCodec mediaCodec, @NonNull MediaFormat mediaFormat) {
-            Log.d(TAG, "MediaCodec.Callback onOutputFormatChanged");
+            TLog.d(TAG, "MediaCodec.Callback onOutputFormatChanged");
         }
     };
 
@@ -132,7 +134,7 @@ public class ADecoder {
         if (mMediaCodec != null) {
             mMediaCodec.stop();
             mMediaCodec.setCallback(null);
-            Log.d(TAG, "AEncor stop");
+            TLog.d(TAG, "AEncor stop");
         }
         release();
     }
@@ -143,7 +145,7 @@ public class ADecoder {
             mOutputDatasQueue.clear();
             mMediaCodec.release();
             mMediaCodec = null;
-            Log.d(TAG, "AEncor release");
+            TLog.d(TAG, "AEncor release");
         }
     }
 }

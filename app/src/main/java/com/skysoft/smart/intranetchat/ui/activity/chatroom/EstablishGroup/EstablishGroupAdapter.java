@@ -7,7 +7,7 @@ package com.skysoft.smart.intranetchat.ui.activity.chatroom.EstablishGroup;
 
 import android.content.Context;
 import android.text.TextUtils;
-import android.util.Log;
+import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -129,7 +129,7 @@ public class EstablishGroupAdapter extends BaseAdapter {
         holder.checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                Log.d(TAG, "onCheckedChanged: " + isChecked);
+                TLog.d(TAG, "onCheckedChanged: " + isChecked);
                 holder.checkBox.setChecked(isChecked);
                 contactBean.setCheck(isChecked);
             }
@@ -222,7 +222,7 @@ public class EstablishGroupAdapter extends BaseAdapter {
     }
 
     public void showGroupMember(List<GroupMemberEntity> memberEntities){
-        Log.d(TAG, "showGroupMember: memberEntities.size() = " + memberEntities.size());
+        TLog.d(TAG, "showGroupMember: memberEntities.size() = " + memberEntities.size());
         isGroup = true;
         Iterator<GroupMemberEntity> iterator = memberEntities.iterator();
         while (iterator.hasNext()){

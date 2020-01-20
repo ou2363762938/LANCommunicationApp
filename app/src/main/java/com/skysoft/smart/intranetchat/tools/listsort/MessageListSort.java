@@ -5,7 +5,7 @@
  */
 package com.skysoft.smart.intranetchat.tools.listsort;
 
-import android.util.Log;
+import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 
 import com.skysoft.smart.intranetchat.app.IntranetChatApplication;
 import com.skysoft.smart.intranetchat.database.table.LatestChatHistoryEntity;
@@ -23,9 +23,9 @@ public class MessageListSort {
             LatestChatHistoryEntity historyEntity = IntranetChatApplication.sLatestChatHistoryMap.get(myBeanList.get(i));
             SimpleDateFormat dateformat = new SimpleDateFormat("yyyy-MM-dd");
             String dateStr = dateformat.format(historyEntity.getContentTimeMill());
-            Log.d("dateformat", "onCreateView:  " + dateStr);
+            TLog.d("dateformat", "onCreateView:  " + dateStr);
             historyEntity.setContentTime(dateStr);
-            Log.d("ContentTimeMill", "onCreateView:  " + historyEntity.getContentTimeMill());
+            TLog.d("ContentTimeMill", "onCreateView:  " + historyEntity.getContentTimeMill());
         }
         return true;
     }

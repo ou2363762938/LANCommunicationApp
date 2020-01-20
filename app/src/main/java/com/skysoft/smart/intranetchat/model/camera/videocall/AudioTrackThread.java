@@ -8,7 +8,7 @@ package com.skysoft.smart.intranetchat.model.camera.videocall;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioTrack;
-import android.util.Log;
+import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 
 public class AudioTrackThread extends Thread {
 
@@ -43,7 +43,7 @@ public class AudioTrackThread extends Thread {
                 mAudioTrack.flush();
             }
             mAudioTrack.write(temp, 0, temp.length);
-            Log.d(TAG, "run: AudioTrack write " + temp.length);
+            TLog.d(TAG, "run: AudioTrack write " + temp.length);
         }
         mAudioTrack.stop();
         mAudioTrack.release();

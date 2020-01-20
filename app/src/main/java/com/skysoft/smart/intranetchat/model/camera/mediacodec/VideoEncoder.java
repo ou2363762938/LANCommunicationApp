@@ -13,6 +13,8 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.util.Log;
 
+import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
+
 import androidx.annotation.NonNull;
 
 import com.skysoft.smart.intranetchat.model.camera.mediamuxer.MyMediaMuxer;
@@ -34,7 +36,7 @@ public class VideoEncoder {
         try {
             mMediaCodec = MediaCodec.createEncoderByType(mimeType);
         } catch (IOException e) {
-            Log.e(TAG, Log.getStackTraceString(e));
+            TLog.e(TAG, Log.getStackTraceString(e));
             mMediaCodec = null;
             return;
         }
@@ -78,12 +80,12 @@ public class VideoEncoder {
 
         @Override
         public void onError(@NonNull MediaCodec mediaCodec, @NonNull MediaCodec.CodecException e) {
-            Log.d(TAG, " MediaCodec.Callback onError");
+            TLog.d(TAG, " MediaCodec.Callback onError");
         }
 
         @Override
         public void onOutputFormatChanged(@NonNull MediaCodec mediaCodec, @NonNull MediaFormat mediaFormat) {
-            Log.d(TAG, "MediaCodec.Callback onOutputFormatChanged");
+            TLog.d(TAG, "MediaCodec.Callback onOutputFormatChanged");
         }
     };
 
@@ -105,14 +107,14 @@ public class VideoEncoder {
         if (mMediaCodec != null) {
             mMediaCodec.stop();
             mMediaCodec.setCallback(null);
-            Log.d(TAG, "videoEncoder stop");
+            TLog.d(TAG, "videoEncoder stop");
         }
     }
 
     public void release() {
         if (mMediaCodec != null) {
             mMediaCodec.release();
-            Log.d(TAG, "videoEncoder release");
+            TLog.d(TAG, "videoEncoder release");
         }
     }
 }

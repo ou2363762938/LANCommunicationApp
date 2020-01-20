@@ -7,7 +7,7 @@ package com.skysoft.smart.intranetchat.model.net_model;
 
 import android.os.RemoteException;
 import android.text.TextUtils;
-import android.util.Log;
+import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 
 import com.skysoft.smart.intranetchat.R;
 import com.skysoft.smart.intranetchat.app.IntranetChatApplication;
@@ -247,7 +247,7 @@ public class SendMessage {
         }
         //发送录音文件
         SendFile sendFile = new SendFile();
-        Log.d(TAG, "handleEventMessage: fileType = " + fileType);
+        TLog.d(TAG, "handleEventMessage: fileType = " + fileType);
         int b = 0;
         if (sendMessageBean.isGroup()){
             b = sendFile.sendFile(rasfb, "255.255.255.255", fileType, (int) eventMessage.getLength());

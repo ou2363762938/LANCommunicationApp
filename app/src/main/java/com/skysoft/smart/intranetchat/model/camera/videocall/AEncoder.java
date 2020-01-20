@@ -15,6 +15,8 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.util.Log;
 
+import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
+
 import androidx.annotation.NonNull;
 
 import java.io.IOException;
@@ -39,7 +41,7 @@ public class AEncoder {
         try {
             mMediaCodec = MediaCodec.createEncoderByType(MediaFormat.MIMETYPE_AUDIO_AAC);
         } catch (IOException e) {
-            Log.e(TAG, Log.getStackTraceString(e));
+            TLog.e(TAG, Log.getStackTraceString(e));
             mMediaCodec = null;
             return;
         }
@@ -94,7 +96,7 @@ public class AEncoder {
                     }
                     addTag(outData, temp.length);
                     Sender.mInputDatasQueue.offer(outData);
-                    Log.d(TAG, "AEncoder: send " + outData.length);
+                    TLog.d(TAG, "AEncoder: send " + outData.length);
                 }
                 mediaCodec.releaseOutputBuffer(id, false);
             } catch (IllegalStateException e) {
@@ -104,13 +106,13 @@ public class AEncoder {
 
         @Override
         public void onError(@NonNull MediaCodec mediaCodec, @NonNull MediaCodec.CodecException e) {
-            Log.d(TAG, " MediaCodec.Callback onError");
+            TLog.d(TAG, " MediaCodec.Callback onError");
             e.printStackTrace();
         }
 
         @Override
         public void onOutputFormatChanged(@NonNull MediaCodec mediaCodec, @NonNull MediaFormat mediaFormat) {
-            Log.d(TAG, "MediaCodec.Callback onOutputFormatChanged");
+            TLog.d(TAG, "MediaCodec.Callback onOutputFormatChanged");
         }
     };
 
@@ -165,7 +167,7 @@ public class AEncoder {
         if (mMediaCodec != null) {
             mMediaCodec.stop();
             mMediaCodec.setCallback(null);
-            Log.d(TAG, "AEncor stop");
+            TLog.d(TAG, "AEncor stop");
         }
         release();
     }
@@ -176,7 +178,7 @@ public class AEncoder {
             mOutputDatasQueue.clear();
             mMediaCodec.release();
             mMediaCodec = null;
-            Log.d(TAG, "AEncor release");
+            TLog.d(TAG, "AEncor release");
         }
     }
 }

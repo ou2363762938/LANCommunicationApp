@@ -9,7 +9,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Log;
+import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -129,7 +129,7 @@ public class VoiceCallActivity extends AppCompatActivity {
     public OnEstablishCallConnect onEstablishCallConnect = new OnEstablishCallConnect() {
         @Override
         public void onEstablishCallConnect() {
-            Log.d(TAG, "onEstablishCallConnect: ");
+            TLog.d(TAG, "onEstablishCallConnect: ");
         }
     };
 

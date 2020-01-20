@@ -7,7 +7,7 @@ package com.skysoft.smart.intranetchat.model.network.receive;
 
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
-import android.util.Log;
+import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 
 import com.skysoft.smart.intranetchat.IIntranetChatAidlInterfaceCallback;
 import com.skysoft.smart.intranetchat.model.network.Config;
@@ -39,9 +39,9 @@ public class MonitorUdpReceivePortThread extends Thread {
             mMonitor = new DatagramSocket(Config.PORT_UDP_RECEIVE);
             monitorUdpRcvPort();
         } catch (SocketException e) {
-            Log.e(TAG, "SocketException: ",e );
+            TLog.e(TAG, "SocketException: ",e );
         } catch (IOException e) {
-            Log.e(TAG, "run: ", e );
+            TLog.e(TAG, "run: ", e );
         }
     }
 

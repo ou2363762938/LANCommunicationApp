@@ -16,7 +16,7 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
 import android.os.IBinder;
-import android.util.Log;
+import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 
 import com.skysoft.smart.intranetchat.R;
 import com.skysoft.smart.intranetchat.app.IntranetChatApplication;
@@ -77,7 +77,7 @@ public class IntranetChatServer extends Service {
         super.onCreate();
         int pid = android.os.Process.myPid();
         IntranetChatApplication.setsCreateProgress(pid);
-        Log.d(TAG, "onCreate: pid = " + pid);
+        TLog.d(TAG, "onCreate: pid = " + pid);
         String myHost = getHostIP();
         MonitorUdpReceivePortThread murpt = new MonitorUdpReceivePortThread(mBinder.getRemoteCallbackList(),mBinder.getUserInfoBean(),myHost);
         murpt.start();
@@ -116,7 +116,7 @@ public class IntranetChatServer extends Service {
                 }
             }
         } catch (SocketException e) {
-            Log.i("yao", "SocketException");
+            TLog.i("yao", "SocketException");
             e.printStackTrace();
         }
         return hostIp;

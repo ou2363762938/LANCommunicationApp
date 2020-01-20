@@ -5,7 +5,7 @@
  ***/
 package com.skysoft.smart.intranetchat.model.camera.videocall;
 
-import android.util.Log;
+import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 
 import com.skysoft.smart.intranetchat.model.net_model.VoiceCall;
 
@@ -37,7 +37,7 @@ public class Sender {
                 VoiceCall.sendVoiceCallData(bytes);
             }
             mInputDatasQueue.clear();
-            Log.d(TAG, "run: stop sender w");
+            TLog.d(TAG, "run: stop sender w");
         }
     }
 }

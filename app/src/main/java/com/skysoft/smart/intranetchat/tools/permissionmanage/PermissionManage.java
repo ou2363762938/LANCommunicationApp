@@ -6,7 +6,7 @@
 package com.skysoft.smart.intranetchat.tools.permissionmanage;
 
 import android.Manifest;
-import android.util.Log;
+import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 
 import com.tbruyelle.rxpermissions2.RxPermissions;
 
@@ -23,13 +23,13 @@ public class PermissionManage{
                 Manifest.permission.READ_CALENDAR,
                 Manifest.permission.WRITE_CALENDAR)
                 .subscribe(permission -> {
-                    Log.d("权限判断！", "allPermissionManage: 判断权限允许、拒绝、不再询问。");
+                    TLog.d("权限判断！", "allPermissionManage: 判断权限允许、拒绝、不再询问。");
                     if (permission.granted) {
-                        Log.i("未拒绝！","权限名称:"+permission.name+",申请结果:"+permission.granted);
+                        TLog.i("未拒绝！","权限名称:"+permission.name+",申请结果:"+permission.granted);
                     } else if (permission.shouldShowRequestPermissionRationale) {
-                        Log.i("仅拒绝！","权限名称:"+permission.name+",申请结果:"+permission.granted);
+                        TLog.i("仅拒绝！","权限名称:"+permission.name+",申请结果:"+permission.granted);
                     } else {
-                        Log.i("拒绝后不再询问！","权限名称:"+permission.name+",申请结果:"+permission.granted);
+                        TLog.i("拒绝后不再询问！","权限名称:"+permission.name+",申请结果:"+permission.granted);
                     }
                 });
     }

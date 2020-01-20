@@ -10,7 +10,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Log;
+import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -71,9 +71,9 @@ public class MineFragment extends Fragment implements View.OnClickListener{
 
         if (IntranetChatApplication.getsMineUserInfo().getName()!=null){
             mineName.setText(IntranetChatApplication.getsMineUserInfo().getName());
-            Log.d(TAG, "onCreateView: IntranetChatApplication.getsMineUserInfo().getName() =null");
+            TLog.d(TAG, "onCreateView: IntranetChatApplication.getsMineUserInfo().getName() =null");
         }
-        Log.d(TAG, "onCreateView: IntranetChatApplication.getsMineAvatarPath() = " + IntranetChatApplication.getsMineAvatarPath());
+        TLog.d(TAG, "onCreateView: IntranetChatApplication.getsMineAvatarPath() = " + IntranetChatApplication.getsMineAvatarPath());
         if (!TextUtils.isEmpty(IntranetChatApplication.getsMineAvatarPath())){
             Glide.with(root).load(IntranetChatApplication.getsMineAvatarPath()).into(mineAvatar);
         }else {
@@ -107,7 +107,7 @@ public class MineFragment extends Fragment implements View.OnClickListener{
                         break;
                 }
                 if (status != IntranetChatApplication.getsMineUserInfo().getStatus()){
-                    Log.d(TAG, "onItemSelected: 改变了状态。status = " + status);
+                    TLog.d(TAG, "onItemSelected: 改变了状态。status = " + status);
                     IntranetChatApplication.getsMineUserInfo().setStatus(status);
                     Login.broadcastUserInfo();
                 }
@@ -141,7 +141,7 @@ public class MineFragment extends Fragment implements View.OnClickListener{
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onReceiveEventMessage(EventMessage eventMessage){
-        Log.d(TAG, "onReceiveEventMessage: eventMessage.getType() = " + eventMessage.getType());
+        TLog.d(TAG, "onReceiveEventMessage: eventMessage.getType() = " + eventMessage.getType());
         if (eventMessage.getType() == 4){
             if (!TextUtils.isEmpty(eventMessage.getMessage())){
                 Glide.with(getContext()).load(eventMessage.getMessage()).into(mineAvatar);

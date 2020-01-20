@@ -4,7 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Log;
+import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -101,7 +101,7 @@ public class AnswerVoiceCallActivity extends AppCompatActivity {
         TimerTask consentOutTask = new TimerTask() {
             @Override
             public void run() {
-                Log.d(TAG, "run: responseConsentOutTime");
+                TLog.d(TAG, "run: responseConsentOutTime");
                 VoiceCall.responseConsentOutTime(host);
                 IntranetChatApplication.setInCall(false);
                 EventBus.getDefault().post(new RecordCallBean(mIdentifier,ChatRoomConfig.CALL_OUT_TIME_ANSWER,host,true));
@@ -115,7 +115,7 @@ public class AnswerVoiceCallActivity extends AppCompatActivity {
             @Override
             public void run() {
                 if (System.currentTimeMillis() - lastRequestConsentTime > intervalTime){
-                    Log.d(TAG, "run: affirmRequestConsentTimer answer voice call");
+                    TLog.d(TAG, "run: affirmRequestConsentTimer answer voice call");
                     VoiceCall.hungUpVoiceCall(host);
                     IntranetChatApplication.setInCall(false);
                     EventBus.getDefault().post(new RecordCallBean(mIdentifier,ChatRoomConfig.CALL_DIE_ANSWER,host,true));
@@ -142,7 +142,7 @@ public class AnswerVoiceCallActivity extends AppCompatActivity {
         @Override
         public void onReceiveRequestConsent() {
             lastRequestConsentTime = System.currentTimeMillis();
-            Log.d(TAG, "onReceiveRequestConsent: " + lastRequestConsentTime);
+            TLog.d(TAG, "onReceiveRequestConsent: " + lastRequestConsentTime);
         }
     };
 

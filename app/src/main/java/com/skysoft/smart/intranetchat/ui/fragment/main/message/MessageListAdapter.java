@@ -7,7 +7,7 @@ package com.skysoft.smart.intranetchat.ui.fragment.main.message;
 
 import android.content.Context;
 import android.text.TextUtils;
-import android.util.Log;
+import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -54,7 +54,7 @@ public class MessageListAdapter extends BaseAdapter {
 
     @Override
     public Object getItem(int position) {
-        Log.d(TAG, "getItem: " + myBeanList.get(position));
+        TLog.d(TAG, "getItem: " + myBeanList.get(position));
         return IntranetChatApplication.sLatestChatHistoryMap.get(myBeanList.get(position));
     }
 
@@ -170,7 +170,7 @@ public class MessageListAdapter extends BaseAdapter {
 
             @Override
             public void onStartOpen(SwipeLayout mSwipeLayout) {
-                Log.i(TAG, "onStartOpen: 正在打开？");
+                TLog.i(TAG, "onStartOpen: 正在打开？");
                 for(SwipeLayout layout:openList){
                     layout.close();
                 }

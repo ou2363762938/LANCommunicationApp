@@ -22,7 +22,7 @@ import android.text.Spanned;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.text.style.ImageSpan;
-import android.util.Log;
+import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 import android.view.GestureDetector;
 import android.view.Gravity;
 import android.view.KeyEvent;
@@ -236,7 +236,7 @@ public class ChatRoomActivity extends AppCompatActivity implements View.OnClickL
                     }
                 }
 
-                Log.d(TAG, "beforeTextChanged: spans.length = " + remainImageSpan);
+                TLog.d(TAG, "beforeTextChanged: spans.length = " + remainImageSpan);
                 if (mNotifyReceivers.size() != remainImageSpan){    //值不同，有ImageSpan被删除
                     ImageSpan[] spans = editableText.getSpans(start, count, ImageSpan.class);   //被删除内容中的ImageSpan
                     for (int i = 0;i < spans.length; i++){
@@ -280,8 +280,8 @@ public class ChatRoomActivity extends AppCompatActivity implements View.OnClickL
         receiverAvatarPath = bundle.getString(ChatRoomConfig.AVATAR);
         receiverIdentifier = bundle.getString(ChatRoomConfig.IDENTIFIER);
         isGroup = bundle.getBoolean(ChatRoomConfig.GROUP);
-        Log.d(TAG, "baseInit onCreate: isGroup = " + isGroup);
-        Log.d(TAG, "baseInit: receiverIdentifier = " + receiverIdentifier);
+        TLog.d(TAG, "baseInit onCreate: isGroup = " + isGroup);
+        TLog.d(TAG, "baseInit: receiverIdentifier = " + receiverIdentifier);
 
         //获得历史聊天记录
         new Thread(new Runnable() {
@@ -396,12 +396,12 @@ public class ChatRoomActivity extends AppCompatActivity implements View.OnClickL
         super.onNewIntent(intent);
         setIntent(intent);
         baseInit(intent);
-        Log.d(TAG, "onNewIntent: 调用了onNewIntent!");
+        TLog.d(TAG, "onNewIntent: 调用了onNewIntent!");
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void handleMessage(MessageBean messageBean) {
-        Log.d(TAG, "handleMessage: " + receiverIdentifier + ", " + messageBean.toString());
+        TLog.d(TAG, "handleMessage: " + receiverIdentifier + ", " + messageBean.toString());
         if (messageBean.getReceiver().equals(receiverIdentifier)) {
             ChatRecordEntity chatRecordEntity = new ChatRecordEntity();
             chatRecordEntity.setIsReceive(ChatRoomConfig.RECEIVE_MESSAGE);
@@ -425,13 +425,13 @@ public class ChatRoomActivity extends AppCompatActivity implements View.OnClickL
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void handleReceiveAndSaveFile(LoadResourceBean loadResourceBean) {
-        Log.d(TAG, "onReceiveAndSaveFile: run: receiver = " + loadResourceBean.getRecordEntity());
+        TLog.d(TAG, "onReceiveAndSaveFile: run: receiver = " + loadResourceBean.getRecordEntity());
         adapter.add(loadResourceBean.getRecordEntity(),true);
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onReceiveEventMessage(EventMessage eventMessage){
-        Log.d(TAG, "onReceiveEventMessage: eventMessage.getType() = " + eventMessage.getType());
+        TLog.d(TAG, "onReceiveEventMessage: eventMessage.getType() = " + eventMessage.getType());
         if (eventMessage.getType() == CALL_FROM_OTHER && isAudioRecording){
             myAudioManager.stopAndNotSend();
             stopAnimation();
@@ -519,7 +519,7 @@ public class ChatRoomActivity extends AppCompatActivity implements View.OnClickL
             public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
                 super.onScrollStateChanged(recyclerView, newState);
                 if (newState == RecyclerView.SCROLL_STATE_IDLE){
-                    Log.d(TAG, "onScrollStateChanged: 底部 TopPosition = " + adapter.getTopPosition());
+                    TLog.d(TAG, "onScrollStateChanged: 底部 TopPosition = " + adapter.getTopPosition());
                     if (!mRefresh){
                         mRefresh = true;
                         return;
@@ -546,7 +546,7 @@ public class ChatRoomActivity extends AppCompatActivity implements View.OnClickL
                                     if (start == 0){
                                         Iterator<ChatRecordEntity> iterator = all.iterator();
                                         while (iterator.hasNext()){
-                                            Log.d(TAG, "run: " + iterator.next().toString());
+                                            TLog.d(TAG, "run: " + iterator.next().toString());
                                         }
                                     }
                                     if (all != null && all.size() != 0){
@@ -593,7 +593,7 @@ public class ChatRoomActivity extends AppCompatActivity implements View.OnClickL
 
         @Override
         public void onReceiveFile(FileBean fileBean, String host) {
-            Log.d(TAG, "onReceiveFile: ");
+            TLog.d(TAG, "onReceiveFile: ");
             ChatRoomActivity.this.host = host;
         }
 
@@ -620,7 +620,7 @@ public class ChatRoomActivity extends AppCompatActivity implements View.OnClickL
 
         switch (v.getId()) {
             case R.id.chat_room_send_message:
-                Log.d(TAG, "onClick: IntranetChatApplication.isNetWortState() = " + IntranetChatApplication.isNetWortState());
+                TLog.d(TAG, "onClick: IntranetChatApplication.isNetWortState() = " + IntranetChatApplication.isNetWortState());
                 if (!IntranetChatApplication.isNetWortState()) {
                     ToastUtil.toast(ChatRoomActivity.this, getString(R.string.Toast_text_non_lan));
                     break;
@@ -634,7 +634,7 @@ public class ChatRoomActivity extends AppCompatActivity implements View.OnClickL
                 break;
             case R.id.chat_room_more_function:
                 if (isInputVoice) {
-                    Log.d(TAG, "onClick: 2");
+                    TLog.d(TAG, "onClick: 2");
                     moreFunctionBox.setVisibility(View.VISIBLE);
                     isClosing = false;
                     inputVoice.setImageResource(R.drawable.ic_voice_circle);
@@ -647,7 +647,7 @@ public class ChatRoomActivity extends AppCompatActivity implements View.OnClickL
                     break;
                 }
                 if (isClosing && !isInputMessage) {
-                    Log.d(TAG, "onClick: 4");
+                    TLog.d(TAG, "onClick: 4");
                     moreFunctionBox.setVisibility(View.VISIBLE);
                     isClosing = false;
                     recyclerView.scrollToPosition(adapter.getItemCount() - 1);
@@ -712,7 +712,7 @@ public class ChatRoomActivity extends AppCompatActivity implements View.OnClickL
                 break;
             case R.id.chat_room_establish_group:
                 if (QuickClickListener.isFastClick(300)) {
-                    Log.d(TAG, "onClick: 查看群成员！！！");
+                    TLog.d(TAG, "onClick: 查看群成员！！！");
                     EstablishGroupActivity.go(ChatRoomActivity.this, receiverIdentifier, isGroup);
                 }
                 break;
@@ -764,9 +764,9 @@ public class ChatRoomActivity extends AppCompatActivity implements View.OnClickL
         } else if (requestCode == 3 && resultCode == RESULT_OK) {
             //文件
             String realFilePathFromUri = ContentUriUtil.getPath(this,data.getData());
-//            Log.d(TAG, "onActivityResult: realFilePathFromUri = " + realFilePathFromUri);
+//            TLog.d(TAG, "onActivityResult: realFilePathFromUri = " + realFilePathFromUri);
             String suffix = realFilePathFromUri.substring(realFilePathFromUri.lastIndexOf("."));
-            Log.d(TAG, "onActivityResult: sufffix = " + suffix);
+            TLog.d(TAG, "onActivityResult: sufffix = " + suffix);
             EventMessage eventMessage = new EventMessage();
             eventMessage.setMessage(realFilePathFromUri);
             if (suffix.equals(".mp4")){
@@ -791,7 +791,7 @@ public class ChatRoomActivity extends AppCompatActivity implements View.OnClickL
 //                    foldMoreFunctionBox();
 //                    showInput(inputMessage);
 //                }
-                Log.d(TAG, "onTouch: isInputVoice = " + isInputVoice);
+                TLog.d(TAG, "onTouch: isInputVoice = " + isInputVoice);
                 if (!isInputVoice) {
                     return false;
                 }
@@ -801,7 +801,7 @@ public class ChatRoomActivity extends AppCompatActivity implements View.OnClickL
                         if (!isAudioRecording)
                             break;
                         if (startVoiceAnimation){
-                            Log.d(TAG, "onTouch: 手指松开被调用！");
+                            TLog.d(TAG, "onTouch: 手指松开被调用！");
                             if (inputVoiceStopTime - inputVoiceStartTime <= 999){
                                 ToastUtil.toast(ChatRoomActivity.this, getString(R.string.ChatRoomActivity_inputVoiceTime_Toast));
                                 sendVoice = false;
@@ -818,7 +818,7 @@ public class ChatRoomActivity extends AppCompatActivity implements View.OnClickL
 //                switch (event.getAction()) {
 //                    case MotionEvent.ACTION_DOWN:
 //                        inputVoiceStartTime = System.currentTimeMillis();
-//                        Log.d(TAG, "onTouch: down");
+//                        TLog.d(TAG, "onTouch: down");
 //                        myAudioManager = new MyAudioManager();
 //                        myAudioManager.startAudioRecordOnly(ChatRoomActivity.this);
 //                        mAudioView.setVisibility(View.VISIBLE);
@@ -826,7 +826,7 @@ public class ChatRoomActivity extends AppCompatActivity implements View.OnClickL
 //                        break;
 //                    case MotionEvent.ACTION_UP:
 //                        inputVoiceStopTime = System.currentTimeMillis();
-//                        Log.d(TAG, "onTouch: up");
+//                        TLog.d(TAG, "onTouch: up");
 ////                        mAudioView.setVisibility(View.GONE);
 //                        stopAnimation();
 //                        if (inputVoiceStopTime - inputVoiceStartTime <= 999){
@@ -958,7 +958,7 @@ public class ChatRoomActivity extends AppCompatActivity implements View.OnClickL
     public OnScrollToPosition onScrollToPosition = new OnScrollToPosition() {
         @Override
         public void onLoadViewOver(int size) {
-            Log.d(TAG, "onLoadViewOver: size = " + size);
+            TLog.d(TAG, "onLoadViewOver: size = " + size);
             recyclerView.scrollToPosition(size - 1);
         }
     };
@@ -1012,7 +1012,7 @@ public class ChatRoomActivity extends AppCompatActivity implements View.OnClickL
 
         Cursor cursor = contentResolver.query(contentUri, filePathColumn, null, null, null);
 
-        Log.d(TAG, "getFilePathFromContentUri: cursor == null: " + (cursor == null));
+        TLog.d(TAG, "getFilePathFromContentUri: cursor == null: " + (cursor == null));
         cursor.moveToFirst();
 
         int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
@@ -1024,7 +1024,7 @@ public class ChatRoomActivity extends AppCompatActivity implements View.OnClickL
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
         if (event.getKeyCode() == KeyEvent.KEYCODE_0) {
-            Log.d(TAG, "dispatchKeyEvent: 00000");
+            TLog.d(TAG, "dispatchKeyEvent: 00000");
         }
         return super.dispatchKeyEvent(event);
     }
@@ -1037,7 +1037,7 @@ public class ChatRoomActivity extends AppCompatActivity implements View.OnClickL
 
     @Override
     public boolean onDown(MotionEvent e) {
-        Log.d(TAG, "onDown: 被调用");
+        TLog.d(TAG, "onDown: 被调用");
         inputVoiceStartTime = System.currentTimeMillis();
         startVoiceAnimation = false;
         return true;
@@ -1046,9 +1046,9 @@ public class ChatRoomActivity extends AppCompatActivity implements View.OnClickL
     @Override
     public void onShowPress(MotionEvent e) {
         if (MyMediaPlayerManager.getsInstance().isPlaying())MyMediaPlayerManager.getsInstance().stop();
-        Log.d(TAG, "onShowPress: 被调用");
+        TLog.d(TAG, "onShowPress: 被调用");
         startVoiceAnimation = true;
-        Log.d(TAG, "onTouch: down");
+        TLog.d(TAG, "onTouch: down");
         myAudioManager = new MyAudioManager();
         myAudioManager.startAudioRecordOnly(ChatRoomActivity.this);
         mAudioView.setVisibility(View.VISIBLE);
@@ -1059,7 +1059,7 @@ public class ChatRoomActivity extends AppCompatActivity implements View.OnClickL
 
     @Override
     public boolean onSingleTapUp(MotionEvent e) {
-        Log.d(TAG, "onSingleTapUp: 被调用");
+        TLog.d(TAG, "onSingleTapUp: 被调用");
         return false;
     }
 
@@ -1070,7 +1070,7 @@ public class ChatRoomActivity extends AppCompatActivity implements View.OnClickL
 
     @Override
     public void onLongPress(MotionEvent e) {
-        Log.d(TAG, "onLongPress: 被调用");
+        TLog.d(TAG, "onLongPress: 被调用");
     }
 
     @Override

@@ -7,13 +7,13 @@ public class TLog {
 
     public static void d(String TAG,String message){
         if (sOpen){
-            TLog.d(TAG, "d: " + message);
+            Log.d(TAG, "d: " + message);
         }
     }
 
     public static void e(String TAG, String message){
         if (sOpen){
-            TLog.e(TAG, "e: " + message);
+            Log.e(TAG, "e: " + message);
         }
     }
 
@@ -23,19 +23,19 @@ public class TLog {
 
     public static void w(String TAG, String message){
         if (sOpen){
-            TLog.w(TAG, "w: " + message );
+            Log.w(TAG, "w: " + message );
         }
     }
 
     public static void i(String TAG, String message){
         if (sOpen){
-            TLog.i(TAG, "i: " + message);
+            Log.i(TAG, "i: " + message);
         }
     }
 
     public static void m(String TAG, String message){
         if (sOpen){
-            TLog.d(TAG, "m() called with: TAG = [" + TAG + "], message = [" + message + "]");
+            Log.d(TAG, "m() called with: TAG = [" + TAG + "], message = [" + message + "]");
         }
     }
 }

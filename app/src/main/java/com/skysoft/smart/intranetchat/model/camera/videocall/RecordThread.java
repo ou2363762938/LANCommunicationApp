@@ -8,7 +8,7 @@ package com.skysoft.smart.intranetchat.model.camera.videocall;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
-import android.util.Log;
+import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 
 import static android.media.AudioRecord.RECORDSTATE_RECORDING;
 import static android.media.AudioRecord.RECORDSTATE_STOPPED;
@@ -29,7 +29,7 @@ public class RecordThread extends Thread {
         mBufferSize = AudioRecord.getMinBufferSize(SAMPLE_RATE_INHZ, CHANNEL_CONFIG, AUDIO_FORMAT);
         mAudioRecord = new AudioRecord(MediaRecorder.AudioSource.VOICE_COMMUNICATION, SAMPLE_RATE_INHZ, CHANNEL_CONFIG, AUDIO_FORMAT, mBufferSize);
         mAudioRecord.startRecording();
-        Log.d(TAG, "RecordThread: start");
+        TLog.d(TAG, "RecordThread: start");
         state = mAudioRecord.getRecordingState();
     }
 
@@ -41,7 +41,7 @@ public class RecordThread extends Thread {
             int read = mAudioRecord.read(data, 0, mBufferSize);
             if (AudioRecord.ERROR_INVALID_OPERATION != read) {
                 mAEncoder.inputFrameToEncoder(data);
-                Log.d(TAG, "run: record " + data.length);
+                TLog.d(TAG, "run: record " + data.length);
             }
         }
         mAudioRecord.stop();

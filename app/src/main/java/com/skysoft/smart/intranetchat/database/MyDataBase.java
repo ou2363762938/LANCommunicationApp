@@ -6,7 +6,7 @@
 package com.skysoft.smart.intranetchat.database;
 
 import android.content.Context;
-import android.util.Log;
+import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 
 import com.skysoft.smart.intranetchat.database.dao.ContactDao;
 import com.skysoft.smart.intranetchat.database.dao.FileDao;
@@ -39,7 +39,7 @@ public abstract class MyDataBase extends RoomDatabase {
     public MyDataBase(){}
     public static MyDataBase sInstance;
     public static void init(Context context){
-        Log.d("MyDatabase", "init: ");
+        TLog.d("MyDatabase", "init: ");
         sInstance = Room.databaseBuilder(context, MyDataBase.class,DB_NAME).build();
     }
 

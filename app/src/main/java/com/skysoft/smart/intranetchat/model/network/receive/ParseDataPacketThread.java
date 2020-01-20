@@ -5,7 +5,7 @@
  */
 package com.skysoft.smart.intranetchat.model.network.receive;
 
-import android.util.Log;
+import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 
 import com.google.gson.Gson;
 import com.skysoft.smart.intranetchat.model.network.bean.EstablishGroupBean;
@@ -50,7 +50,7 @@ public class ParseDataPacketThread extends Thread {
     /*解析收数据包，提取数据包中的数据*/
     private void parseDataPacketBean(DataPacketBean dataPacketBean,String host){
         if (dataPacketBean == null){
-            Log.e(TAG, "parseDataPacketBean: can not parse null data packet" );
+            TLog.e(TAG, "parseDataPacketBean: can not parse null data packet" );
             return;
         }
         switch (dataPacketBean.getCode()){
@@ -128,7 +128,7 @@ public class ParseDataPacketThread extends Thread {
     }
 
     private void onReceiveVideoCall(DataPacketBean dataPacketBean, String host) {
-        Log.d(TAG, "onReceiveVideoCall: " + host);
+        TLog.d(TAG, "onReceiveVideoCall: " + host);
         UserInfoBean userInfoBean = (UserInfoBean) GsonTools.formJson(dataPacketBean.getData(),UserInfoBean.class);
         if (userInfoBean == null || userInfoBean.getIdentifier().equals(IntranetChatAidl.getUserInfoBean().getIdentifier())){
             return;
@@ -137,7 +137,7 @@ public class ParseDataPacketThread extends Thread {
     }
 
     private void onReceiveVoiceCall(DataPacketBean dataPacketBean, String host) {
-        Log.d(TAG, "onReceiveVoiceCall: " + host);
+        TLog.d(TAG, "onReceiveVoiceCall: " + host);
         UserInfoBean userInfoBean = (UserInfoBean) GsonTools.formJson(dataPacketBean.getData(),UserInfoBean.class);
         if (userInfoBean == null){
             return;
@@ -147,7 +147,7 @@ public class ParseDataPacketThread extends Thread {
 
     /*当从数据包获取到FileBean时的处理方法*/
     private void onReceiveFileBean(DataPacketBean dataPacketBean, String host) {
-        Log.d(TAG, "onReceiveFileBean: " + host);
+        TLog.d(TAG, "onReceiveFileBean: " + host);
         FileBean fileBean = (FileBean) GsonTools.formJson(dataPacketBean.getData(), FileBean.class);
         if (fileBean == null || fileBean.getSender().equals(IntranetChatAidl.getUserInfoBean().getIdentifier())){
             return;
@@ -172,13 +172,13 @@ public class ParseDataPacketThread extends Thread {
 
     /*当从数据包获取到AskResourceBean时的处理方法*/
     private void onReceiveAskResourceBean(DataPacketBean dataPacketBean, String host) {
-        Log.d(TAG, "onReceiveAskResourceBean: " + host);
+        TLog.d(TAG, "onReceiveAskResourceBean: " + host);
         AskResourceBean askResourceBean = (AskResourceBean) GsonTools.formJson(dataPacketBean.getData(),AskResourceBean.class);
         if (askResourceBean == null){
             return;
         }
 
-        Log.d(TAG, "onReceiveAskResourceBean: " +  askResourceBean.getResourceUniqueIdentifier().equals(IntranetChatServer.sUserInfo.getIdentifier()));
+        TLog.d(TAG, "onReceiveAskResourceBean: " +  askResourceBean.getResourceUniqueIdentifier().equals(IntranetChatServer.sUserInfo.getIdentifier()));
 
         switch (askResourceBean.getResourceType()){
             case Config.REQUEST_MONITOR:
@@ -189,16 +189,16 @@ public class ParseDataPacketThread extends Thread {
                 return;
         }
 
-        Log.d(TAG, "onReceiveAskResourceBean: found resource");
+        TLog.d(TAG, "onReceiveAskResourceBean: found resource");
         /*没有找到资源*/
         if(!ResourceManager.getInstance().exist(askResourceBean.getResourceUniqueIdentifier())){
             ResponseSender.response(Config.RESPONSE_NOT_REQUEST_THIS_RESOURCE,askResourceBean.getResourceUniqueIdentifier(),host);
-            Log.d(TAG, "onReceiveAskResourceBean: not found resource");
+            TLog.d(TAG, "onReceiveAskResourceBean: not found resource");
             MonitorUdpReceivePortThread.broadcastReceive(Config.NOT_FOUND_RESOURCE,dataPacketBean.getData(),host);
             return;
         }
 
-        Log.d(TAG, "onReceiveAskResourceBean: busy");
+        TLog.d(TAG, "onReceiveAskResourceBean: busy");
         /*设备忙碌*/
         if (SocketManager.getInstance().getSocketNumber() == SocketManager.MAX_NUMBER){
             ResourceManagerBean resource = ResourceManager.getInstance().getResource(askResourceBean.getResourceUniqueIdentifier());
@@ -213,14 +213,14 @@ public class ParseDataPacketThread extends Thread {
             return;
         }
 
-        Log.d(TAG, "onReceiveAskResourceBean: broadcast");
+        TLog.d(TAG, "onReceiveAskResourceBean: broadcast");
         MonitorUdpReceivePortThread.broadcastReceive(Config.CODE_ASK_RESOURCE,dataPacketBean.getData(),host);
 
-        Log.d(TAG, "onReceiveAskResourceBean: add to wait");
+        TLog.d(TAG, "onReceiveAskResourceBean: add to wait");
         //添加资源到待发送列表
         FileWaitToSend.getInstance().setWaitToSend(host,askResourceBean);
 
-        Log.d(TAG, "onReceiveAskResourceBean: response");
+        TLog.d(TAG, "onReceiveAskResourceBean: response");
         //通知对方向我请求
         ResponseSender.response(Config.RESPONSE_RESOURCE_OK,askResourceBean.getResourceUniqueIdentifier(),host);
     }
@@ -229,7 +229,7 @@ public class ParseDataPacketThread extends Thread {
     private void onReceiveRequestBean(DataPacketBean dataPacketBean, String host) {
 
         AskBean askBean = (AskBean) GsonTools.formJson( dataPacketBean.getData(), AskBean.class);
-        Log.d(TAG, "onReceiveRequestBean: " + askBean.getRequestType() + ",   " + host);
+        TLog.d(TAG, "onReceiveRequestBean: " + askBean.getRequestType() + ",   " + host);
         if (askBean == null){
             return;
         }
@@ -243,7 +243,7 @@ public class ParseDataPacketThread extends Thread {
 
     /*当从数据包获取到MessageBean时的处理方法*/
     private void onReceiveMessageBean(DataPacketBean dataPacketBean, String host){
-        Log.d(TAG, "onReceiveMessageBean: " + host);
+        TLog.d(TAG, "onReceiveMessageBean: " + host);
         MessageBean messageBean = (MessageBean) GsonTools.formJson(dataPacketBean.getData(),MessageBean.class);
         if (messageBean == null || messageBean.getSender().equals(IntranetChatAidl.getUserInfoBean().getIdentifier())){
             return;
@@ -253,7 +253,7 @@ public class ParseDataPacketThread extends Thread {
 
     /*当从数据包获取到UserInfoBean时的处理方法*/
     private void onReceiveUserInfoBean(DataPacketBean dataPacketBean, String host){
-        Log.d(TAG, "onReceiveUserInfoBean: " + host);
+        TLog.d(TAG, "onReceiveUserInfoBean: " + host);
         UserInfoBean userInfoBean = (UserInfoBean) GsonTools.formJson(dataPacketBean.getData(),UserInfoBean.class);
         if (userInfoBean == null || userInfoBean.getIdentifier().equals(IntranetChatAidl.getUserInfoBean().getIdentifier())){
             return;

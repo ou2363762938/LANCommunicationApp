@@ -2,7 +2,7 @@ package com.skysoft.smart.intranetchat.ui.activity.chatroom.PopupWindow;
 
 import android.content.Context;
 import android.text.TextUtils;
-import android.util.Log;
+import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -41,7 +41,7 @@ public class SearchResultAdapter extends BaseAdapter {
     }
 
     public void onInputSearchKeyChange(String key){
-        Log.d(TAG, "onInputSearchKeyChange: key = " + key);
+        TLog.d(TAG, "onInputSearchKeyChange: key = " + key);
         if (TextUtils.isEmpty(key)){
             mSearchResults.clear();
             notifyDataSetChanged();
@@ -85,7 +85,7 @@ public class SearchResultAdapter extends BaseAdapter {
             }
         }
 
-        Log.d(TAG, "onInputSearchKeyChange: size = " + list.size());
+        TLog.d(TAG, "onInputSearchKeyChange: size = " + list.size());
         if (mSearchResults.size() != 0){
             mSearchResults.clear();
         }
@@ -106,7 +106,7 @@ public class SearchResultAdapter extends BaseAdapter {
             for (int i = 1; i < key.length(); i++){
                 bean = baseMatchingContactEntity(key.substring(0,i),contactEntity);
                 if (null != bean){
-                    Log.d(TAG, "matchingContactEntity: key.substring(0,i)" + key.substring(0,i));
+                    TLog.d(TAG, "matchingContactEntity: key.substring(0,i)" + key.substring(0,i));
                     break;
                 }
             }
@@ -116,7 +116,7 @@ public class SearchResultAdapter extends BaseAdapter {
             for (int i = 0; i < key.length() ; i++){
                 bean = baseMatchingContactEntity(""+key.charAt(i),contactEntity);
                 if (null != bean){
-                    Log.d(TAG, "matchingContactEntity: key.charAt(i)" + ""+key.charAt(i));
+                    TLog.d(TAG, "matchingContactEntity: key.charAt(i)" + ""+key.charAt(i));
                     break;
                 }else {
                     //忽视大小写

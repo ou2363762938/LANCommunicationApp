@@ -6,7 +6,7 @@
 package com.skysoft.smart.intranetchat.ui.fragment.main.message;
 
 import android.os.Bundle;
-import android.util.Log;
+import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -49,7 +49,7 @@ public class MessageFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 if (QuickClickListener.isFastClick(300)) {
-                    Log.d(TAG, "onClick: ");
+                    TLog.d(TAG, "onClick: ");
                     EstablishGroupActivity.go(getActivity(), "group", false);
                 }
             }

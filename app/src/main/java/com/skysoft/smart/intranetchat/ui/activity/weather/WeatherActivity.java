@@ -2,7 +2,7 @@ package com.skysoft.smart.intranetchat.ui.activity.weather;
 
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
-import android.util.Log;
+import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.LinearLayout;
@@ -33,7 +33,7 @@ public class WeatherActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        Log.i(TAG, "onCreate: "+"跳转成功！");
+        TLog.i(TAG, "onCreate: "+"跳转成功！");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_weather);
 
@@ -104,7 +104,7 @@ public class WeatherActivity extends AppCompatActivity {
             @Override
             public void onFailure(Call<WeatherEntity> call, Throwable t) {
                 t.printStackTrace();
-                Log.i(TAG, "onFailure: 失败");
+                TLog.i(TAG, "onFailure: 失败");
             }
         });
     }

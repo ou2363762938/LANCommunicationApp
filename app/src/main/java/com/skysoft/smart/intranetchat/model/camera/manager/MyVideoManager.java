@@ -20,7 +20,7 @@ import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.os.Handler;
 import android.os.HandlerThread;
-import android.util.Log;
+import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 import android.util.Size;
 import android.util.SparseIntArray;
 import android.view.Surface;
@@ -111,7 +111,7 @@ public class MyVideoManager {
             cameraDevice.close();
             mCameraDevice = null;
             if (null != mActivity) {
-                Log.d(TAG, "CameraDevice.StateCallback onError finish");
+                TLog.d(TAG, "CameraDevice.StateCallback onError finish");
                 mActivity.finish();
             }
         }
@@ -123,7 +123,7 @@ public class MyVideoManager {
     @SuppressLint("MissingPermission")
     public void openCamera(int width, int height) {
         if (ContextCompat.checkSelfPermission(mActivity, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-            Log.d(TAG, "permission fail");
+            TLog.d(TAG, "permission fail");
             checkPermissions();
             return;
         }
@@ -157,13 +157,13 @@ public class MyVideoManager {
             Surface surface = new Surface(texture);
             mPreviewRequestBuilder = mCameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
             mPreviewRequestBuilder.addTarget(surface);
-            Log.d(TAG, "mPreviewSize.getWidth() " + mPreviewSize.getWidth() + " mPreviewSize.getHeight() " + mPreviewSize.getHeight());
+            TLog.d(TAG, "mPreviewSize.getWidth() " + mPreviewSize.getWidth() + " mPreviewSize.getHeight() " + mPreviewSize.getHeight());
             mCameraDevice.createCaptureSession(Collections.singletonList(surface), new CameraCaptureSession.StateCallback() {
 
                         @Override
                         public void onConfigured(@NonNull CameraCaptureSession cameraCaptureSession) {
                             if (null == mCameraDevice) {
-                                Log.d(TAG, " mCameraDevice null");
+                                TLog.d(TAG, " mCameraDevice null");
                                 return;
                             }
                             mCaptureSession = cameraCaptureSession;
@@ -180,7 +180,7 @@ public class MyVideoManager {
                         @Override
                         public void onConfigureFailed(
                                 @NonNull CameraCaptureSession cameraCaptureSession) {
-                            Log.d(TAG, "onConfigureFailed fail");
+                            TLog.d(TAG, "onConfigureFailed fail");
                         }
                     }, null
             );
@@ -228,7 +228,7 @@ public class MyVideoManager {
                         @Override
                         public void onConfigured(@NonNull CameraCaptureSession cameraCaptureSession) {
                             if (null == mCameraDevice) {
-                                Log.d(TAG, " mCameraDevice null");
+                                TLog.d(TAG, " mCameraDevice null");
                                 return;
                             }
                             try {
@@ -245,7 +245,7 @@ public class MyVideoManager {
                         @Override
                         public void onConfigureFailed(
                                 @NonNull CameraCaptureSession cameraCaptureSession) {
-                            Log.d(TAG, "onConfigureFailed fail");
+                            TLog.d(TAG, "onConfigureFailed fail");
                         }
                     }, null
             );

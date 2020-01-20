@@ -5,7 +5,7 @@ import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
-import android.util.Log;
+import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -30,7 +30,7 @@ public class CustomStatusBarBackground {
             //根据资源ID获取响应的尺寸值
             statusBarHeight = context.getResources().getDimensionPixelSize(resourceId);
         }
-        Log.d("TransparencyView", "statusBarHeight: "+statusBarHeight);
+        TLog.d("TransparencyView", "statusBarHeight: "+statusBarHeight);
         ViewGroup.LayoutParams customStatusBar = view.getLayoutParams();
         customStatusBar.height = statusBarHeight;
         view.setBackground(context.getResources().getDrawable(drawable));
@@ -43,7 +43,7 @@ public class CustomStatusBarBackground {
             //根据资源ID获取响应的尺寸值
             statusBarHeight = context.getResources().getDimensionPixelSize(resourceId);
         }
-        Log.d("TransparencyView", "statusBarHeight: "+statusBarHeight);
+        TLog.d("TransparencyView", "statusBarHeight: "+statusBarHeight);
         ViewGroup.LayoutParams customStatusBar = view.getLayoutParams();
         customStatusBar.height = statusBarHeight;
         view.setBackground(context.getResources().getDrawable(color));

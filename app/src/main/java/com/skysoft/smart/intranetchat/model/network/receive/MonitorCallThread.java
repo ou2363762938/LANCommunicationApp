@@ -5,7 +5,7 @@
  */
 package com.skysoft.smart.intranetchat.model.network.receive;
 
-import android.util.Log;
+import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 
 import com.skysoft.smart.intranetchat.model.network.Config;
 import com.skysoft.smart.intranetchat.model.network.call.VoiceCallThread;
@@ -25,7 +25,7 @@ public class MonitorCallThread extends Thread {
             serverSocket = new ServerSocket(Config.PORT_TCP_CALL);
             while (true){
                 Socket accept = serverSocket.accept();
-                Log.d(TAG, "run: VoiceCallThread");
+                TLog.d(TAG, "run: VoiceCallThread");
                 VoiceCallThread.init(accept);
             }
         } catch (IOException e) {

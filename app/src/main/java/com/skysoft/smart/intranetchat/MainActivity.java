@@ -16,7 +16,7 @@ import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.text.TextUtils;
-import android.util.Log;
+import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
@@ -227,7 +227,7 @@ public class MainActivity extends AppCompatActivity{
 
         @Override
         public void onReceiveVoiceCall(UserInfoBean userInfoBean, String host) {
-            Log.d(TAG, "onReceiveVoiceCall: isInCall = " + IntranetChatApplication.isInCall());
+            TLog.d(TAG, "onReceiveVoiceCall: isInCall = " + IntranetChatApplication.isInCall());
             if (IntranetChatApplication.isInCall()){
                 VoiceCall.responseInCall(host);
                 return;
@@ -245,7 +245,7 @@ public class MainActivity extends AppCompatActivity{
 
         @Override
         public void onReceiveVideoCall(UserInfoBean userInfoBean, String host) {
-            Log.d(TAG, "onReceiveVideoCall: isInCall = " + IntranetChatApplication.isInCall());
+            TLog.d(TAG, "onReceiveVideoCall: isInCall = " + IntranetChatApplication.isInCall());
             if (IntranetChatApplication.isInCall()){
                 VoiceCall.responseInCall(host);
                 return;

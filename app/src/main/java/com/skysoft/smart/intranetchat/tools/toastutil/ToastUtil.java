@@ -2,7 +2,7 @@ package com.skysoft.smart.intranetchat.tools.toastutil;
 
 import android.content.Context;
 import android.icu.text.TimeZoneFormat;
-import android.util.Log;
+import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 import android.widget.Toast;
 
 import org.w3c.dom.Text;
@@ -46,7 +46,7 @@ public class ToastUtil {
                 myToast.cancel();
             }
             this.cancel();
-            Log.d(TAG, "run:  TimerTask 已经被cancel");
+            TLog.d(TAG, "run:  TimerTask 已经被cancel");
         }
     }
 }

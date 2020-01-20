@@ -5,7 +5,7 @@
  */
 package com.skysoft.smart.intranetchat.tools;
 
-import android.util.Log;
+import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 
 import com.google.gson.Gson;
 
@@ -18,7 +18,7 @@ public class GsonTools {
         try{
             json = sGson.toJson(obj);
         }catch (Exception e){
-            Log.e(TAG, "toJson: ", e);
+            TLog.e(TAG, "toJson: ", e);
         }
         return json;
     }
@@ -28,7 +28,7 @@ public class GsonTools {
         try{
             obj = sGson.fromJson(json,tClass);
         }catch (Exception e){
-            Log.e(TAG, "formJson: ", e);
+            TLog.e(TAG, "formJson: ", e);
         }
         return obj;
     }

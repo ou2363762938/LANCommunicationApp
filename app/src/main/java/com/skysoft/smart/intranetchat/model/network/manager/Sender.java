@@ -6,7 +6,7 @@
 package com.skysoft.smart.intranetchat.model.network.manager;
 
 import android.text.TextUtils;
-import android.util.Log;
+import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 
 import com.skysoft.smart.intranetchat.model.network.bean.DataPacketBean;
 import com.skysoft.smart.intranetchat.model.network.send.SendDataPacket;
@@ -22,7 +22,7 @@ public class Sender {
         DataPacketBean dataPacketBean = new DataPacketBean();
         dataPacketBean.setCode(code);
         dataPacketBean.setData(data);
-        Log.d("Sender", "sender: ");
+        TLog.d("Sender", "sender: ");
         SendDataPacket sdp = new SendDataPacket(GsonTools.toJson(dataPacketBean),host);
         sdp.start();
     }

@@ -13,6 +13,8 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.util.Log;
 
+import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
+
 import androidx.annotation.NonNull;
 
 import com.skysoft.smart.intranetchat.model.camera.audiorecord.MyAudioRecord;
@@ -48,7 +50,7 @@ public class AudioEncoder {
         try {
             mMediaCodec = MediaCodec.createEncoderByType(MediaFormat.MIMETYPE_AUDIO_AAC);
         } catch (IOException e) {
-            Log.e(TAG, Log.getStackTraceString(e));
+            TLog.e(TAG, Log.getStackTraceString(e));
             mMediaCodec = null;
             return;
         }
@@ -96,13 +98,13 @@ public class AudioEncoder {
 
         @Override
         public void onError(@NonNull MediaCodec mediaCodec, @NonNull MediaCodec.CodecException e) {
-            Log.d(TAG, " MediaCodec.Callback onError");
+            TLog.d(TAG, " MediaCodec.Callback onError");
             e.printStackTrace();
         }
 
         @Override
         public void onOutputFormatChanged(@NonNull MediaCodec mediaCodec, @NonNull MediaFormat mediaFormat) {
-            Log.d(TAG, "MediaCodec.Callback onOutputFormatChanged");
+            TLog.d(TAG, "MediaCodec.Callback onOutputFormatChanged");
         }
     };
 
@@ -149,10 +151,10 @@ public class AudioEncoder {
         ByteBuffer outputBuffer = mediaCodec.getOutputBuffer(id);
         MediaFormat outputFormat = mediaCodec.getOutputFormat(id);
         if (!mMediaMuxer.isStart()) {
-            Log.d(TAG, "audio no start");
+            TLog.d(TAG, "audio no start");
             if (mMediaMuxer.papre(outputFormat, false)) {
                 mMediaMuxer.startMuxer();
-                Log.d(TAG, "audio  start");
+                TLog.d(TAG, "audio  start");
             }
         } else {
             if (outputBuffer != null && bufferInfo.size > 0) {
@@ -187,7 +189,7 @@ public class AudioEncoder {
         if (mMediaCodec != null) {
             mMediaCodec.stop();
             mMediaCodec.setCallback(null);
-            Log.d(TAG, "AudioEncor stop");
+            TLog.d(TAG, "AudioEncor stop");
         }
         if (mOutput != null) {
             try {
@@ -204,14 +206,14 @@ public class AudioEncoder {
         if (mMediaCodec != null) {
             mInputDatasQueue.clear();
             mMediaCodec.release();
-            Log.d(TAG, "AudioEncor release");
+            TLog.d(TAG, "AudioEncor release");
         }
 
         if (mFile != null && isSend) {
             mStopTime = System.currentTimeMillis();
             int time = (int) ((mStopTime - mStartTime) / 1000)+1;
             EventBus.getDefault().post(new EventMessage(mFile.getAbsolutePath(), time, 3));
-            Log.d(TAG, "stopRecord: time" + time);
+            TLog.d(TAG, "stopRecord: time" + time);
         }
     }
 }

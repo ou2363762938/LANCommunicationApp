@@ -5,7 +5,7 @@
  */
 package com.skysoft.smart.intranetchat.model.network.call;
 
-import android.util.Log;
+import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 
 import com.skysoft.smart.intranetchat.model.network.Config;
 import com.skysoft.smart.intranetchat.model.network.receive.MonitorTcpReceivePortThread;
@@ -34,9 +34,9 @@ public class VoiceCallThread {
     }
 
     public static void init(Socket socket) {
-        Log.d(TAG, "init: 1");
+        TLog.d(TAG, "init: 1");
         if (sInstance.isClose()) {
-            Log.d(TAG, "init: 2");
+            TLog.d(TAG, "init: 2");
             sInstance.mDatasQueue.clear();
             sInstance.socket = socket;
             sInstance.close = false;
@@ -61,7 +61,7 @@ public class VoiceCallThread {
     }
 
     private void voiceCall() {
-        Log.d(TAG, "voiceCall: ");
+        TLog.d(TAG, "voiceCall: ");
         sInstance.mReceiveData = null;
         sInstance.mReceiveData = new ReceiveVoiceCallData();
         sInstance.mReceiveData.start();
@@ -116,7 +116,7 @@ public class VoiceCallThread {
 
     public void close() {
         close = true;
-        Log.d(TAG, "close = " + close);
+        TLog.d(TAG, "close = " + close);
         if (socket != null) {
             try {
                 socket.close();

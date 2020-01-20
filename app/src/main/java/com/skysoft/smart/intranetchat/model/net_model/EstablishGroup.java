@@ -1,7 +1,7 @@
 package com.skysoft.smart.intranetchat.model.net_model;
 
 import android.os.RemoteException;
-import android.util.Log;
+import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 
 import com.skysoft.smart.intranetchat.app.IntranetChatApplication;
 import com.skysoft.smart.intranetchat.database.MyDataBase;
@@ -24,7 +24,7 @@ public class EstablishGroup {
     private static String TAG = EstablishGroup.class.getSimpleName();
     public static void establishGroup(EstablishGroupBean establishGroupBean,List<String> hostList){
         try {
-            Log.d(TAG, "establishGroup: ");
+            TLog.d(TAG, "establishGroup: ");
             IntranetChatApplication.sAidlInterface.establishGroup(GsonTools.toJson(establishGroupBean),hostList);
         } catch (RemoteException e) {
             e.printStackTrace();

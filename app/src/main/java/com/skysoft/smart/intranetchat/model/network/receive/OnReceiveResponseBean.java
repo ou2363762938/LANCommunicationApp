@@ -5,7 +5,7 @@
  */
 package com.skysoft.smart.intranetchat.model.network.receive;
 
-import android.util.Log;
+import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 
 import com.skysoft.smart.intranetchat.model.network.Config;
 import com.skysoft.smart.intranetchat.model.network.bean.AskResourceBean;
@@ -64,24 +64,24 @@ public class OnReceiveResponseBean {
                 askFileThread.start();
                 break;
             case Config.RESPONSE_NOTHING_ASK:
-                Log.d(TAG, "onReceiveResponseBean: RESPONSE_NOTHING_ASK");
+                TLog.d(TAG, "onReceiveResponseBean: RESPONSE_NOTHING_ASK");
                 break;
             case Config.RESPONSE_REFUSE_VOICE_CALL:
-                Log.d(TAG, "onReceiveResponseBean: RESPONSE_REFUSE_VOICE_CALL");
+                TLog.d(TAG, "onReceiveResponseBean: RESPONSE_REFUSE_VOICE_CALL");
                 MonitorUdpReceivePortThread.broadcastReceive(Config.RESPONSE_REFUSE_VOICE_CALL,null,host);
                 break;
             case Config.RESPONSE_CONSENT_VOICE_CALL:
-                Log.d(TAG, "onReceiveResponseBean: RESPONSE_CONSENT_VOICE_CALL");
+                TLog.d(TAG, "onReceiveResponseBean: RESPONSE_CONSENT_VOICE_CALL");
                 onResponseConsentVoiceCall(host);
                 break;
             case Config.RESPONSE_REFUSE_VIDEO_CALL:
-                Log.d(TAG, "onReceiveResponseBean: RESPONSE_REFUSE_VIDEO_CALL");
+                TLog.d(TAG, "onReceiveResponseBean: RESPONSE_REFUSE_VIDEO_CALL");
                 break;
             case Config.RESPONSE_CONSENT_VIDEO_CALL:
-                Log.d(TAG, "onReceiveResponseBean: RESPONSE_CONSENT_VIDEO_CALL");
+                TLog.d(TAG, "onReceiveResponseBean: RESPONSE_CONSENT_VIDEO_CALL");
                 break;
             case Config.RESPONSE_HUNG_UP_CALL:
-                Log.d(TAG, "onReceiveResponseBean: RESPONSE_HUNG_UP_CALL");
+                TLog.d(TAG, "onReceiveResponseBean: RESPONSE_HUNG_UP_CALL");
                 onResponseHungUpCall(host);
                 VoiceCallThread.getInstance().close();
                 break;

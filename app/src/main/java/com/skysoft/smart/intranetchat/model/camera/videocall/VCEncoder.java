@@ -13,6 +13,8 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.util.Log;
 
+import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
+
 import androidx.annotation.NonNull;
 
 import java.io.IOException;
@@ -32,7 +34,7 @@ public class VCEncoder {
         try {
             mMediaCodec = MediaCodec.createEncoderByType("video/avc");
         } catch (IOException e) {
-            Log.e(TAG, Log.getStackTraceString(e));
+            TLog.e(TAG, Log.getStackTraceString(e));
             mMediaCodec = null;
             return;
         }
@@ -69,7 +71,7 @@ public class VCEncoder {
                     addTag(outData, outBitsSize);
                     outputBuffer.get(outData, 7, outBitsSize);
                     Sender.mInputDatasQueue.offer(outData);
-                    Log.d(TAG, "VCEncoder: send data" + outData.length);
+                    TLog.d(TAG, "VCEncoder: send data" + outData.length);
                 }
                 mMediaCodec.releaseOutputBuffer(id, true);
             } catch (IllegalStateException e) {
@@ -108,7 +110,7 @@ public class VCEncoder {
     public void startVCEncoder() {
         if (mMediaCodec != null) {
             mMediaCodec.start();
-            Log.d(TAG, "startVCEncoder: ");
+            TLog.d(TAG, "startVCEncoder: ");
         }
     }
 

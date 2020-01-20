@@ -10,7 +10,7 @@ import android.content.Intent;
 import android.graphics.SurfaceTexture;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Log;
+import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 import android.view.TextureView;
 import android.view.View;
 import android.widget.ImageView;
@@ -106,7 +106,7 @@ public class AnswerVideoCallActivity extends AppCompatActivity {
         lastRequestConsentTime = System.currentTimeMillis();
         consentOutTime();
         Sender.mInputDatasQueue.clear();
-        Log.d(TAG, "onClick: send queen "+ Sender.mInputDatasQueue.size()+" receiver : "+IntranetChatApplication.getmDatasQueue().size());
+        TLog.d(TAG, "onClick: send queen "+ Sender.mInputDatasQueue.size()+" receiver : "+IntranetChatApplication.getmDatasQueue().size());
 
     }
 
@@ -115,7 +115,7 @@ public class AnswerVideoCallActivity extends AppCompatActivity {
         TimerTask consentOutTask = new TimerTask() {
             @Override
             public void run() {
-                Log.d(TAG, "run: responseConsentOutTime");
+                TLog.d(TAG, "run: responseConsentOutTime");
                 VoiceCall.responseConsentOutTime(host);
                 IntranetChatApplication.setInCall(false);
                 EventBus.getDefault().post(new RecordCallBean(mIdentifier,ChatRoomConfig.CALL_OUT_TIME_ANSWER,host,false));
@@ -155,7 +155,7 @@ public class AnswerVideoCallActivity extends AppCompatActivity {
         @Override
         public void onReceiveRequestConsent() {
             lastRequestConsentTime = System.currentTimeMillis();
-            Log.d(TAG, "onReceiveRequestConsent: " + lastRequestConsentTime);
+            TLog.d(TAG, "onReceiveRequestConsent: " + lastRequestConsentTime);
         }
     };
 
@@ -204,12 +204,12 @@ public class AnswerVideoCallActivity extends AppCompatActivity {
         @Override
         public void onSurfaceTextureAvailable(SurfaceTexture texture, int width, int height) {
             mShowCaptureManager.openCamera(width, height);
-            Log.d(TAG, "onSurfaceTextureAvailable: ");
+            TLog.d(TAG, "onSurfaceTextureAvailable: ");
         }
 
         @Override
         public void onSurfaceTextureSizeChanged(SurfaceTexture texture, int width, int height) {
-            Log.d(TAG, "onSurfaceTextureSizeChanged: ");
+            TLog.d(TAG, "onSurfaceTextureSizeChanged: ");
         }
 
         @Override

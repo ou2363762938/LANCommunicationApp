@@ -1,7 +1,7 @@
 package com.skysoft.smart.intranetchat.app;
 
 import android.os.Bundle;
-import android.util.Log;
+import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 import android.view.View;
 
 import com.skysoft.smart.intranetchat.R;
@@ -23,7 +23,7 @@ public abstract class BaseActivity extends AppCompatActivity {
 
     public void setStatusView(@IdRes int viewId){
         mStatus = findViewById(viewId);
-        Log.d(TAG, "onCreate: mStatus = " + mStatus);
+        TLog.d(TAG, "onCreate: mStatus = " + mStatus);
         CustomStatusBarBackground.customStatusBarTransparent(this);
         CustomStatusBarBackground.drawableViewStatusBar(this, mTitleDrawableResource,mStatus);
     }

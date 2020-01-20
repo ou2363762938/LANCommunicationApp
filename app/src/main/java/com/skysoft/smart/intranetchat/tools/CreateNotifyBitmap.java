@@ -4,7 +4,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.util.Log;
+import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 
 import com.skysoft.smart.intranetchat.R;
 
@@ -18,7 +18,7 @@ public class CreateNotifyBitmap {
      * @return 创建成功的bitmap*/
     public static Bitmap notifyBitmap(Context context, String notify){
         float sp = DisplayUtil.sp2px(context,context.getResources().getDimension(R.dimen.sp_6)-2);
-        Log.d(TAG, "onClickReplay: sp = " + sp);
+        TLog.d(TAG, "onClickReplay: sp = " + sp);
         Paint paint = new Paint();
         paint.setTextSize(sp);
         paint.setColor(context.getResources().getColor(R.color.color_white));

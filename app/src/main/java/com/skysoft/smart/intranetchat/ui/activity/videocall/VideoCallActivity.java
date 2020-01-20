@@ -22,7 +22,7 @@ import android.hardware.camera2.TotalCaptureResult;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
-import android.util.Log;
+import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 import android.view.Surface;
 import android.view.TextureView;
 import android.view.View;
@@ -176,7 +176,7 @@ public class VideoCallActivity extends AppCompatActivity implements View.OnClick
     public OnEstablishCallConnect onEstablishCallConnect = new OnEstablishCallConnect() {
         @Override
         public void onEstablishCallConnect() {
-            Log.d(TAG, "onEstablishCallConnect: ");
+            TLog.d(TAG, "onEstablishCallConnect: ");
         }
     };
 
@@ -196,12 +196,12 @@ public class VideoCallActivity extends AppCompatActivity implements View.OnClick
         public void onSurfaceTextureAvailable(SurfaceTexture texture, int width, int height) {
             mInputSurface = mManager.initVCEncoder(width, height).getMediaCodec().createInputSurface();
             openCamera();
-            Log.d(TAG, "video call mSurfaceTextureListener onSurfaceTextureAvailable: ");
+            TLog.d(TAG, "video call mSurfaceTextureListener onSurfaceTextureAvailable: ");
         }
 
         @Override
         public void onSurfaceTextureSizeChanged(SurfaceTexture texture, int width, int height) {
-            Log.d(TAG, "onSurfaceTextureSizeChanged: ");
+            TLog.d(TAG, "onSurfaceTextureSizeChanged: ");
         }
 
         @Override
@@ -284,7 +284,7 @@ public class VideoCallActivity extends AppCompatActivity implements View.OnClick
                         @Override
                         public void onConfigured(@NonNull CameraCaptureSession cameraCaptureSession) {
                             if (null == mCameraDevice) {
-                                Log.d(TAG, " mCameraDevice null");
+                                TLog.d(TAG, " mCameraDevice null");
                                 return;
                             }
                             try {
@@ -301,7 +301,7 @@ public class VideoCallActivity extends AppCompatActivity implements View.OnClick
                         @Override
                         public void onConfigureFailed(
                                 @NonNull CameraCaptureSession cameraCaptureSession) {
-                            Log.d(TAG, "onConfigureFailed fail");
+                            TLog.d(TAG, "onConfigureFailed fail");
                         }
                     }, null
             );

@@ -12,7 +12,7 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
-import android.util.Log;
+import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -86,7 +86,7 @@ public class TransmitActivity extends BaseActivity implements View.OnClickListen
 
         @Override
         public void afterTextChanged(Editable s) {
-            Log.d(TAG, "afterTextChanged: s = " + s.toString());
+            TLog.d(TAG, "afterTextChanged: s = " + s.toString());
             if (!TextUtils.isEmpty(s.toString())){
                 mSearchResultBox.setBackgroundColor(getResources().getColor(R.color.color_white));
                 mNoMoreResult.setVisibility(View.VISIBLE);
@@ -248,7 +248,7 @@ public class TransmitActivity extends BaseActivity implements View.OnClickListen
                     alertDialog.dismiss();
                 }else {
                     String leave = leaveWord.getText().toString();      //获得输入的留言
-                    Log.d(TAG, "onClick: leave = " + leave);
+                    TLog.d(TAG, "onClick: leave = " + leave);
 
                     ChatRecordEntity messageRecord = null;
                     ChatRecordEntity leaveRecord = null;
@@ -289,7 +289,7 @@ public class TransmitActivity extends BaseActivity implements View.OnClickListen
                 break;
             case R.id.contact_list_item:
                 int i = ((ViewGroup) v.getParent()).indexOfChild(v);
-                Log.d(TAG, "onClick: i = " + i);
+                TLog.d(TAG, "onClick: i = " + i);
                 showDialog(i);
                 break;
             case R.id.transmit_search_box:
