@@ -171,14 +171,20 @@ public class SendMessage {
                 chatRecordEntity.setType(ChatRoomConfig.RECORD_TEXT);//发送消息
                 break;
             case 1:
-                chatRecordEntity.setFileName(GsonTools.toJson(((NotificationMessageBean) messageBean).getmNotificationUsers()));       //记录@列表
-                chatRecordEntity.setType(ChatRoomConfig.RECORD_NOTIFY_MESSAGE);         //记录类型：@
+                if (messageBean instanceof NotificationMessageBean){
+                    NotificationMessageBean notificationMessageBean = (NotificationMessageBean) messageBean;
+                    chatRecordEntity.setFileName(GsonTools.toJson(notificationMessageBean.getmNotificationUsers()));       //记录@列表
+                    chatRecordEntity.setType(ChatRoomConfig.RECORD_NOTIFY_MESSAGE);         //记录类型：@
+                }
                 break;
             case 2:
-                chatRecordEntity.setFileName(GsonTools.toJson(((ReplayMessageBean) messageBean).getmNotificationUsers()));       //记录@列表
-                chatRecordEntity.setPath(((ReplayMessageBean) messageBean).getmReplayName() + "|" + ((ReplayMessageBean) messageBean).getmReplayContent());     //记录回复对象和回复内容
-                chatRecordEntity.setLength(((ReplayMessageBean) messageBean).getmReplayType());     //记录回复类型
-                chatRecordEntity.setType(ChatRoomConfig.RECORD_REPLAY_MESSAGE);     //记录类型：回复
+                if (messageBean instanceof ReplayMessageBean){
+                    ReplayMessageBean replayMessageBean = (ReplayMessageBean) messageBean;
+                    chatRecordEntity.setFileName(GsonTools.toJson(replayMessageBean.getmNotificationUsers()));       //记录@列表
+                    chatRecordEntity.setPath(replayMessageBean.getmReplayName() + "|" + replayMessageBean.getmReplayContent());     //记录回复对象和回复内容
+                    chatRecordEntity.setLength(replayMessageBean.getmReplayType());     //记录回复类型
+                    chatRecordEntity.setType(ChatRoomConfig.RECORD_REPLAY_MESSAGE);     //记录类型：回复
+                }
                 break;
         }
         return chatRecordEntity;

@@ -110,7 +110,7 @@
         android:scaleType="center"/>
 
 <!--    对方发送的文字消息-->
-    <TextView
+    <EditText
         android:id="@+id/list_view_chat_room_sender_message"
         android:visibility="gone"
         android:layout_width="wrap_content"
@@ -126,7 +126,8 @@
         android:textSize="@dimen/sp_18"
         android:singleLine="false"
         android:maxLines="6"
-        android:textColor="@color/color_gray_dark"/>
+        android:textColor="@color/color_gray_dark"
+        android:focusable="false"/>
 
 <!--    对方发送的语音-->
     <LinearLayout
@@ -222,7 +223,7 @@
             android:layout_marginTop="@dimen/dp_10"
             android:layout_marginBottom="@dimen/dp_10"/>
 
-        <TextView
+        <EditText
             android:id="@+id/list_view_chat_room_sender_replay_message"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -372,7 +373,7 @@
     </LinearLayout>
 
 <!--    我发送的文字消息-->
-    <TextView
+    <EditText
         android:id="@+id/list_view_chat_room_mine_message"
         android:visibility="gone"
         android:layout_width="wrap_content"
@@ -430,7 +431,7 @@
             android:layout_marginTop="@dimen/dp_10"
             android:layout_marginBottom="@dimen/dp_10"/>
 
-        <TextView
+        <EditText
             android:id="@+id/list_view_chat_room_mine_replay_message"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

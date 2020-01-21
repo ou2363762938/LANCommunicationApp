@@ -41,6 +41,7 @@ import com.skysoft.smart.intranetchat.model.network.bean.FileBean;
 import com.skysoft.smart.intranetchat.model.network.bean.MessageBean;
 import com.skysoft.smart.intranetchat.model.network.bean.NotificationMessageBean;
 import com.skysoft.smart.intranetchat.model.network.bean.ReceiveAndSaveFileBean;
+import com.skysoft.smart.intranetchat.model.network.bean.ReplayMessageBean;
 import com.skysoft.smart.intranetchat.model.network.bean.UserInfoBean;
 import com.skysoft.smart.intranetchat.model.network.bean.VoiceCallDataBean;
 import com.skysoft.smart.intranetchat.tools.GsonTools;
@@ -143,26 +144,21 @@ public class IntranetChatCallback extends IIntranetChatAidlInterfaceCallback.Stu
         }
 
         messageBean.setHost(host);
-        //只要能在联系人或者群名单找到对应聊天室
-        if (IntranetChatApplication.sContactMap.containsKey(messageBean.getReceiver()) ||
-                IntranetChatApplication.sGroupContactMap.containsKey(messageBean.getReceiver())){
-            EventBus.getDefault().post(messageBean);
-            return;
-        }
-
-        notFoundContact(messageBean);
+        handleMessageBean(messageBean);
     }
 
     @Override
     public void receiveNotifyMessageBean(String notifyMessageJson, String host) throws RemoteException {
         TLog.d(TAG,"notifyMessageJson " + notifyMessageJson);
-        onReceiveMessage(notifyMessageJson,host);
+        NotificationMessageBean notificationMessageBean = (NotificationMessageBean) GsonTools.formJson(notifyMessageJson,NotificationMessageBean.class);
+        handleMessageBean(notificationMessageBean);
     }
 
     @Override
     public void receiveReplayMessageBean(String replayMessageJson, String host) throws RemoteException {
         TLog.d(TAG,"replayMessageJson " + replayMessageJson);
-        onReceiveMessage(replayMessageJson,host);
+        ReplayMessageBean replayMessageBean = (ReplayMessageBean) GsonTools.formJson(replayMessageJson,ReplayMessageBean.class);
+        handleMessageBean(replayMessageBean);
     }
 
     /**
@@ -187,6 +183,17 @@ public class IntranetChatCallback extends IIntranetChatAidlInterfaceCallback.Stu
                 e.printStackTrace();
             }
         }
+    }
+
+    private void handleMessageBean(MessageBean messageBean){
+        //只要能在联系人或者群名单找到对应聊天室
+        if (IntranetChatApplication.sContactMap.containsKey(messageBean.getReceiver()) ||
+                IntranetChatApplication.sGroupContactMap.containsKey(messageBean.getReceiver())){
+            EventBus.getDefault().post(messageBean);
+            return;
+        }
+
+        notFoundContact(messageBean);
     }
 
     @Override

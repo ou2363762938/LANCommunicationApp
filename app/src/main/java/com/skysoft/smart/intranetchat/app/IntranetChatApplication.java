@@ -617,8 +617,14 @@ public class IntranetChatApplication extends Application {
                 recordEntity.setIsReceive(ChatRoomConfig.RECEIVE_MESSAGE);
                 break;
             case 1:
-                recordEntity.setIsReceive(ChatRoomConfig.RECEIVE_MESSAGE);
+                recordEntity.setIsReceive(ChatRoomConfig.RECEIVE_AT_MESSAGE);
+                break;
+            case 2:
+                recordEntity.setIsReceive(ChatRoomConfig.RECEIVE_REPLAY_MESSAGE);
+                break;
         }
+        TLog.d(TAG,"recordEntity " + recordEntity.toString());
+
         //如果当前处于messageBean对应的聊天室
         if (sChatRoomMessageAdapter != null && sChatRoomMessageAdapter.getReceiverIdentifier().equals(recordEntity.getReceiver())){
             sChatRoomMessageAdapter.add(recordEntity);      //记录

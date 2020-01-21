@@ -902,6 +902,7 @@ public class ChatRoomActivity extends AppCompatActivity implements View.OnClickL
             case 2:     //回复消息
                 break;
         }
+        inputMessage.setText("");
     }
 
     /**
@@ -919,7 +920,7 @@ public class ChatRoomActivity extends AppCompatActivity implements View.OnClickL
 
         ChatRecordEntity recordEntity = SendMessage.broadcastAtMessage(new SendAtMessageBean(message, receiverIdentifier, host,
                 receiverAvatarPath, receiverName, isGroup, atIdentifiers));
-//        String[] array = (String[]) GsonTools.formJson(recordEntity.getFileName(), String[].class);       //解析json数组
+        adapter.add(recordEntity);
     }
 
     /**
@@ -928,7 +929,6 @@ public class ChatRoomActivity extends AppCompatActivity implements View.OnClickL
     private void sendCommonMessage(String message){
         ChatRecordEntity recordEntity = SendMessage.sendCommonMessage(new SendMessageBean(message, receiverIdentifier, host,
                 receiverAvatarPath, receiverName, isGroup));
-        inputMessage.setText("");
         adapter.add(recordEntity);
     }
 

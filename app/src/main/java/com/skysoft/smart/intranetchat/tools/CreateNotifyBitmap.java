@@ -29,7 +29,7 @@ public class CreateNotifyBitmap {
         Canvas canvas = new Canvas(bitmap);
         canvas.drawColor(context.getResources().getColor(R.color.color_blue));
 
-        canvas.drawText(notify.substring(0,notify.length()-1),0,height-4,paint);
+        canvas.drawText(notify.trim(),0,height-4,paint);
         canvas.save();
         canvas.restore();
         return bitmap;

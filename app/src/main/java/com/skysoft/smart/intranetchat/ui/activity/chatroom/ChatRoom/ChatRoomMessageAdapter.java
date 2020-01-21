@@ -168,6 +168,8 @@ public class ChatRoomMessageAdapter extends RecyclerView.Adapter<ChatRoomMessage
             case ChatRoomConfig.RECEIVE_FILE:
             case ChatRoomConfig.RECEIVE_VIDEO_CALL:
             case ChatRoomConfig.RECEIVE_VOICE_CALL:
+            case ChatRoomConfig.RECEIVE_AT_MESSAGE:
+            case ChatRoomConfig.RECEIVE_REPLAY_MESSAGE:
                 bindAvatar(holder,bean,true);
                 break;
             case ChatRoomConfig.SEND_IMAGE:
@@ -177,6 +179,8 @@ public class ChatRoomMessageAdapter extends RecyclerView.Adapter<ChatRoomMessage
             case ChatRoomConfig.SEND_FILE:
             case ChatRoomConfig.SEND_VIDEO_CALL:
             case ChatRoomConfig.SEND_VOICE_CALL:
+            case ChatRoomConfig.SEND_AT_MESSAGE:
+            case ChatRoomConfig.SEND_REPLAY_MESSAGE:
                 bindAvatar(holder,bean,false);
                 break;
         }
@@ -184,6 +188,9 @@ public class ChatRoomMessageAdapter extends RecyclerView.Adapter<ChatRoomMessage
         switch (bean.getType()){
             case ChatRoomConfig.RECORD_TEXT:
                 bindText(holder, bean);
+                break;
+            case ChatRoomConfig.RECORD_NOTIFY_MESSAGE:
+                bindAtText(holder,bean);
                 break;
             case ChatRoomConfig.RECORD_VOICE:
                 bindVoice(holder, bean);
@@ -391,7 +398,7 @@ public class ChatRoomMessageAdapter extends RecyclerView.Adapter<ChatRoomMessage
 
     private void bindAtText(ChatRoomMessageViewHolder holder, ChatRecordEntity bean){
         TextView message = null;
-        if (bean.getIsReceive() == ChatRoomConfig.RECEIVE_MESSAGE){
+        if (bean.getIsReceive() == ChatRoomConfig.RECEIVE_AT_MESSAGE){
             holder.getSenderMessage().setText(bean.getContent());
             holder.getSenderMessage().setVisibility(View.VISIBLE);
             message = holder.getSenderMessage();
@@ -412,22 +419,22 @@ public class ChatRoomMessageAdapter extends RecyclerView.Adapter<ChatRoomMessage
             Editable editableText = message.getEditableText();
 
             String[] array = (String[]) GsonTools.formJson(at, String[].class);
-            for (int i = 0; i < array.length; i++){
-                String[] split = array[i].split("|");
+            for (int i = array.length-1; i >= 0; i--){
+                String[] split = array[i].split("\\|");
 
                 int st = Integer.parseInt(split[1]);        //at开始位置
                 int length = Integer.parseInt(split[2]);    //用户名长度
 
-                ContactEntity entity = IntranetChatApplication.sContactMap.get(split);
+                ContactEntity entity = IntranetChatApplication.sContactMap.get(split[0]);
                 if (null != entity){
                     editableText.replace(st+1,st+length+1,entity.getName());
-                }else if (split.equals(IntranetChatApplication.getsMineUserInfo().getIdentifier())){
+                }else if (split[0].equals(IntranetChatApplication.getsMineUserInfo().getIdentifier())){
                     String name = IntranetChatApplication.getsMineUserInfo().getName();
                     SpannableStringBuilder spannableString = new SpannableStringBuilder("@"+name);    //构建SpannableStringBuilder
                     Bitmap bitmap = CreateNotifyBitmap.notifyBitmap(context,"@"+name);      //构建内容为notify的bitmap
                     ImageSpan imageSpan = new ImageSpan(context,bitmap);      //构建内容为bitmap的ImageSpan
                     spannableString.setSpan(imageSpan,
-                            0,name.length()-1,
+                            0,name.length()+1,
                             Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);        //SpannableStringBuilder添加ImageSpan
 
                     editableText.replace(st,st+length+1,spannableString);
