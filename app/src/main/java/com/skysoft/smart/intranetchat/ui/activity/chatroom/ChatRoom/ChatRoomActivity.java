@@ -404,21 +404,6 @@ public class ChatRoomActivity extends AppCompatActivity implements View.OnClickL
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
-    public void handleMessage(MessageBean messageBean) {
-        TLog.d(TAG, "handleMessage: " + receiverIdentifier + ", " + messageBean.toString());
-        if (messageBean.getReceiver().equals(receiverIdentifier)) {
-            ChatRecordEntity chatRecordEntity = new ChatRecordEntity();
-            chatRecordEntity.setIsReceive(ChatRoomConfig.RECEIVE_MESSAGE);
-            chatRecordEntity.setContent(messageBean.getMsg());
-            chatRecordEntity.setReceiver(receiverIdentifier);
-            chatRecordEntity.setSender(messageBean.getSender());
-            chatRecordEntity.setType(ChatRoomConfig.RECORD_TEXT);
-            chatRecordEntity.setTime(messageBean.getTimeStamp());
-            adapter.add(chatRecordEntity);
-        }
-    }
-
-    @Subscribe(threadMode = ThreadMode.MAIN)
     public void loadChatHistory(List<ChatRecordEntity> chatHistory) {
         if (chatHistory.size() == 0){
             ToastUtil.toast(ChatRoomActivity.this, getString(R.string.ChatRoomActivity_loadChatHistory_toast_text));
@@ -590,7 +575,6 @@ public class ChatRoomActivity extends AppCompatActivity implements View.OnClickL
         @Override
         public void onReceiveMessage(MessageBean message, String host) {
             if (message.getReceiver().equals(receiverIdentifier)){
-                EventBus.getDefault().post(message);
                 ChatRoomActivity.this.host = host;
             }
         }

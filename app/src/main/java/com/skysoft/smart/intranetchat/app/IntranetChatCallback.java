@@ -30,6 +30,7 @@ import com.skysoft.smart.intranetchat.database.table.LatestChatHistoryEntity;
 import com.skysoft.smart.intranetchat.database.table.RefuseGroupEntity;
 import com.skysoft.smart.intranetchat.model.net_model.EstablishGroup;
 import com.skysoft.smart.intranetchat.model.net_model.Login;
+import com.skysoft.smart.intranetchat.model.net_model.SendMessage;
 import com.skysoft.smart.intranetchat.model.net_model.SendRequest;
 import com.skysoft.smart.intranetchat.model.net_model.SendResponse;
 import com.skysoft.smart.intranetchat.model.network.Config;
@@ -38,6 +39,7 @@ import com.skysoft.smart.intranetchat.model.network.bean.AskResourceBean;
 import com.skysoft.smart.intranetchat.model.network.bean.EstablishGroupBean;
 import com.skysoft.smart.intranetchat.model.network.bean.FileBean;
 import com.skysoft.smart.intranetchat.model.network.bean.MessageBean;
+import com.skysoft.smart.intranetchat.model.network.bean.NotificationMessageBean;
 import com.skysoft.smart.intranetchat.model.network.bean.ReceiveAndSaveFileBean;
 import com.skysoft.smart.intranetchat.model.network.bean.UserInfoBean;
 import com.skysoft.smart.intranetchat.model.network.bean.VoiceCallDataBean;
@@ -139,40 +141,52 @@ public class IntranetChatCallback extends IIntranetChatAidlInterfaceCallback.Stu
         if (messageBean.getSender().equals(IntranetChatApplication.getsMineUserInfo().getIdentifier())){
             return;
         }
-        ContactEntity next = null;
-        int group = 0;
-        //单聊
-        if (messageBean.getReceiver().equals(messageBean.getSender())){
-            next = IntranetChatApplication.sContactMap.get(messageBean.getReceiver());
-        }else {
-            next = IntranetChatApplication.sGroupContactMap.get(messageBean.getReceiver());
-            group = 1;
-        }
-        TLog.d(TAG, "notification: group = " + group);
-        if (null != next){
-            LatestChatHistoryEntity latestChatHistoryEntity = generateLatestChatHistoryEntity(messageBean.getTimeStamp(),messageBean.getMsg(),next.getAvatarIdentifier(),
-                    next.getAvatarPath(),messageBean.getReceiver(),messageBean.getSender(),next.getName(),host);
-            latestChatHistoryEntity.setType(ChatRoomConfig.RECORD_TEXT);
-            latestChatHistoryEntity.setGroup(group);
-            latestChatHistoryEntity.setContentTimeMill(messageBean.getTimeStamp());
-            EventBus.getDefault().post(latestChatHistoryEntity);
-            if (onReceiveMessage != null){
-                onReceiveMessage.onReceiveMessage(messageBean,host);
-            }
+
+        messageBean.setHost(host);
+        //只要能在联系人或者群名单找到对应聊天室
+        if (IntranetChatApplication.sContactMap.containsKey(messageBean.getReceiver()) ||
+                IntranetChatApplication.sGroupContactMap.containsKey(messageBean.getReceiver())){
+            EventBus.getDefault().post(messageBean);
             return;
         }
-        //本地没有这个群的记录
+
+        notFoundContact(messageBean);
+    }
+
+    @Override
+    public void receiveNotifyMessageBean(String notifyMessageJson, String host) throws RemoteException {
+        TLog.d(TAG,"notifyMessageJson " + notifyMessageJson);
+        onReceiveMessage(notifyMessageJson,host);
+    }
+
+    @Override
+    public void receiveReplayMessageBean(String replayMessageJson, String host) throws RemoteException {
+        TLog.d(TAG,"replayMessageJson " + replayMessageJson);
+        onReceiveMessage(replayMessageJson,host);
+    }
+
+    /**
+     * 在已有的所有联系人和群名单中没有找到messageBean对应的人
+     * @param messageBean*/
+    private void notFoundContact(MessageBean messageBean){
+        //查询拒收名单是否有此人
         Iterator<RefuseGroupEntity> refuseIterator = IntranetChatApplication.getsRefuseGroupList().iterator();
         while (refuseIterator.hasNext()){
             if (refuseIterator.next().getIdentifier().equals(messageBean.getReceiver())){
                 return;
             }
         }
-        //TODO 请求该群信息
-        AskResourceBean askResourceBean = new AskResourceBean();
-        askResourceBean.setResourceType(Config.RESOURCE_GROUP);
-        askResourceBean.setResourceUniqueIdentifier(messageBean.getReceiver());
-        IntranetChatApplication.sAidlInterface.askResource(GsonTools.toJson(askResourceBean),host);
+
+        if (!messageBean.getReceiver().equals(messageBean.getSender())){    //为记录的群
+            AskResourceBean askResourceBean = new AskResourceBean();
+            askResourceBean.setResourceType(Config.RESOURCE_GROUP);     //请求群信息
+            askResourceBean.setResourceUniqueIdentifier(messageBean.getReceiver());     //群唯一标识符
+            try {
+                IntranetChatApplication.sAidlInterface.askResource(GsonTools.toJson(askResourceBean),messageBean.getHost());
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     @Override
@@ -520,16 +534,6 @@ public class IntranetChatCallback extends IIntranetChatAidlInterfaceCallback.Stu
                 IntranetChatApplication.sBeMonitored.containsKey(identifier)){
             IntranetChatApplication.sBeMonitored.remove(identifier);
         }
-    }
-
-    @Override
-    public void receiveNotifyMessageBean(String notifyMessageJson, String host) throws RemoteException {
-
-    }
-
-    @Override
-    public void receiveReplayMessageBean(String notifyMessageJson, String host) throws RemoteException {
-
     }
 
     @Override

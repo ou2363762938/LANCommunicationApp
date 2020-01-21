@@ -80,7 +80,8 @@ public class SendMessage {
     public static ChatRecordEntity sendCommonMessage(SendMessageBean sendMessageBean){
         MessageBean messageBean = initMessageBean(new MessageBean(), sendMessageBean);     //初始化待发送的MessageBean
 
-        ChatRecordEntity chatRecordEntity = initChatRecordEntity(sendMessageBean,messageBean);
+        ChatRecordEntity chatRecordEntity = initChatRecordEntity(messageBean,sendMessageBean);
+        chatRecordEntity.setIsReceive(ChatRoomConfig.SEND_MESSAGE);     //标记为发消息的类型
 
         if (!sendMessageBean.isGroup()){
             if (!TextUtils.isEmpty(sendMessageBean.getHost())){
@@ -100,17 +101,17 @@ public class SendMessage {
         //初始化NotificationMessageBean
         NotificationMessageBean messageBean = initMessageBean(new NotificationMessageBean(),sendMessageBean);
 
-        //初始化ChatRecordEntity
-        ChatRecordEntity chatRecordEntity = initChatRecordEntity(sendMessageBean,messageBean);
-
         messageBean.setmNotificationUsers(sendMessageBean.getmAt());    //装填@对象
+        messageBean.setType(1);
 
         SendMessage.broadcastAtMessage(messageBean);        //广播@消息
 
         refreshMessageFragment(sendMessageBean);        //刷新消息界面
 
-        chatRecordEntity.setFileName(GsonTools.toJson(sendMessageBean.getmAt()));       //记录@列表
-        chatRecordEntity.setType(ChatRoomConfig.RECORD_NOTIFY_MESSAGE);         //记录类型：@
+        //初始化ChatRecordEntity
+        ChatRecordEntity chatRecordEntity = initChatRecordEntity(messageBean,sendMessageBean);
+        chatRecordEntity.setIsReceive(ChatRoomConfig.SEND_AT_MESSAGE);
+
         return chatRecordEntity;
     }
 
@@ -121,22 +122,20 @@ public class SendMessage {
         //初始化ReplayMessageBean
         ReplayMessageBean messageBean = initMessageBean(new ReplayMessageBean(), sendMessageBean);
 
-        //初始化ChatRecordEntity
-        ChatRecordEntity chatRecordEntity = initChatRecordEntity(sendMessageBean,messageBean);
-
         messageBean.setmNotificationUsers(sendMessageBean.getmAt());        //装填@对象
         messageBean.setmReplayContent(sendMessageBean.getReplayContent());      //装填回复内容
         messageBean.setmReplayName(sendMessageBean.getReplayName());            //装填回复对象名称
         messageBean.setmReplayType(sendMessageBean.getReplayType());            //装填回复内容内型
+        messageBean.setType(2);
 
         SendMessage.broadcastReplayMessage(messageBean);        //广播回复消息
 
         refreshMessageFragment(sendMessageBean);                //刷新消息界面
 
-        chatRecordEntity.setFileName(GsonTools.toJson(sendMessageBean.getmAt()));       //记录@列表
-        chatRecordEntity.setPath(sendMessageBean.replayName + "|" + sendMessageBean.replayContent);     //记录回复对象和回复内容
-        chatRecordEntity.setLength(sendMessageBean.replayType);     //记录回复类型
-        chatRecordEntity.setType(ChatRoomConfig.RECORD_REPLAY_MESSAGE);     //记录类型：回复
+        //初始化ChatRecordEntity
+        ChatRecordEntity chatRecordEntity = initChatRecordEntity(messageBean,sendMessageBean);
+        chatRecordEntity.setIsReceive(ChatRoomConfig.SEND_REPLAY_MESSAGE);
+
         return chatRecordEntity;
     }
 
@@ -158,18 +157,36 @@ public class SendMessage {
 
     /**
      * 依据SendMessageBean和MessageBean生成ChatRecordEntity
-     * @param sendMessageBean
      * @param messageBean
      * @return */
-    public static ChatRecordEntity initChatRecordEntity(SendMessageBean sendMessageBean, MessageBean messageBean){
+    public static ChatRecordEntity initChatRecordEntity(MessageBean messageBean){
         ChatRecordEntity chatRecordEntity = new ChatRecordEntity();
-        chatRecordEntity.setContent(sendMessageBean.getMessage());      //记录发送内容
-        chatRecordEntity.setIsReceive(ChatRoomConfig.SEND_MESSAGE);     //标记为发消息的类型
-        chatRecordEntity.setReceiver(sendMessageBean.getReciever());
+        chatRecordEntity.setContent(messageBean.getMsg());      //记录发送内容
+        chatRecordEntity.setReceiver(messageBean.getReceiver());
         chatRecordEntity.setSender(IntranetChatApplication.getsMineUserInfo().getIdentifier());     //记录发送者
         chatRecordEntity.setTime(messageBean.getTimeStamp());           //记录发送时间
-        chatRecordEntity.setType(ChatRoomConfig.RECORD_TEXT);//发送消息
 
+        switch (messageBean.getType()){
+            case 0:
+                chatRecordEntity.setType(ChatRoomConfig.RECORD_TEXT);//发送消息
+                break;
+            case 1:
+                chatRecordEntity.setFileName(GsonTools.toJson(((NotificationMessageBean) messageBean).getmNotificationUsers()));       //记录@列表
+                chatRecordEntity.setType(ChatRoomConfig.RECORD_NOTIFY_MESSAGE);         //记录类型：@
+                break;
+            case 2:
+                chatRecordEntity.setFileName(GsonTools.toJson(((ReplayMessageBean) messageBean).getmNotificationUsers()));       //记录@列表
+                chatRecordEntity.setPath(((ReplayMessageBean) messageBean).getmReplayName() + "|" + ((ReplayMessageBean) messageBean).getmReplayContent());     //记录回复对象和回复内容
+                chatRecordEntity.setLength(((ReplayMessageBean) messageBean).getmReplayType());     //记录回复类型
+                chatRecordEntity.setType(ChatRoomConfig.RECORD_REPLAY_MESSAGE);     //记录类型：回复
+                break;
+        }
+        return chatRecordEntity;
+    }
+
+    public static ChatRecordEntity initChatRecordEntity(MessageBean messageBean, SendMessageBean sendMessageBean){
+        ChatRecordEntity chatRecordEntity = initChatRecordEntity(messageBean);
+        chatRecordEntity.setReceiver(sendMessageBean.getReciever());
         return chatRecordEntity;
     }
 

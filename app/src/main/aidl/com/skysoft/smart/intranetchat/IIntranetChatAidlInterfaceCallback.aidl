@@ -72,7 +72,7 @@ interface IIntranetChatAidlInterfaceCallback {
     void receiveNotifyMessageBean(String notifyMessageJson, String host);
 
     /*接收到回复消息*/
-    void receiveReplayMessageBean(String notifyMessageJson, String host);
+    void receiveReplayMessageBean(String replayMessageJson, String host);
 
     /*收到Identifier用户下线广播*/
     void receiveUserOutLine(String identifier);

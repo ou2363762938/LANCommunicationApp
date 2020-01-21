@@ -11,8 +11,17 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.media.MediaMetadataRetriever;
+import android.text.Editable;
+import android.text.SpannableStringBuilder;
+import android.text.Spanned;
 import android.text.TextUtils;
+
+import com.skysoft.smart.intranetchat.model.network.bean.UserInfoBean;
+import com.skysoft.smart.intranetchat.tools.CreateNotifyBitmap;
+import com.skysoft.smart.intranetchat.tools.GsonTools;
 import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
+
+import android.text.style.ImageSpan;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -380,6 +389,55 @@ public class ChatRoomMessageAdapter extends RecyclerView.Adapter<ChatRoomMessage
         message.setOnLongClickListener(new OnLongClickRecord(bean, holder));
     }
 
+    private void bindAtText(ChatRoomMessageViewHolder holder, ChatRecordEntity bean){
+        TextView message = null;
+        if (bean.getIsReceive() == ChatRoomConfig.RECEIVE_MESSAGE){
+            holder.getSenderMessage().setText(bean.getContent());
+            holder.getSenderMessage().setVisibility(View.VISIBLE);
+            message = holder.getSenderMessage();
+
+            String at = bean.getFileName();
+            buildNotify(at,holder.getSenderMessage());
+        }else {
+            holder.getMineMessage().setText(bean.getContent());
+            holder.getMineMessage().setVisibility(View.VISIBLE);
+            message = holder.getMineMessage();
+        }
+
+        message.setOnLongClickListener(new OnLongClickRecord(bean, holder));
+    }
+
+    private void buildNotify(String at,TextView message){
+        if (!TextUtils.isEmpty(at)){
+            Editable editableText = message.getEditableText();
+
+            String[] array = (String[]) GsonTools.formJson(at, String[].class);
+            for (int i = 0; i < array.length; i++){
+                String[] split = array[i].split("|");
+
+                int st = Integer.parseInt(split[1]);        //at开始位置
+                int length = Integer.parseInt(split[2]);    //用户名长度
+
+                ContactEntity entity = IntranetChatApplication.sContactMap.get(split);
+                if (null != entity){
+                    editableText.replace(st+1,st+length+1,entity.getName());
+                }else if (split.equals(IntranetChatApplication.getsMineUserInfo().getIdentifier())){
+                    String name = IntranetChatApplication.getsMineUserInfo().getName();
+                    SpannableStringBuilder spannableString = new SpannableStringBuilder("@"+name);    //构建SpannableStringBuilder
+                    Bitmap bitmap = CreateNotifyBitmap.notifyBitmap(context,"@"+name);      //构建内容为notify的bitmap
+                    ImageSpan imageSpan = new ImageSpan(context,bitmap);      //构建内容为bitmap的ImageSpan
+                    spannableString.setSpan(imageSpan,
+                            0,name.length()-1,
+                            Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);        //SpannableStringBuilder添加ImageSpan
+
+                    editableText.replace(st,st+length+1,spannableString);
+                }
+            }
+
+            message.setText(editableText);
+        }
+    }
+
     private void bindAvatar(ChatRoomMessageViewHolder holder, ChatRecordEntity bean,  boolean sender){
         if (sender){
             ContactEntity next = IntranetChatApplication.sContactMap.get(bean.getSender());
@@ -547,6 +605,7 @@ public class ChatRoomMessageAdapter extends RecyclerView.Adapter<ChatRoomMessage
                         MyDataBase.getInstance().getChatRecordDao().insert(recordTime);
                     }
                     MyDataBase.getInstance().getChatRecordDao().insert(chatRecordEntity);
+                    TLog.d(TAG,"chatRecordEntity " + chatRecordEntity);
                 }
             }).start();
         }

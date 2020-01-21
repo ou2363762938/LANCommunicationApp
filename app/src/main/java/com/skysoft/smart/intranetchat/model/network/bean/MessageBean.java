@@ -9,6 +9,25 @@ public class MessageBean{
     private String sender;
     private String receiver;
     private String msg;
+    private int type;       //0：普通，1：@，2：回复
+    private String host;
+
+    public String getHost() {
+        return host;
+    }
+
+    public void setHost(String host) {
+        this.host = host;
+    }
+
+    public int getType() {
+        return type;
+    }
+
+    public void setType(int type) {
+        this.type = type;
+    }
+
     private long timeStamp;
 
     public long getTimeStamp() {

@@ -29,6 +29,10 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.text.TextUtils;
 import android.util.EventLog;
+
+import com.skysoft.smart.intranetchat.model.net_model.SendMessage;
+import com.skysoft.smart.intranetchat.model.network.bean.NotificationMessageBean;
+import com.skysoft.smart.intranetchat.model.network.bean.ReplayMessageBean;
 import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 import android.widget.RemoteViews;
 import android.widget.TextView;
@@ -549,31 +553,7 @@ public class IntranetChatApplication extends Application {
         messageBean.setReceiver(latestChatHistoryEntity.getUserIdentifier());
         messageBean.setSender(latestChatHistoryEntity.getSenderIdentifier());
         messageBean.setTimeStamp(System.currentTimeMillis());
-        if (latestChatHistoryEntity.getType() == ChatRoomConfig.RECORD_TEXT) {
-            ChatRecordEntity recordEntity = new ChatRecordEntity();
-            recordEntity.setTime(System.currentTimeMillis());
-            //文字消息或者文件的唯一标识符
-            recordEntity.setLength(latestChatHistoryEntity.getLength());
-            recordEntity.setIsReceive(ChatRoomConfig.RECEIVE_MESSAGE);
-            recordEntity.setType(ChatRoomConfig.RECORD_TEXT);
-            recordEntity.setContent(latestChatHistoryEntity.getContent());
-            recordEntity.setReceiver(latestChatHistoryEntity.getUserIdentifier());
-            recordEntity.setSender(latestChatHistoryEntity.getSenderIdentifier());
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    ChatRecordDao chatRecordDao = MyDataBase.getInstance().getChatRecordDao();
-                    if (sChatRoomMessageAdapter == null || !sChatRoomMessageAdapter.getReceiverIdentifier().equals(recordEntity.getReceiver())){
-                        long latestRecordTime = chatRecordDao.getLatestRecordTime(recordEntity.getReceiver());
-                        if (latestRecordTime != 0 && recordEntity.getTime() - latestRecordTime > 2*60*1000){
-                            ChatRecordEntity recordTime = ChatRoomMessageAdapter.generatorTimeRecord(recordEntity.getReceiver(),latestRecordTime);
-                            chatRecordDao.insert(recordTime);
-                        }
-                        chatRecordDao.insert(recordEntity);
-                    }
-                }
-            }).start();
-        }
+
         switch (latestChatHistoryEntity.getType()) {
             case ChatRoomConfig.RECORD_IMAGE:
                 latestChatHistoryEntity.setContent(getString(R.string.image));
@@ -620,6 +600,93 @@ public class IntranetChatApplication extends Application {
                 MyDataBase.getInstance().getLatestChatHistoryDao().insert(latestChatHistoryEntity);
             }
         }).start();
+    }
+
+    /**
+     * 处理接受到的文字类消息
+     * @param messageBean 接收到的文字类消息*/
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void handleMessage(MessageBean messageBean) {
+        updateHeartbeat(messageBean.getSender());       //更新心跳包
+
+        ChatRecordEntity recordEntity = SendMessage.initChatRecordEntity(messageBean);      //初始化聊天记录
+        recordEntity.setSender(messageBean.getSender());
+
+        switch (messageBean.getType()){
+            case 0:
+                recordEntity.setIsReceive(ChatRoomConfig.RECEIVE_MESSAGE);
+                break;
+            case 1:
+                recordEntity.setIsReceive(ChatRoomConfig.RECEIVE_MESSAGE);
+        }
+        //如果当前处于messageBean对应的聊天室
+        if (sChatRoomMessageAdapter != null && sChatRoomMessageAdapter.getReceiverIdentifier().equals(recordEntity.getReceiver())){
+            sChatRoomMessageAdapter.add(recordEntity);      //记录
+        }else {
+            //添加记录到数据库中
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    ChatRecordDao chatRecordDao = MyDataBase.getInstance().getChatRecordDao();
+                    long latestRecordTime = chatRecordDao.getLatestRecordTime(recordEntity.getReceiver());
+                    if (latestRecordTime != 0 && recordEntity.getTime() - latestRecordTime > 2*60*1000){
+                        ChatRecordEntity recordTime = ChatRoomMessageAdapter.generatorTimeRecord(recordEntity.getReceiver(),latestRecordTime);
+                        chatRecordDao.insert(recordTime);
+                    }
+                    chatRecordDao.insert(recordEntity);
+                }
+            }).start();
+        }
+
+        boolean create = false;     //是否新建最近记录
+        LatestChatHistoryEntity historyEntity = sLatestChatHistoryMap.get(messageBean.getReceiver());
+        if (null == historyEntity){     //新建最近记录
+            create = true;
+            sLatestChatHistoryList.add(messageBean.getReceiver());      //添加到最近记录列表中
+
+            historyEntity = new LatestChatHistoryEntity();
+            boolean isGroup = !messageBean.getReceiver().endsWith(messageBean.getSender());     //是否为群聊
+            historyEntity.setGroup( isGroup ? 0 : 1);
+
+            ContactEntity contactEntity = null;     //设置记录对应聊天室参数
+            if (isGroup){
+                contactEntity = sGroupContactMap.get(messageBean.getReceiver());
+            }else {
+                contactEntity = sContactMap.get(messageBean.getReceiver());
+            }
+
+            historyEntity.setUserName(contactEntity.getName());     //聊天室名
+            historyEntity.setStatus(contactEntity.getStatus());        //聊天室状态
+            historyEntity.setUserHeadPath(contactEntity.getAvatarPath());       //聊天室头像地址
+            historyEntity.setUserHeadIdentifier(contactEntity.getAvatarIdentifier());   //聊天室头像唯一标识符
+            sLatestChatHistoryMap.put(messageBean.getReceiver(),historyEntity);     //添加到Map中
+        }
+
+        historyEntity.setHost(messageBean.getHost());       //记录IP
+        historyEntity.setContent(messageBean.getMsg());     //记录聊天内容
+        historyEntity.setContentTimeMill(messageBean.getTimeStamp());       //记录聊天时间
+        //将毫秒数时间转为String
+        historyEntity.setContentTime(ChatRoomActivity.millsToTime(historyEntity.getContentTimeMill()));
+        MessageListSort.CollectionsList(sLatestChatHistoryList);        //对记录排序
+
+        setUnReadNumber(historyEntity,historyEntity,messageBean);       //设置未读数
+
+        LatestChatHistoryEntity finalHistoryEntity = historyEntity;     //准备更新数据库
+        if (!create){
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    MyDataBase.getInstance().getLatestChatHistoryDao().update(finalHistoryEntity);
+                }
+            }).start();
+        }else {
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    MyDataBase.getInstance().getLatestChatHistoryDao().insert(finalHistoryEntity);
+                }
+            }).start();
+        }
     }
 
     private void setUnReadNumber(LatestChatHistoryEntity next,LatestChatHistoryEntity latestChatHistoryEntity,MessageBean messageBean){
