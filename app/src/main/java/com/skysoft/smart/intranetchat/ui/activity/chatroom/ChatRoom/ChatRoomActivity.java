@@ -24,6 +24,7 @@ import android.text.TextWatcher;
 import android.text.style.ImageSpan;
 
 import com.skysoft.smart.intranetchat.bean.SendAtMessageBean;
+import com.skysoft.smart.intranetchat.tools.GsonTools;
 import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 import android.view.GestureDetector;
 import android.view.Gravity;
@@ -82,6 +83,7 @@ import com.skysoft.smart.intranetchat.ui.activity.voicecall.LaunchVoiceCallActiv
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
+import org.json.JSONArray;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -930,8 +932,10 @@ public class ChatRoomActivity extends AppCompatActivity implements View.OnClickL
             int idx = message.indexOf('@' + name);
             atIdentifiers[i] = atIdentifiers[i] + '|' + idx + '|' + name.length();
         }
+
         ChatRecordEntity recordEntity = SendMessage.broadcastAtMessage(new SendAtMessageBean(message, receiverIdentifier, host,
                 receiverAvatarPath, receiverName, isGroup, atIdentifiers));
+//        String[] array = (String[]) GsonTools.formJson(recordEntity.getFileName(), String[].class);       //解析json数组
     }
 
     /**

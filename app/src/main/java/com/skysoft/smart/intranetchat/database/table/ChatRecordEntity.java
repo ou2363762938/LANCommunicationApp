@@ -22,11 +22,11 @@ public class ChatRecordEntity {
     @ColumnInfo
     private int type;
     @ColumnInfo
-    private String path;
+    private String path;        //1：语音、图片、视频预览图地址；2：回复名 | 回复内容
     @ColumnInfo(name = "file_name")
-    private String fileName;
+    private String fileName;    //1：文件名；2：视频地址；3：@数组
     @ColumnInfo
-    private long length;
+    private long length;        //1：文件长度；2：回复类型
     @ColumnInfo
     private String content;
     @ColumnInfo(name = "is_receive")
