@@ -127,7 +127,9 @@
         android:singleLine="false"
         android:maxLines="6"
         android:textColor="@color/color_gray_dark"
-        android:focusable="false"/>
+        android:focusable="false"
+        android:editable="false"
+        android:textIsSelectable="false"/>
 
 <!--    对方发送的语音-->
     <LinearLayout
@@ -227,7 +229,10 @@
             android:id="@+id/list_view_chat_room_sender_replay_message"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="@dimen/sp_18"/>
+            android:textSize="@dimen/sp_18"
+            android:focusable="false"
+            android:editable="false"
+            android:textIsSelectable="false"/>
     </LinearLayout>
 
 <!--    我的头像-->
@@ -391,7 +396,10 @@
         android:textSize="@dimen/sp_18"
         android:singleLine="false"
         android:maxLines="6"
-        android:textColor="@color/color_gray_dark"/>
+        android:textColor="@color/color_gray_dark"
+        android:focusable="false"
+        android:editable="false"
+        android:textIsSelectable="false"/>
 
 <!--    我发送的回复框-->
     <LinearLayout
@@ -435,6 +443,9 @@
             android:id="@+id/list_view_chat_room_mine_replay_message"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="@dimen/sp_18"/>
+            android:textSize="@dimen/sp_18"
+            android:focusable="false"
+            android:editable="false"
+            android:textIsSelectable="false"/>
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -22,8 +22,11 @@ import com.skysoft.smart.intranetchat.tools.GsonTools;
 import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 
 import android.text.style.ImageSpan;
+import android.view.ActionMode;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -414,6 +417,10 @@ public class ChatRoomMessageAdapter extends RecyclerView.Adapter<ChatRoomMessage
         message.setOnLongClickListener(new OnLongClickRecord(bean, holder));
     }
 
+    /**
+     * 根据唯一标识符寻找本地名字替代@后的名字
+     * @param at @队列
+     * @param message */
     private void buildNotify(String at,TextView message){
         if (!TextUtils.isEmpty(at)){
             Editable editableText = message.getEditableText();
