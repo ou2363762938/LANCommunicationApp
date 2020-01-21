@@ -3,7 +3,7 @@ package com.skysoft.smart.intranetchat.model.network.bean;
 public class ReplayMessageBean extends NotificationMessageBean {
     private String mReplayName;
     private String mReplayContent;
-    private String mReplayType;
+    private int mReplayType;
 
     public String getmReplayName() {
         return mReplayName;
@@ -21,11 +21,11 @@ public class ReplayMessageBean extends NotificationMessageBean {
         this.mReplayContent = mReplayContent;
     }
 
-    public String getmReplayType() {
+    public int getmReplayType() {
         return mReplayType;
     }
 
-    public void setmReplayType(String mReplayType) {
+    public void setmReplayType(int mReplayType) {
         this.mReplayType = mReplayType;
     }
 }

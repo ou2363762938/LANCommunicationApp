@@ -27,6 +27,12 @@ interface IIntranetChatAidlInterface {
     /*在群组中广播userInfo*/
     void sendGroupMessage(in String messageJson,in List<String> hostList);
 
+    /*在局域网中广播@消息*/
+    void broadcastAtMessage(in String atMessageJson);
+
+    /*在局域网中广播回复消息*/
+    void broadcastReplayMessage(in String replayMessageJson);
+
     /*向所有用户请求用户信息*/
     void requestAllUserInfo(in String requestInfo);
 

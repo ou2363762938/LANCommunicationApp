@@ -339,7 +339,7 @@ public class TransmitActivity extends BaseActivity implements View.OnClickListen
      * @param transmitBean 转发对象*/
     public static ChatRecordEntity transmitMessage(String message, TransmitBean transmitBean){
         //转发消息
-        ChatRecordEntity recordEntity = SendMessage.sendMessage(new SendMessageBean(message,
+        ChatRecordEntity recordEntity = SendMessage.sendCommonMessage(new SendMessageBean(message,
                 transmitBean.getmUserIdentifier(),
                 transmitBean.getmHost(),
                 transmitBean.getmAvatarPath(),
@@ -354,7 +354,7 @@ public class TransmitActivity extends BaseActivity implements View.OnClickListen
      * @param i 转发对象在mTransmitUsers中的位置*/
     private ChatRecordEntity transmitFile(int i){
         int type = mMessage.equals(ChatRoomConfig.RECORD_VIDEO) ? 2 : 1;
-        ChatRecordEntity chatRecordEntity = SendMessage.sendMessage(new EventMessage(mMessage, type),
+        ChatRecordEntity chatRecordEntity = SendMessage.sendCommonMessage(new EventMessage(mMessage, type),
                 new SendMessageBean(mMessage,
                         mTransmitUsers.get(i).getmUserIdentifier(),
                         mTransmitUsers.get(i).getmHost(),

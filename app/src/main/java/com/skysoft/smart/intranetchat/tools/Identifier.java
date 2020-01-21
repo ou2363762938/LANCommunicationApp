@@ -24,7 +24,7 @@ public class Identifier {
 
     private String getIdentifier(String ref) {
         // 16进制数组
-        char hexDigits[] = { '5', '0', '5', '6', '2', '9', '6', '2', '5', 'q', 'b', 'l', 'e', 'k', 'm', 'y' };
+        char hexDigits[] = { 'g', '0', 'p', '6', 'x', '9', '3', '2', '5', 'q', 'b', 'j', 'e', 'k', 'm', 'y' };
         try {
             char str[];
             byte strTemp[] = ref.getBytes();

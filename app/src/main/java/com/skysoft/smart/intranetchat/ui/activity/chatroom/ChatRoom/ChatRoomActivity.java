@@ -22,6 +22,8 @@ import android.text.Spanned;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.text.style.ImageSpan;
+
+import com.skysoft.smart.intranetchat.bean.SendAtMessageBean;
 import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 import android.view.GestureDetector;
 import android.view.Gravity;
@@ -445,7 +447,7 @@ public class ChatRoomActivity extends AppCompatActivity implements View.OnClickL
         if (!sendVoice && eventMessage.getType() == 3){
             return;
         }
-        ChatRecordEntity recordEntity = SendMessage.sendMessage(eventMessage, new SendMessageBean("", receiverIdentifier, host,
+        ChatRecordEntity recordEntity = SendMessage.sendCommonMessage(eventMessage, new SendMessageBean("", receiverIdentifier, host,
                 receiverAvatarPath, receiverName, isGroup),true);
         if (null != recordEntity){
             adapter.add(recordEntity);
@@ -776,7 +778,7 @@ public class ChatRoomActivity extends AppCompatActivity implements View.OnClickL
             }else {
                 eventMessage.setType(4);
             }
-            SendMessage.sendMessage(eventMessage, new SendMessageBean("", receiverIdentifier, host,
+            SendMessage.sendCommonMessage(eventMessage, new SendMessageBean("", receiverIdentifier, host,
                     receiverAvatarPath, receiverName, isGroup),false);
         }
         super.onActivityResult(requestCode, resultCode, data);
@@ -904,7 +906,39 @@ public class ChatRoomActivity extends AppCompatActivity implements View.OnClickL
             ToastUtil.toast(ChatRoomActivity.this, getString(R.string.chat_room_word_limit));
             return;
         }
-        ChatRecordEntity recordEntity = SendMessage.sendMessage(new SendMessageBean(message, receiverIdentifier, host,
+        switch (mSendMessageType){
+            case 0:     //普通消息
+                sendCommonMessage(message);
+                break;
+            case 1:     //@消息
+                sendAtMessage(message);
+                break;
+            case 2:     //回复消息
+                break;
+        }
+    }
+
+    /**
+     * 发送@消息到指定用户*/
+    private void sendAtMessage(String message) {
+        Editable editableText = inputMessage.getEditableText();
+        ImageSpan[] spans = editableText.getSpans(0, editableText.length(), ImageSpan.class);
+        String[] atIdentifiers = new String[spans.length];
+        for (int i = 0; i<spans.length; i++){
+            atIdentifiers[i] = mNotifyReceivers.get(spans[i]);
+            String name = IntranetChatApplication.sContactMap.get(atIdentifiers[i]).getName();
+            int idx = message.indexOf('@' + name);
+            atIdentifiers[i] = atIdentifiers[i] + '|' + idx + '|' + name.length();
+        }
+        ChatRecordEntity recordEntity = SendMessage.broadcastAtMessage(new SendAtMessageBean(message, receiverIdentifier, host,
+                receiverAvatarPath, receiverName, isGroup, atIdentifiers));
+    }
+
+    /**
+     * 发送普通消息到指定用户
+     * @param message 发送的消息*/
+    private void sendCommonMessage(String message){
+        ChatRecordEntity recordEntity = SendMessage.sendCommonMessage(new SendMessageBean(message, receiverIdentifier, host,
                 receiverAvatarPath, receiverName, isGroup));
         inputMessage.setText("");
         adapter.add(recordEntity);

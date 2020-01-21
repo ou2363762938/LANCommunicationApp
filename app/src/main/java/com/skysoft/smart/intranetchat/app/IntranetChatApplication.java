@@ -982,18 +982,12 @@ public class IntranetChatApplication extends Application {
         sBaseTimeLine = initBaseTimeLine();
         boolean isCurrentProcess = getApplicationContext().getPackageName().equals
                 (getCurrentProcessName());
-        if (Build.MANUFACTURER.equals("vivo") || Build.MANUFACTURER.equals("OPPO")) {
-            if (isNotificationEnabled(this)) {
-//                toSettingPage(this);
-            }
-        }
         int pid = android.os.Process.myPid();
         sCreateProgress = pid;
         if (isCurrentProcess) {
             MyDataBase.getInstance();
             setContext(this);
             Intent intent = new Intent(this, IntranetChatServer.class);
-//            startForegroundService(intent);
             bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
             sCurrentProgress = pid;
             Timer senderMyHeartbeat = new Timer();

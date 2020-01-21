@@ -7,6 +7,11 @@ package com.skysoft.smart.intranetchat.model.net_model;
 
 import android.os.RemoteException;
 import android.text.TextUtils;
+
+import com.skysoft.smart.intranetchat.bean.SendAtMessageBean;
+import com.skysoft.smart.intranetchat.bean.SendReplayMessageBean;
+import com.skysoft.smart.intranetchat.model.network.bean.NotificationMessageBean;
+import com.skysoft.smart.intranetchat.model.network.bean.ReplayMessageBean;
 import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 
 import com.skysoft.smart.intranetchat.R;
@@ -32,9 +37,31 @@ import java.io.File;
 
 public class SendMessage {
     private static String TAG = SendMessage.class.getSimpleName();
-    public static void sendMessage(MessageBean messageBean,String host){
+    public static void sendCommonMessage(MessageBean messageBean, String host){
         try {
             IntranetChatApplication.sAidlInterface.sendMessage(GsonTools.toJson(messageBean),host);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * at消息只有群众存在，所以只需要广播
+     * @param messageBean @消息*/
+    public static void broadcastAtMessage(NotificationMessageBean messageBean){
+        try {
+            IntranetChatApplication.sAidlInterface.broadcastAtMessage(GsonTools.toJson(messageBean));
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 回复消息只有群中存在，所以只需要广播
+     * @param messageBean 回复消息*/
+    public static void broadcastReplayMessage(ReplayMessageBean messageBean){
+        try {
+            IntranetChatApplication.sAidlInterface.broadcastReplayMessage(GsonTools.toJson(messageBean));
         } catch (RemoteException e) {
             e.printStackTrace();
         }
@@ -50,32 +77,92 @@ public class SendMessage {
 
     /**
      * 发送消息同时更新消息界面*/
-    public static ChatRecordEntity sendMessage(SendMessageBean sendMessageBean){
-        MessageBean messageBean = new MessageBean();
-        messageBean.setMsg(sendMessageBean.getMessage());
-        messageBean.setTimeStamp(System.currentTimeMillis());
-        messageBean.setSender(IntranetChatApplication.getsMineUserInfo().getIdentifier());
-        if (sendMessageBean.isGroup()){
-            messageBean.setReceiver(sendMessageBean.getReciever());
-        }else {
-            messageBean.setReceiver(messageBean.getSender());
-        }
-        ChatRecordEntity chatRecordEntity = new ChatRecordEntity();
-        chatRecordEntity.setContent(sendMessageBean.getMessage());
-        chatRecordEntity.setIsReceive(ChatRoomConfig.SEND_MESSAGE);
-        chatRecordEntity.setReceiver(sendMessageBean.getReciever());
-        chatRecordEntity.setSender(IntranetChatApplication.getsMineUserInfo().getIdentifier());
-        chatRecordEntity.setTime(messageBean.getTimeStamp());
-        chatRecordEntity.setType(ChatRoomConfig.RECORD_TEXT);//发送消息
+    public static ChatRecordEntity sendCommonMessage(SendMessageBean sendMessageBean){
+        MessageBean messageBean = initMessageBean(sendMessageBean);     //初始化待发送的MessageBean
+
+        ChatRecordEntity chatRecordEntity = initChatRecordEntity(sendMessageBean,messageBean);
+
         if (!sendMessageBean.isGroup()){
             if (!TextUtils.isEmpty(sendMessageBean.getHost())){
-                SendMessage.sendMessage(messageBean,sendMessageBean.getHost());
+                SendMessage.sendCommonMessage(messageBean,sendMessageBean.getHost());
             }
         }else {
             SendMessage.broadMessage(messageBean);
         }
 
         refreshMessageFragment(sendMessageBean);
+        return chatRecordEntity;
+    }
+
+    /**
+     * 发送@消息同时更新消息界面*/
+    public static ChatRecordEntity broadcastAtMessage(SendAtMessageBean sendMessageBean){
+        //初始化NotificationMessageBean
+        NotificationMessageBean messageBean = (NotificationMessageBean) initMessageBean(sendMessageBean);
+
+        //初始化ChatRecordEntity
+        ChatRecordEntity chatRecordEntity = initChatRecordEntity(sendMessageBean,messageBean);
+
+        messageBean.setmNotificationUsers(sendMessageBean.getmAt());    //装填@对象
+
+        SendMessage.broadcastAtMessage(messageBean);        //广播@消息
+
+        refreshMessageFragment(sendMessageBean);        //刷新消息界面
+        return chatRecordEntity;
+    }
+
+    /**
+     * 发送回复消息同事更新消息界面
+     * @param sendMessageBean 回复消息*/
+    public static ChatRecordEntity broadcastReplayMessage(SendReplayMessageBean sendMessageBean){
+        //初始化ReplayMessageBean
+        ReplayMessageBean messageBean = (ReplayMessageBean) initMessageBean(sendMessageBean);
+
+        //初始化ChatRecordEntity
+        ChatRecordEntity chatRecordEntity = initChatRecordEntity(sendMessageBean,messageBean);
+
+        messageBean.setmNotificationUsers(sendMessageBean.getmAt());        //装填@对象
+        messageBean.setmReplayContent(sendMessageBean.getReplayContent());      //装填回复内容
+        messageBean.setmReplayName(sendMessageBean.getReplayName());            //装填回复对象名称
+        messageBean.setmReplayType(sendMessageBean.getReplayType());            //装填回复内容内型
+
+        SendMessage.broadcastReplayMessage(messageBean);        //广播回复消息
+
+        refreshMessageFragment(sendMessageBean);                //刷新消息界面
+        return chatRecordEntity;
+    }
+
+    /**
+     * SendMessageBean初始化为MessageBean
+     * @param sendMessageBean
+     * @return */
+    public static MessageBean initMessageBean(SendMessageBean sendMessageBean){
+        MessageBean messageBean = new MessageBean();
+        messageBean.setMsg(sendMessageBean.getMessage());       //消息内容
+        messageBean.setTimeStamp(System.currentTimeMillis());   //消息时间戳
+        messageBean.setSender(IntranetChatApplication.getsMineUserInfo().getIdentifier());      //记录发送者
+        if (sendMessageBean.isGroup()){     //群聊接收者为群
+            messageBean.setReceiver(sendMessageBean.getReciever());
+        }else {         //私聊接受者为自己
+            messageBean.setReceiver(messageBean.getSender());
+        }
+        return messageBean;
+    }
+
+    /**
+     * 依据SendMessageBean和MessageBean生成ChatRecordEntity
+     * @param sendMessageBean
+     * @param messageBean
+     * @return */
+    public static ChatRecordEntity initChatRecordEntity(SendMessageBean sendMessageBean, MessageBean messageBean){
+        ChatRecordEntity chatRecordEntity = new ChatRecordEntity();
+        chatRecordEntity.setContent(sendMessageBean.getMessage());      //记录发送内容
+        chatRecordEntity.setIsReceive(ChatRoomConfig.SEND_MESSAGE);     //标记为发消息的类型
+        chatRecordEntity.setReceiver(sendMessageBean.getReciever());
+        chatRecordEntity.setSender(IntranetChatApplication.getsMineUserInfo().getIdentifier());     //记录发送者
+        chatRecordEntity.setTime(messageBean.getTimeStamp());           //记录发送时间
+        chatRecordEntity.setType(ChatRoomConfig.RECORD_TEXT);//发送消息
+
         return chatRecordEntity;
     }
 
@@ -153,7 +240,7 @@ public class SendMessage {
      * @param sendMessageBean 携带接收者信息
      * @param refresh 是否刷新消息界面
      * @return 发送成功后返回消息记录*/
-    public static ChatRecordEntity sendMessage(EventMessage eventMessage,SendMessageBean sendMessageBean,boolean refresh){
+    public static ChatRecordEntity sendCommonMessage(EventMessage eventMessage, SendMessageBean sendMessageBean, boolean refresh){
         if (!IntranetChatApplication.isNetWortState()){
             ToastUtil.toast(IntranetChatApplication.getContext(), IntranetChatApplication.getContext().getString(R.string.Toast_text_non_lan));
             return null;

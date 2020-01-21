@@ -5,6 +5,7 @@
  */
 package com.skysoft.smart.intranetchat.server;
 
+import android.nfc.Tag;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
@@ -57,13 +58,25 @@ public class IntranetChatAidl extends IIntranetChatAidlInterface.Stub {
 
     @Override
     public void sendMessage(String messageJson, String host) throws RemoteException {
-        TLog.d(TAG, "sendMessage: " + messageJson);
+        TLog.d(TAG, "sendCommonMessage: " + messageJson);
         send(messageJson,Config.CODE_MESSAGE,host);
     }
 
     @Override
     public void sendGroupMessage(String messageJson, List<String> hostList) throws RemoteException {
         sendGroup(messageJson,Config.CODE_MESSAGE,hostList);
+    }
+
+    @Override
+    public void broadcastAtMessage(String atMessageJson) throws RemoteException {
+        TLog.d(TAG,"broadcastAtMessage: " + atMessageJson);
+        send(atMessageJson,Config.CODE_MESSAGE_NOTIFICATION,BROADCAST_HOST);
+    }
+
+    @Override
+    public void broadcastReplayMessage(String replayMessageJson) throws RemoteException {
+        TLog.d(TAG,"sendReplayMessage: " + replayMessageJson);
+        send(replayMessageJson,Config.CODE_MESSAGE_REPLAY,BROADCAST_HOST);
     }
 
     @Override
