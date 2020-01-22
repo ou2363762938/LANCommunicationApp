@@ -779,7 +779,9 @@ public class ChatRoomMessageAdapter extends RecyclerView.Adapter<ChatRoomMessage
                 || chatRecordEntity.getIsReceive() == ChatRoomConfig.SEND_VIDEO
                 || chatRecordEntity.getIsReceive() == ChatRoomConfig.SEND_VIDEO_CALL
                 || chatRecordEntity.getIsReceive() == ChatRoomConfig.SEND_VOICE
-                || chatRecordEntity.getIsReceive() == ChatRoomConfig.SEND_VOICE_CALL){
+                || chatRecordEntity.getIsReceive() == ChatRoomConfig.SEND_VOICE_CALL
+                || chatRecordEntity.getIsReceive() == ChatRoomConfig.SEND_AT_MESSAGE
+                || chatRecordEntity.getIsReceive() == ChatRoomConfig.SEND_REPLAY_MESSAGE){
             TLog.d(TAG, "showPopupMenu: right");
             offsetX = -(contentView.getMeasuredWidth() - view.getWidth());
         }

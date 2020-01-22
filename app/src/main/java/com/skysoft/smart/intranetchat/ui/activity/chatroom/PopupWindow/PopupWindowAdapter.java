@@ -36,7 +36,11 @@ public class PopupWindowAdapter extends RecyclerView.Adapter<PopupWindowAdapter.
         //判断长按的消息记录
         switch (mChatRecordEntity.getType()){
             case ChatRoomConfig.RECORD_TEXT:
-                if (mChatRecordEntity.getIsReceive() == ChatRoomConfig.RECEIVE_MESSAGE && mChatAdapter.isGroup()){
+            case ChatRoomConfig.RECORD_NOTIFY_MESSAGE:
+            case ChatRoomConfig.RECORD_REPLAY_MESSAGE:
+                if ((mChatRecordEntity.getIsReceive() == ChatRoomConfig.RECEIVE_MESSAGE ||
+                        mChatRecordEntity.getIsReceive() == ChatRoomConfig.RECEIVE_AT_MESSAGE ||
+                        mChatRecordEntity.getIsReceive() == ChatRoomConfig.RECEIVE_REPLAY_MESSAGE) && mChatAdapter.isGroup()){
                     mItemList = Arrays.asList(mContext.getResources().getStringArray(R.array.popup_window_item_text));
                 }else {
                     mItemList = Arrays.asList(mContext.getResources().getStringArray(R.array.popup_window_item_text_send));
