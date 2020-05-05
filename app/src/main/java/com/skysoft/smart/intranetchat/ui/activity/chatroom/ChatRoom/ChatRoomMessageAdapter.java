@@ -17,6 +17,7 @@ import android.text.Spanned;
 import android.text.TextUtils;
 
 import com.skysoft.smart.intranetchat.model.network.bean.UserInfoBean;
+import com.skysoft.smart.intranetchat.tools.ChatRoom.RoomUtils;
 import com.skysoft.smart.intranetchat.tools.CreateNotifyBitmap;
 import com.skysoft.smart.intranetchat.tools.GsonTools;
 import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
@@ -158,7 +159,7 @@ public class ChatRoomMessageAdapter extends RecyclerView.Adapter<ChatRoomMessage
 
     private void onBindView(ChatRoomMessageViewHolder holder,ChatRecordEntity bean){
         if (bean.getType() == ChatRoomConfig.RECORD_TIME){
-            holder.getTime().setText(ChatRoomActivity.millToFullTime(bean.getTime()));
+            holder.getTime().setText(RoomUtils.millToFullTime(bean.getTime()));
             holder.getTime().setVisibility(View.VISIBLE);
             return;
         }
@@ -279,7 +280,7 @@ public class ChatRoomMessageAdapter extends RecyclerView.Adapter<ChatRoomMessage
                 break;
         }
 
-        file.setOnLongClickListener(new OnLongClickRecord(bean, holder));
+//        file.setOnLongClickListener(new OnLongClickRecord(bean, holder));
     }
 
     //加载图片
@@ -566,7 +567,6 @@ public class ChatRoomMessageAdapter extends RecyclerView.Adapter<ChatRoomMessage
             ChatRecordEntity temp = messageBeanList.get(messageBeanList.size() - 1);
             ChatRecordEntity recordTime = generatorTimeRecord(mReceiverIdentifier,temp.getTime());
             messageBeanList.add(recordTime);
-            TLog.d(TAG, "add: recordTime 4 timeString = " + ChatRoomActivity.millToFullTime(recordTime.getTime()) + ", entity = " + chatRecordEntity.toString());
             addRecordToList(chatRecordEntity,recordTime,receive);
             return;
         }

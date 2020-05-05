@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.skysoft.smart.intranetchat">
 
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
@@ -24,7 +25,8 @@
         android:networkSecurityConfig="@xml/network_security_config"
         android:requestLegacyExternalStorage="true"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme"
+        tools:ignore="GoogleAppIndexingWarning">
         <activity android:name=".ui.activity.chatroom.PopupWindow.TransmitActivity"
             android:screenOrientation="portrait"/>
         <activity

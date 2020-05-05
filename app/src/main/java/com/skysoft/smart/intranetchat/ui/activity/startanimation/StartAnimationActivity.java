@@ -9,6 +9,8 @@ import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.content.Intent;
 import android.os.Bundle;
+
+import com.skysoft.smart.intranetchat.tools.ChatRoom.RoomUtils;
 import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 import android.view.View;
 import android.view.animation.AccelerateInterpolator;
@@ -128,8 +130,8 @@ public class StartAnimationActivity extends AppCompatActivity {
                 while (historyIterator.hasNext()){
                     LatestChatHistoryEntity next = historyIterator.next();
                     total += next.getUnReadNumber();
-                    if (next.getContentTimeMill() != 0 && ChatRoomActivity.initMillToTmie(next.getContentTimeMill())){
-                        next.setContentTime(ChatRoomActivity.millToFullTime(next.getContentTimeMill()));
+                    if (next.getContentTimeMill() != 0 && RoomUtils.initMillToTmie(next.getContentTimeMill())){
+                        next.setContentTime(RoomUtils.millToFullTime(next.getContentTimeMill()));
                     }
                     history.add(next.getUserIdentifier());
                     IntranetChatApplication.sLatestChatHistoryMap.put(next.getUserIdentifier(),next);

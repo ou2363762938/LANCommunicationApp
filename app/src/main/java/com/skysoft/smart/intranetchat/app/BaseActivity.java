@@ -23,7 +23,6 @@ public abstract class BaseActivity extends AppCompatActivity {
 
     public void setStatusView(@IdRes int viewId){
         mStatus = findViewById(viewId);
-        TLog.d(TAG, "onCreate: mStatus = " + mStatus);
         CustomStatusBarBackground.customStatusBarTransparent(this);
         CustomStatusBarBackground.drawableViewStatusBar(this, mTitleDrawableResource,mStatus);
     }
@@ -32,5 +31,6 @@ public abstract class BaseActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         //沉浸式状态栏
+        CustomStatusBarBackground.customStatusBarTransparent(this);
     }
 }

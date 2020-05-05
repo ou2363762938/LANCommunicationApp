@@ -1,6 +1,8 @@
 package com.skysoft.smart.intranetchat.model.net_model;
 
 import android.os.RemoteException;
+
+import com.skysoft.smart.intranetchat.tools.ChatRoom.RoomUtils;
 import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 
 import com.skysoft.smart.intranetchat.app.IntranetChatApplication;
@@ -45,7 +47,7 @@ public class EstablishGroup {
         latestChatHistoryEntity.setUserName(establishGroupBean.getmGroupName());
         latestChatHistoryEntity.setStatus(Config.STATUS_GROUP);
         latestChatHistoryEntity.setContentTimeMill(System.currentTimeMillis());
-        latestChatHistoryEntity.setContentTime(ChatRoomActivity.millsToTime(System.currentTimeMillis()));
+        latestChatHistoryEntity.setContentTime(RoomUtils.millsToTime(System.currentTimeMillis()));
         latestChatHistoryEntity.setUserIdentifier(establishGroupBean.getmGroupIdentifier());
         latestChatHistoryEntity.setUserHeadIdentifier(establishGroupBean.getmGroupAvatarIdentifier());
         return latestChatHistoryEntity;

@@ -47,9 +47,8 @@ public class PopupWindowAdapter extends RecyclerView.Adapter<PopupWindowAdapter.
                 }
                 break;
             case ChatRoomConfig.RECORD_VOICE:
-                if (mChatRecordEntity.getIsReceive() == ChatRoomConfig.RECEIVE_VOICE && mChatAdapter.isGroup()){
-                    mItemList = Arrays.asList(mContext.getResources().getStringArray(R.array.popup_window_item_voice));
-                }
+            case ChatRoomConfig.RECORD_CALL:
+                mItemList = Arrays.asList(mContext.getResources().getStringArray(R.array.popup_window_item_voice));
                 break;
             case ChatRoomConfig.RECORD_IMAGE:
             case ChatRoomConfig.RECORD_VIDEO:

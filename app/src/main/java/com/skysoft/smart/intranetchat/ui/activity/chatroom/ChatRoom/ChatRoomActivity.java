@@ -5,17 +5,13 @@
  */
 package com.skysoft.smart.intranetchat.ui.activity.chatroom.ChatRoom;
 
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.graphics.Rect;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
-import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
@@ -23,8 +19,10 @@ import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.text.style.ImageSpan;
 
+import com.skysoft.smart.intranetchat.app.BaseActivity;
 import com.skysoft.smart.intranetchat.bean.SendAtMessageBean;
-import com.skysoft.smart.intranetchat.tools.GsonTools;
+import com.skysoft.smart.intranetchat.tools.ChatRoom.KeyBoardUtils;
+import com.skysoft.smart.intranetchat.tools.ChatRoom.RoomUtils;
 import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 import android.view.GestureDetector;
 import android.view.Gravity;
@@ -33,14 +31,12 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -58,7 +54,6 @@ import com.skysoft.smart.intranetchat.model.camera.manager.MyMediaPlayerManager;
 import com.skysoft.smart.intranetchat.model.camera.videocall.Sender;
 import com.skysoft.smart.intranetchat.tools.CreateNotifyBitmap;
 import com.skysoft.smart.intranetchat.tools.QuickClickListener;
-import com.skysoft.smart.intranetchat.tools.customstatusbar.CustomStatusBarBackground;
 import com.skysoft.smart.intranetchat.tools.toastutil.ToastUtil;
 import com.skysoft.smart.intranetchat.ui.activity.camera.CameraActivity;
 import com.skysoft.smart.intranetchat.ui.activity.camera.ShowPictureActivity;
@@ -83,12 +78,8 @@ import com.skysoft.smart.intranetchat.ui.activity.voicecall.LaunchVoiceCallActiv
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
-import org.json.JSONArray;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -96,7 +87,7 @@ import java.util.Map;
 
 import static com.skysoft.smart.intranetchat.MainActivity.CALL_FROM_OTHER;
 
-public class ChatRoomActivity extends AppCompatActivity implements View.OnClickListener,GestureDetector.OnGestureListener {
+public class ChatRoomActivity extends BaseActivity implements View.OnClickListener,GestureDetector.OnGestureListener {
 
     private static long inputVoiceStartTime;
     private static long inputVoiceStopTime;
@@ -104,62 +95,91 @@ public class ChatRoomActivity extends AppCompatActivity implements View.OnClickL
     private static String TAG = ChatRoomActivity.class.getSimpleName();
     private String host;
     private String myHost;
-    private String receiverName;
-    private String receiverAvatarPath;
-    private String receiverIdentifier;
-    private ChatRoomMessageAdapter adapter;
-    private RecyclerView recyclerView;
-    private TextView sendMessage;
-    private EditText inputMessage;
-    private ImageView inputVoice;
-    private boolean isInputVoice = false;
-    private TextView roomName;
-    private ImageView moreFunction;
-    private boolean isClosing = true;
-    private View statusBar;
-    private ImageView backImage;
-    private TextView backText;
-    private MyAudioManager myAudioManager;
-    private ConstraintLayout camera;
-    private ConstraintLayout photo;
-    private ConstraintLayout voiceCall;
-    private ConstraintLayout videoCall;
-    private ConstraintLayout file;
-    private GestureDetector sGestureDetector;
-    private LinearLayout moreFunctionBox;
-    private AudioRecordMicView mAudioView;
-    private ConstraintLayout cameraShooting;
-    private TextView establishGroup;
-    private boolean isGroup = false;
+    private String mReceiverName;
+    private String mReceiverAvatarPath;
+    private String mReceiverIdentifier;
+
+    private TextView mRoomName;
+    private TextView mSendMessage;
+    private TextView mEstablishGroup;
     private TextView mInputVoiceBox;
-    private boolean isInputMessage = false;
-    private ViewTreeObserver.OnGlobalLayoutListener mLayoutChangeListener;
+    private TextView mReplayReceiverMessage;
+
+    private EditText mInputMessage;
+
+    private ImageView mIconInputVoice;
+    private ImageView mIconMoreFunction;
+    private ImageView mIconBackImage;
+    private ImageView mIconReplayImage;
+    private ImageView mIconReplayCancel;
+
+    private ChatRoomMessageAdapter mAdapter;
+    private RecyclerView mRecyclerView;
+
+    private LinearLayout mMoreFunctionBox;
+    private LinearLayout mBlankFunctionBox;
+
+    private ConstraintLayout mCameraBox;
+    private ConstraintLayout mPhotoBox;
+    private ConstraintLayout mVoiceCallBox;
+    private ConstraintLayout mVideoCallBox;
+    private ConstraintLayout mFileBox;
+    private ConstraintLayout mCameraShootingBox;
+    private ConstraintLayout mReplayMessageBox;
+
+    private GestureDetector sGestureDetector;
+
+    private MyAudioManager myAudioManager;
+    private AudioRecordMicView mAudioView;
+
     private int mNotifyId;
-    private boolean mRefresh = false;
-    private boolean mUp = false;
-    private boolean startVoiceAnimation;
-    private boolean mHiddenSoftKeyboard = false;
+    private int mSendMessageType = 0;       //0 普通文字消息,1 @消息,2 回复消息
+    private int level;
+
+    private Handler handler;
+
+    private boolean isInputVoice = false;
+    private boolean isClosing = true;
+    private boolean isGroup = false;
+    private boolean isInputMessage = false;
+    private boolean isRefresh = false;
+    private boolean isUp = false;
+    private boolean isStartVoiceAnimation;
+    private boolean isHiddenSoftKeyboard = false;
     private boolean isAudioRecording = false;
     public static boolean sIsAudioRecording = false;
-    private ConstraintLayout mReplayMesssageBox;
-    private TextView mReplayReceiverMessage;
-    private ImageView mReplayImage;
-    private ImageView mReplayCancel;
-    private int mSendMessageType = 0;       //0 普通文字消息,1 @消息,2 回复消息
+
     private Map<ImageSpan,String> mNotifyReceivers = new HashMap<>();
-    private OnSoftKeyboardStateChangedListener mOSSCL = new OnSoftKeyboardStateChangedListener() {
+
+    private ViewTreeObserver.OnGlobalLayoutListener mLayoutChangeListener =
+            new ViewTreeObserver.OnGlobalLayoutListener() {
+        @Override
+        public void onGlobalLayout() {
+            Point screenSize = new Point();
+            getWindowManager().getDefaultDisplay().getSize(screenSize);
+
+            Rect rect = new Rect();
+            getWindow().getDecorView().getWindowVisibleDisplayFrame(rect);
+            int heightDifference = screenSize.y - rect.bottom;
+            boolean isKeyboardShowing = heightDifference > screenSize.y/3;
+            mOSSCL.onSoftKeyboardStateChangedListener(isKeyboardShowing,heightDifference,screenSize.y);
+        }
+    };
+
+    private OnSoftKeyboardStateChangedListener mOSSCL =
+            new OnSoftKeyboardStateChangedListener() {
 
         @Override
         public void onSoftKeyboardStateChangedListener(boolean isKeyBoardShow, int keyboardHeight, int screenSize) {
-            if (!isInputMessage && isKeyBoardShow && !mHiddenSoftKeyboard){
+            if (!isInputMessage && isKeyBoardShow && !isHiddenSoftKeyboard){
                 isInputMessage = true;
-                recyclerView.scrollToPosition(adapter.getItemCount() - 1);
+                mRecyclerView.scrollToPosition(mAdapter.getItemCount() - 1);
             }
             if (!isKeyBoardShow && !isClosing && isInputMessage){
-                moreFunctionBox.setVisibility(View.GONE);
+                mMoreFunctionBox.setVisibility(View.GONE);
                 isClosing = true;
                 isInputMessage = false;
-                inputMessage.clearFocus();
+                mInputMessage.clearFocus();
             }
             if (isClosing){
                 isInputMessage = false;
@@ -167,22 +187,23 @@ public class ChatRoomActivity extends AppCompatActivity implements View.OnClickL
         }
     };
 
-    private OnClickReplayOrNotify mOnClickReplayOrNotify = new OnClickReplayOrNotify() {
+    private OnClickReplayOrNotify mOnClickReplayOrNotify =
+            new OnClickReplayOrNotify() {
         @Override
         public void onClickReplay(ChatRecordEntity recordEntity, String name) {
-            mReplayMesssageBox.setVisibility(View.VISIBLE);
+            mReplayMessageBox.setVisibility(View.VISIBLE);
 
             if (recordEntity.getIsReceive() == ChatRoomConfig.RECEIVE_MESSAGE){
-                mReplayImage.setVisibility(View.GONE);
+                mIconReplayImage.setVisibility(View.GONE);
                 mReplayReceiverMessage.setText(name);
                 mReplayReceiverMessage.append(" :\n\t\t");
                 mReplayReceiverMessage.append(recordEntity.getContent());
             }else if (recordEntity.getIsReceive() == ChatRoomConfig.RECEIVE_IMAGE){
                 mReplayReceiverMessage.setText(name);
                 mReplayReceiverMessage.append(" :");
-                mReplayImage.setVisibility(View.VISIBLE);
+                mIconReplayImage.setVisibility(View.VISIBLE);
                 if (!TextUtils.isEmpty(recordEntity.getPath())){
-                    Glide.with(ChatRoomActivity.this).load(recordEntity.getPath()).into(mReplayImage);
+                    Glide.with(ChatRoomActivity.this).load(recordEntity.getPath()).into(mIconReplayImage);
                 }
             }
 
@@ -195,7 +216,7 @@ public class ChatRoomActivity extends AppCompatActivity implements View.OnClickL
             if (!mNotifyReceivers.containsValue(recordEntity.getSender())){     //未被@
                 mSendMessageType = 1;
                 String notify = " @" + name + " ";
-                int start = inputMessage.getSelectionStart();       //当前光标位置
+                int start = mInputMessage.getSelectionStart();       //当前光标位置
                 SpannableStringBuilder spannableString = new SpannableStringBuilder(notify);    //构建SpannableStringBuilder
                 Bitmap bitmap = CreateNotifyBitmap.notifyBitmap(ChatRoomActivity.this,notify);      //构建内容为notify的bitmap
                 ImageSpan imageSpan = new ImageSpan(ChatRoomActivity.this,bitmap);      //构建内容为bitmap的ImageSpan
@@ -203,11 +224,11 @@ public class ChatRoomActivity extends AppCompatActivity implements View.OnClickL
                         1,notify.length()-1,
                         Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);        //SpannableStringBuilder天剑ImageSpan
                 //原内容中插入SpannableStringBuilder
-                Editable editable = inputMessage.getEditableText();
-                editable.insert(inputMessage.getSelectionStart(),spannableString);
-                inputMessage.setText(editable);
+                Editable editable = mInputMessage.getEditableText();
+                editable.insert(mInputMessage.getSelectionStart(),spannableString);
+                mInputMessage.setText(editable);
                 //移动光标到SpannableStringBuilder后
-                inputMessage.setSelection(start+notify.length());
+                mInputMessage.setSelection(start+notify.length());
                 //记录插入的ImageSpan
                 mNotifyReceivers.put(imageSpan,recordEntity.getSender());
             }
@@ -218,7 +239,7 @@ public class ChatRoomActivity extends AppCompatActivity implements View.OnClickL
         @Override
         public void beforeTextChanged(CharSequence s, int start, int count, int after) {
             if (after == 0){    //删除内容是after为0
-                Editable editableText = inputMessage.getEditableText();     //用于获得ImageSpan[]
+                Editable editableText = mInputMessage.getEditableText();     //用于获得ImageSpan[]
                 int remainImageSpan = 0;    //删除内容后剩余的ImageSpan数量
 
                 if (start != 0){    //被删除内容的起始位置不是原内容的开端
@@ -240,7 +261,6 @@ public class ChatRoomActivity extends AppCompatActivity implements View.OnClickL
                     }
                 }
 
-                TLog.d(TAG, "beforeTextChanged: spans.length = " + remainImageSpan);
                 if (mNotifyReceivers.size() != remainImageSpan){    //值不同，有ImageSpan被删除
                     ImageSpan[] spans = editableText.getSpans(start, count, ImageSpan.class);   //被删除内容中的ImageSpan
                     for (int i = 0;i < spans.length; i++){
@@ -264,37 +284,73 @@ public class ChatRoomActivity extends AppCompatActivity implements View.OnClickL
         }
     };
 
+    private OnReceiveMessage onReceiveMessage = new OnReceiveMessage() {
+        @Override
+        public void onReceiveMessage(MessageBean message, String host) {
+            if (message.getReceiver().equals(mReceiverIdentifier)){
+                ChatRoomActivity.this.host = host;
+            }
+        }
+
+        @Override
+        public void onReceiveFile(FileBean fileBean, String host) {
+            TLog.d(TAG, "onReceiveFile: ");
+            ChatRoomActivity.this.host = host;
+        }
+
+        @Override
+        public void onReceiveAndSaveFile(String sender, String receiver, String identifier, String path) {
+
+        }
+    };
+
+    public OnScrollToPosition onScrollToPosition = new OnScrollToPosition() {
+        @Override
+        public void onLoadViewOver(int size) {
+            mRecyclerView.scrollToPosition(size - 1);
+        }
+    };
+
+    public static void go(Context context,String name,String avatar,String host,String identifier,boolean group){
+        Intent intent = new Intent(context,ChatRoomActivity.class);
+        Bundle bundle = new Bundle();
+        bundle.putString(ChatRoomConfig.NAME,name);
+        bundle.putString(ChatRoomConfig.AVATAR,avatar);
+        bundle.putString(ChatRoomConfig.HOST,host);
+        bundle.putString(ChatRoomConfig.IDENTIFIER,identifier);
+        bundle.putBoolean(ChatRoomConfig.GROUP,group);
+        intent.putExtras(bundle);
+        context.startActivity(intent);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        CustomStatusBarBackground.customStatusBarTransparent(this);
         setContentView(R.layout.activity_chat_room);
         IntranetChatApplication.getsCallback().setOnReceiveMessage(onReceiveMessage);
         EventBus.getDefault().register(this);
         sGestureDetector = new GestureDetector(ChatRoomActivity.this,this);
-        init();
+        initView();
         Intent intent = getIntent();
-        baseInit(intent);
+        initData(intent);
     }
 
-    private void baseInit(Intent intent){
+    private void initData(Intent intent){
         Bundle bundle = intent.getExtras();
         host = bundle.getString(ChatRoomConfig.HOST);
-        receiverName = bundle.getString(ChatRoomConfig.NAME);
-        receiverAvatarPath = bundle.getString(ChatRoomConfig.AVATAR);
-        receiverIdentifier = bundle.getString(ChatRoomConfig.IDENTIFIER);
+        mReceiverName = bundle.getString(ChatRoomConfig.NAME);
+        mReceiverAvatarPath = bundle.getString(ChatRoomConfig.AVATAR);
+        mReceiverIdentifier = bundle.getString(ChatRoomConfig.IDENTIFIER);
         isGroup = bundle.getBoolean(ChatRoomConfig.GROUP);
-        TLog.d(TAG, "baseInit onCreate: isGroup = " + isGroup);
-        TLog.d(TAG, "baseInit: receiverIdentifier = " + receiverIdentifier);
 
         //获得历史聊天记录
         new Thread(new Runnable() {
             @Override
             public void run() {
                 ChatRecordDao chatRecordDao = MyDataBase.getInstance().getChatRecordDao();
-                int number = chatRecordDao.getNumber(receiverIdentifier);
+                int number = chatRecordDao.getNumber(mReceiverIdentifier);
                 int pageNum = 20;
-                List<ChatRecordEntity> all = chatRecordDao.getAll(receiverIdentifier,number-pageNum,pageNum);
+                List<ChatRecordEntity> all = chatRecordDao.getAll(mReceiverIdentifier,number-pageNum,pageNum);
                 if (all != null && all.size() != 0){
                     EventBus.getDefault().post(all);
                 }
@@ -302,46 +358,41 @@ public class ChatRoomActivity extends AppCompatActivity implements View.OnClickL
         }).start();
 
         //加载历史聊天记录
-        IntranetChatApplication.setsChatRoomMessageAdapter(new ChatRoomMessageAdapter(this,IntranetChatApplication.getsMineAvatarPath(),receiverIdentifier,isGroup));
-        adapter = IntranetChatApplication.getsChatRoomMessageAdapter();
-        adapter.setHasStableIds(true);
+        IntranetChatApplication.
+                setsChatRoomMessageAdapter(
+                        new ChatRoomMessageAdapter(
+                                this,
+                                IntranetChatApplication.getsMineAvatarPath(),
+                                mReceiverIdentifier,isGroup)
+                );
+        mAdapter = IntranetChatApplication.getsChatRoomMessageAdapter();
+        mAdapter.setHasStableIds(true);
+        mAdapter.setHasStableIds(true);
+        mAdapter.setOnScrollToPosition(onScrollToPosition);
+        mAdapter.setOnClickReplayOrNotify(mOnClickReplayOrNotify);       //注册回复和@
+        mRecyclerView.setAdapter(mAdapter);
+
         GroupMembersBean bean = new GroupMembersBean();
-        bean.setmMemberName(receiverName);
-        bean.setmMemberAvatarPath(receiverAvatarPath);
-        adapter.setHasStableIds(true);
-        adapter.setOnScrollToPosition(onScrollToPosition);
-        recyclerView.setAdapter(adapter);
-        roomName.setText(receiverName);
-        adapter.setOnClickReplayOrNotify(mOnClickReplayOrNotify);       //注册回复和@
+        bean.setmMemberName(mReceiverName);
+        bean.setmMemberAvatarPath(mReceiverAvatarPath);
+        mRoomName.setText(mReceiverName);
 
         myHost = IntranetChatServer.getHostIP();
 
         //单聊聊天室不允许建群
         if (!isGroup){
-            establishGroup.setVisibility(View.GONE);
+            mEstablishGroup.setVisibility(View.GONE);
         }else {
             findViewById(R.id.chat_room_more_function_voice_call_box).setVisibility(View.GONE);
             findViewById(R.id.chat_room_more_function_video_call_box).setVisibility(View.GONE);
             findViewById(R.id.chat_room_more_function_placeholder).setVisibility(View.VISIBLE);
         }
-        //监听软键盘弹出
-        mLayoutChangeListener = new ViewTreeObserver.OnGlobalLayoutListener() {
-            @Override
-            public void onGlobalLayout() {
-                Point screenSize = new Point();
-                getWindowManager().getDefaultDisplay().getSize(screenSize);
 
-                Rect rect = new Rect();
-                getWindow().getDecorView().getWindowVisibleDisplayFrame(rect);
-                int heightDifference = screenSize.y - rect.bottom;
-                boolean isKeyboardShowing = heightDifference > screenSize.y/3;
-                mOSSCL.onSoftKeyboardStateChangedListener(isKeyboardShowing,heightDifference,screenSize.y);
-            }
-        };
+        //监听软键盘弹出
         getWindow().getDecorView().getViewTreeObserver().addOnGlobalLayoutListener(mLayoutChangeListener);
 
         //刷新未读消息数
-        LatestChatHistoryEntity item = IntranetChatApplication.sLatestChatHistoryMap.get(receiverIdentifier);
+        LatestChatHistoryEntity item = IntranetChatApplication.sLatestChatHistoryMap.get(mReceiverIdentifier);
         if (null != item){
             int number = IntranetChatApplication.getmTotalUnReadNumber() - item.getUnReadNumber();
             item.setUnReadNumber(0);
@@ -367,9 +418,9 @@ public class ChatRoomActivity extends AppCompatActivity implements View.OnClickL
         //删除存在的通知
         ContactEntity next = null;
         if (isGroup){
-            next = IntranetChatApplication.sGroupContactMap.get(receiverIdentifier);
+            next = IntranetChatApplication.sGroupContactMap.get(mReceiverIdentifier);
         }else {
-            next = IntranetChatApplication.sContactMap.get(receiverIdentifier);
+            next = IntranetChatApplication.sContactMap.get(mReceiverIdentifier);
         }
         if (null != next){
             mNotifyId = next.getNotifyId();
@@ -378,160 +429,85 @@ public class ChatRoomActivity extends AppCompatActivity implements View.OnClickL
             }
         }
 
-    }
-
-    /**
-     * 改变Recycler的滑动速度
-     * @param recyclerView
-     * @param velocity      //滑动速度默认是8000dp
-     */
-    public static void setMaxFlingVelocity(RecyclerView recyclerView, int velocity){
-        try{
-            Field field = recyclerView.getClass().getDeclaredField("mMaxFlingVelocity");
-            field.setAccessible(true);
-            field.set(recyclerView, velocity);
-        }catch (Exception e){
-            e.printStackTrace();
-        }
-    }
-
-    @Override
-    protected void onNewIntent(Intent intent) {
-        super.onNewIntent(intent);
-        setIntent(intent);
-        baseInit(intent);
-        TLog.d(TAG, "onNewIntent: 调用了onNewIntent!");
-    }
-
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void loadChatHistory(List<ChatRecordEntity> chatHistory) {
-        if (chatHistory.size() == 0){
-            ToastUtil.toast(ChatRoomActivity.this, getString(R.string.ChatRoomActivity_loadChatHistory_toast_text));
-            return;
-        }
-        adapter.addAll(chatHistory);
-    }
-
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void handleReceiveAndSaveFile(LoadResourceBean loadResourceBean) {
-        TLog.d(TAG, "onReceiveAndSaveFile: run: receiver = " + loadResourceBean.getRecordEntity());
-        adapter.add(loadResourceBean.getRecordEntity(),true);
-    }
-
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onReceiveEventMessage(EventMessage eventMessage){
-        TLog.d(TAG, "onReceiveEventMessage: eventMessage.getType() = " + eventMessage.getType());
-        if (eventMessage.getType() == CALL_FROM_OTHER && isAudioRecording){
-            myAudioManager.stopAndNotSend();
-            stopAnimation();
-            isAudioRecording = false;
-            sIsAudioRecording = false;
-            return;
-        }
-        if (!(eventMessage.getType() == 1 || eventMessage.getType() == 2 || eventMessage.getType() == 3)){
-            return;
-        }
-        if (!sendVoice && eventMessage.getType() == 3){
-            return;
-        }
-        ChatRecordEntity recordEntity = SendMessage.sendCommonMessage(eventMessage, new SendMessageBean("", receiverIdentifier, host,
-                receiverAvatarPath, receiverName, isGroup),true);
-        if (null != recordEntity){
-            adapter.add(recordEntity);
-        }
-    }
-
-    private void init() {
-        statusBar = findViewById(R.id.custom_status_bar_background);
-        recyclerView = findViewById(R.id.chat_room_recycler);
-        sendMessage = findViewById(R.id.chat_room_send_message);
-        inputMessage = findViewById(R.id.chat_room_input_message);
-        inputVoice = findViewById(R.id.chat_room_input_voice);
-        backImage = findViewById(R.id.chat_room_back);
-        backText = findViewById(R.id.chat_room_title_message);
         myAudioManager = new MyAudioManager();
-        moreFunctionBox = findViewById(R.id.chat_room_bottom_function);
-        camera = findViewById(R.id.chat_room_more_function_camera_box);
-        photo = findViewById(R.id.chat_room_more_function_photo_box);
-        file = findViewById(R.id.chat_room_more_function_file_box);
-        voiceCall = findViewById(R.id.chat_room_more_function_voice_call_box);
-        videoCall = findViewById(R.id.chat_room_more_function_video_call_box);
-        cameraShooting = findViewById(R.id.chat_room_more_function_video_box);
-        establishGroup = findViewById(R.id.chat_room_establish_group);
+    }
+
+    private void initView() {
+        mRecyclerView = findViewById(R.id.chat_room_recycler);
+        mSendMessage = findViewById(R.id.chat_room_send_message);
+        mInputMessage = findViewById(R.id.chat_room_input_message);
+        mIconInputVoice = findViewById(R.id.chat_room_input_voice);
+        mIconBackImage = findViewById(R.id.chat_room_back);
+
+        mMoreFunctionBox = findViewById(R.id.chat_room_bottom_function);
+        mBlankFunctionBox = findViewById(R.id.chat_room_bottom_blank_function);
+
+        mCameraBox = findViewById(R.id.chat_room_more_function_camera_box);
+        mPhotoBox = findViewById(R.id.chat_room_more_function_photo_box);
+        mFileBox = findViewById(R.id.chat_room_more_function_file_box);
+        mVoiceCallBox = findViewById(R.id.chat_room_more_function_voice_call_box);
+        mVideoCallBox = findViewById(R.id.chat_room_more_function_video_call_box);
+        mCameraShootingBox = findViewById(R.id.chat_room_more_function_video_box);
+        mEstablishGroup = findViewById(R.id.chat_room_establish_group);
         mInputVoiceBox = findViewById(R.id.chat_room_input_voice_box);
 
-        moreFunction = findViewById(R.id.chat_room_more_function);
-        roomName = findViewById(R.id.chat_room_name);
+        mIconMoreFunction = findViewById(R.id.chat_room_more_function);
+        mRoomName = findViewById(R.id.chat_room_name);
         mAudioView = findViewById(R.id.chat_room_audio_view);
-        sendMessage.setOnClickListener(this);
-        inputVoice.setOnClickListener(this);
-        inputMessage.setOnClickListener(this::onClick);
-        moreFunction.setOnClickListener(this);
-        backImage.setOnClickListener(this::onClick);
-        backText.setOnClickListener(this::onClick);
-        //more function
-        camera.setOnClickListener(this::onClick);
-        photo.setOnClickListener(this::onClick);
-        file.setOnClickListener(this::onClick);
-        voiceCall.setOnClickListener(this::onClick);
-        videoCall.setOnClickListener(this::onClick);
-        cameraShooting.setOnClickListener(this::onClick);
-        establishGroup.setOnClickListener(this::onClick);
 
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
-        recyclerView.setLayoutManager(linearLayoutManager);
-        recyclerView.getItemAnimator().setAddDuration(120);
-        recyclerView.getItemAnimator().setChangeDuration(250);
-        recyclerView.getItemAnimator().setMoveDuration(250);
-        recyclerView.getItemAnimator().setRemoveDuration(120);
+        mRecyclerView.setLayoutManager(linearLayoutManager);
+        mRecyclerView.getItemAnimator().setAddDuration(120);
+        mRecyclerView.getItemAnimator().setChangeDuration(250);
+        mRecyclerView.getItemAnimator().setMoveDuration(250);
+        mRecyclerView.getItemAnimator().setRemoveDuration(120);
         //设置recyclerView的滑动惯性
-        setMaxFlingVelocity(recyclerView,6000);
+        RoomUtils.setMaxFlingVelocity(mRecyclerView, 6000);
 
-        ViewGroup.LayoutParams layoutParams = moreFunctionBox.getLayoutParams();
+        ViewGroup.LayoutParams layoutParams = mMoreFunctionBox.getLayoutParams();
         layoutParams.height = IntranetChatApplication.getsEquipmentInfoEntity().getSoftInputHeight();
-        moreFunctionBox.setLayoutParams(layoutParams);
+        mMoreFunctionBox.setLayoutParams(layoutParams);
 
-        CustomStatusBarBackground.drawableViewStatusBar(this,R.drawable.custom_gradient_main_title,statusBar);
-        inputMessage.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+        mInputMessage.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
                 if (hasFocus && isClosing){
-                    moreFunctionBox.setVisibility(View.INVISIBLE);
+                    mMoreFunctionBox.setVisibility(View.INVISIBLE);
                     isClosing = false;
-                    recyclerView.scrollToPosition(adapter.getItemCount() - 1);
+                    mRecyclerView.scrollToPosition(mAdapter.getItemCount() - 1);
                 }
             }
         });
 
-        recyclerView.setOnScrollListener(new RecyclerView.OnScrollListener() {
+        mRecyclerView.setOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
                 super.onScrollStateChanged(recyclerView, newState);
                 if (newState == RecyclerView.SCROLL_STATE_IDLE){
-                    TLog.d(TAG, "onScrollStateChanged: 底部 TopPosition = " + adapter.getTopPosition());
-                    if (!mRefresh){
-                        mRefresh = true;
+                    TLog.d(TAG, "onScrollStateChanged: 底部 TopPosition = " + mAdapter.getTopPosition());
+                    if (!isRefresh){
+                        isRefresh = true;
                         return;
                     }
-                    if (adapter.getTopPosition() == 0 && mUp){
-                        mRefresh = false;
+                    if (mAdapter.getTopPosition() == 0 && isUp){
+                        isRefresh = false;
                         new Thread(new Runnable() {
                             @Override
                             public void run() {
                                 ChatRecordDao chatRecordDao = MyDataBase.getInstance().getChatRecordDao();
-                                int number = chatRecordDao.getNumber(receiverIdentifier);
-                                if (number == adapter.getItemCount()){
+                                int number = chatRecordDao.getNumber(mReceiverIdentifier);
+                                if (number == mAdapter.getItemCount()){
                                     List<ChatRecordEntity> all = new ArrayList<>();
                                     EventBus.getDefault().post(all);
                                     return;
                                 }else {
                                     int more = 15;
-                                    int start = number - adapter.getItemCount() - 15;
+                                    int start = number - mAdapter.getItemCount() - 15;
                                     if (start < 0){
                                         start = 0;
-                                        more = number - adapter.getItemCount();
+                                        more = number - mAdapter.getItemCount();
                                     }
-                                    List<ChatRecordEntity> all = chatRecordDao.getAll(receiverIdentifier, start, more);
+                                    List<ChatRecordEntity> all = chatRecordDao.getAll(mReceiverIdentifier, start, more);
                                     if (start == 0){
                                         Iterator<ChatRecordEntity> iterator = all.iterator();
                                         while (iterator.hasNext()){
@@ -551,17 +527,82 @@ public class ChatRoomActivity extends AppCompatActivity implements View.OnClickL
             @Override
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
-                mUp = dy < 0;
+                isUp = dy < 0;
             }
         });
 
-        inputMessage.addTextChangedListener(mWatchInputMessage);        //监听输入框内容变化
-
         mReplayReceiverMessage = findViewById(R.id.replay_receiver_message);
-        mReplayMesssageBox = findViewById(R.id.replay_box);
-        mReplayImage = findViewById(R.id.replay_image);
-        mReplayCancel = findViewById(R.id.replay_cancel);
-        mReplayCancel.setOnClickListener(this::onClick);
+        mReplayMessageBox = findViewById(R.id.replay_box);
+        mIconReplayImage = findViewById(R.id.replay_image);
+        mIconReplayCancel = findViewById(R.id.replay_cancel);
+
+        setListener();
+    }
+
+    private void setListener() {
+        mSendMessage.setOnClickListener(this);
+        mIconInputVoice.setOnClickListener(this);
+        mInputMessage.setOnClickListener(this::onClick);
+        mIconMoreFunction.setOnClickListener(this);
+        mIconBackImage.setOnClickListener(this::onClick);
+        //more function
+        mCameraBox.setOnClickListener(this::onClick);
+        mPhotoBox.setOnClickListener(this::onClick);
+        mFileBox.setOnClickListener(this::onClick);
+        mVoiceCallBox.setOnClickListener(this::onClick);
+        mVideoCallBox.setOnClickListener(this::onClick);
+        mCameraShootingBox.setOnClickListener(this::onClick);
+        mEstablishGroup.setOnClickListener(this::onClick);
+
+        mInputMessage.addTextChangedListener(mWatchInputMessage);        //监听输入框内容变化
+
+        mIconReplayCancel.setOnClickListener(this::onClick);
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        initData(intent);
+        TLog.d(TAG, "onNewIntent: 调用了onNewIntent!");
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void loadChatHistory(List<ChatRecordEntity> chatHistory) {
+        if (chatHistory.size() == 0){
+            ToastUtil.toast(ChatRoomActivity.this, getString(R.string.ChatRoomActivity_loadChatHistory_toast_text));
+            return;
+        }
+        mAdapter.addAll(chatHistory);
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void handleReceiveAndSaveFile(LoadResourceBean loadResourceBean) {
+        TLog.d(TAG, "onReceiveAndSaveFile: run: receiver = " + loadResourceBean.getRecordEntity());
+        mAdapter.add(loadResourceBean.getRecordEntity(),true);
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onReceiveEventMessage(EventMessage eventMessage){
+        TLog.d(TAG, "onReceiveEventMessage: eventMessage.getType() = " + eventMessage.getType());
+        if (eventMessage.getType() == CALL_FROM_OTHER && isAudioRecording){
+            myAudioManager.stopAndNotSend();
+            stopAnimation();
+            isAudioRecording = false;
+            sIsAudioRecording = false;
+            return;
+        }
+        if (!(eventMessage.getType() == 1 || eventMessage.getType() == 2 || eventMessage.getType() == 3)){
+            return;
+        }
+        if (!sendVoice && eventMessage.getType() == 3){
+            return;
+        }
+        ChatRecordEntity recordEntity = SendMessage.sendCommonMessage(eventMessage, new SendMessageBean("", mReceiverIdentifier, host,
+                mReceiverAvatarPath, mReceiverName, isGroup),true);
+        if (null != recordEntity){
+            mAdapter.add(recordEntity);
+        }
     }
 
     @Override
@@ -571,44 +612,11 @@ public class ChatRoomActivity extends AppCompatActivity implements View.OnClickL
         IntranetChatApplication.setsChatRoomMessageAdapter(null);
     }
 
-    private OnReceiveMessage onReceiveMessage = new OnReceiveMessage() {
-        @Override
-        public void onReceiveMessage(MessageBean message, String host) {
-            if (message.getReceiver().equals(receiverIdentifier)){
-                ChatRoomActivity.this.host = host;
-            }
-        }
-
-        @Override
-        public void onReceiveFile(FileBean fileBean, String host) {
-            TLog.d(TAG, "onReceiveFile: ");
-            ChatRoomActivity.this.host = host;
-        }
-
-        @Override
-        public void onReceiveAndSaveFile(String sender, String receiver, String identifier, String path) {
-
-        }
-    };
-
-    public static void go(Context context,String name,String avatar,String host,String identifier,boolean group){
-        Intent intent = new Intent(context,ChatRoomActivity.class);
-        Bundle bundle = new Bundle();
-        bundle.putString(ChatRoomConfig.NAME,name);
-        bundle.putString(ChatRoomConfig.AVATAR,avatar);
-        bundle.putString(ChatRoomConfig.HOST,host);
-        bundle.putString(ChatRoomConfig.IDENTIFIER,identifier);
-        bundle.putBoolean(ChatRoomConfig.GROUP,group);
-        intent.putExtras(bundle);
-        context.startActivity(intent);
-    }
-
     @Override
     public void onClick(View v) {
 
         switch (v.getId()) {
             case R.id.chat_room_send_message:
-                TLog.d(TAG, "onClick: IntranetChatApplication.isNetWortState() = " + IntranetChatApplication.isNetWortState());
                 if (!IntranetChatApplication.isNetWortState()) {
                     ToastUtil.toast(ChatRoomActivity.this, getString(R.string.Toast_text_non_lan));
                     break;
@@ -623,35 +631,35 @@ public class ChatRoomActivity extends AppCompatActivity implements View.OnClickL
             case R.id.chat_room_more_function:
                 if (isInputVoice) {
                     TLog.d(TAG, "onClick: 2");
-                    moreFunctionBox.setVisibility(View.VISIBLE);
+                    mMoreFunctionBox.setVisibility(View.VISIBLE);
                     isClosing = false;
-                    inputVoice.setImageResource(R.drawable.ic_voice_circle);
-                    inputMessage.setGravity(Gravity.LEFT | Gravity.CENTER_VERTICAL);
-                    inputMessage.setVisibility(View.VISIBLE);
+                    mIconInputVoice.setImageResource(R.drawable.ic_voice_circle);
+                    mInputMessage.setGravity(Gravity.LEFT | Gravity.CENTER_VERTICAL);
+                    mInputMessage.setVisibility(View.VISIBLE);
                     mInputVoiceBox.setVisibility(View.GONE);
                     mInputVoiceBox.setOnTouchListener(null);
                     isInputVoice = false;
-                    recyclerView.scrollToPosition(adapter.getItemCount() - 1);
+                    mRecyclerView.scrollToPosition(mAdapter.getItemCount() - 1);
                     break;
                 }
                 if (isClosing && !isInputMessage) {
                     TLog.d(TAG, "onClick: 4");
-                    moreFunctionBox.setVisibility(View.VISIBLE);
+                    mMoreFunctionBox.setVisibility(View.VISIBLE);
                     isClosing = false;
-                    recyclerView.scrollToPosition(adapter.getItemCount() - 1);
+                    mRecyclerView.scrollToPosition(mAdapter.getItemCount() - 1);
                     break;
                 }
                 if (isInputMessage) {
-                    mHiddenSoftKeyboard = true;
+                    isHiddenSoftKeyboard = true;
                     hintKeyBoard();
-                    moreFunctionBox.setVisibility(View.VISIBLE);
+                    mMoreFunctionBox.setVisibility(View.VISIBLE);
                 } else {
-                    mHiddenSoftKeyboard = false;
-                    showInput(inputMessage);
-                    moreFunctionBox.setVisibility(View.INVISIBLE);
+                    isHiddenSoftKeyboard = false;
+                    isInputMessage = true;
+                    KeyBoardUtils.showInput(this,mInputMessage);
+                    mMoreFunctionBox.setVisibility(View.INVISIBLE);
                 }
                 break;
-            case R.id.chat_room_title_message:
             case R.id.chat_room_back:
                 MainActivity.go(ChatRoomActivity.this);
                 finish();
@@ -663,7 +671,7 @@ public class ChatRoomActivity extends AppCompatActivity implements View.OnClickL
                         break;
                     }
                     IntranetChatApplication.setInCall(true);
-                    LaunchVoiceCallActivity.go(ChatRoomActivity.this, host, receiverName, receiverAvatarPath, receiverIdentifier);
+                    LaunchVoiceCallActivity.go(ChatRoomActivity.this, host, mReceiverName, mReceiverAvatarPath, mReceiverIdentifier);
                 }
                 break;
             case R.id.chat_room_more_function_video_call_box:
@@ -675,7 +683,7 @@ public class ChatRoomActivity extends AppCompatActivity implements View.OnClickL
                     IntranetChatApplication.setInCall(true);
                     IntranetChatApplication.getmDatasQueue().clear();
                     Sender.mInputDatasQueue.clear();
-                    LaunchVideoCallActivity.go(ChatRoomActivity.this, host, receiverName, receiverAvatarPath, receiverIdentifier);
+                    LaunchVideoCallActivity.go(ChatRoomActivity.this, host, mReceiverName, mReceiverAvatarPath, mReceiverIdentifier);
                 }
                 break;
             case R.id.chat_room_more_function_camera_box:
@@ -701,14 +709,14 @@ public class ChatRoomActivity extends AppCompatActivity implements View.OnClickL
             case R.id.chat_room_establish_group:
                 if (QuickClickListener.isFastClick(300)) {
                     TLog.d(TAG, "onClick: 查看群成员！！！");
-                    EstablishGroupActivity.go(ChatRoomActivity.this, receiverIdentifier, isGroup);
+                    EstablishGroupActivity.go(ChatRoomActivity.this, mReceiverIdentifier, isGroup);
                 }
                 break;
             case R.id.chat_room_input_message:
-                mHiddenSoftKeyboard = false;
-                if (!isInputMessage && inputMessage.hasFocus()) {
+                isHiddenSoftKeyboard = false;
+                if (!isInputMessage && mInputMessage.hasFocus()) {
                     if (isClosing) {
-                        moreFunctionBox.setVisibility(View.INVISIBLE);
+                        mMoreFunctionBox.setVisibility(View.INVISIBLE);
                         isClosing = false;
                     }
                 }
@@ -720,13 +728,12 @@ public class ChatRoomActivity extends AppCompatActivity implements View.OnClickL
                 break;
             case R.id.replay_cancel:    //关闭回复消息展示框
                 if (QuickClickListener.isFastClick()){
-                    mReplayMesssageBox.setVisibility(View.GONE);
+                    mReplayMessageBox.setVisibility(View.GONE);
                     mSendMessageType = 1;
                 }
                 break;
         }
     }
-
 
     private void goChoseFile() {
         Intent intent = new Intent();
@@ -743,42 +750,11 @@ public class ChatRoomActivity extends AppCompatActivity implements View.OnClickL
         startActivityForResult(intent, 2);
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == 2 && resultCode == RESULT_OK) {
-            //图片
-//            ClipImageActivity.goActivity(this, data.getData());
-            ShowPictureActivity.goActivity(this,data.getData(),false);
-        } else if (requestCode == 3 && resultCode == RESULT_OK) {
-            //文件
-            String realFilePathFromUri = ContentUriUtil.getPath(this,data.getData());
-//            TLog.d(TAG, "onActivityResult: realFilePathFromUri = " + realFilePathFromUri);
-            String suffix = realFilePathFromUri.substring(realFilePathFromUri.lastIndexOf("."));
-            TLog.d(TAG, "onActivityResult: sufffix = " + suffix);
-            EventMessage eventMessage = new EventMessage();
-            eventMessage.setMessage(realFilePathFromUri);
-            if (suffix.equals(".mp4")){
-                eventMessage.setType(2);
-            }else if (suffix.equals(".jpg") || suffix.equals(".png")){
-                eventMessage.setType(1);
-            }else {
-                eventMessage.setType(4);
-            }
-            SendMessage.sendCommonMessage(eventMessage, new SendMessageBean("", receiverIdentifier, host,
-                    receiverAvatarPath, receiverName, isGroup),false);
-        }
-        super.onActivityResult(requestCode, resultCode, data);
-    }
-
     //输入框的按压事件
     public void onTouchInputMessageListener() {
         mInputVoiceBox.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-//                if (!isClosing){
-//                    foldMoreFunctionBox();
-//                    showInput(inputMessage);
-//                }
                 TLog.d(TAG, "onTouch: isInputVoice = " + isInputVoice);
                 if (!isInputVoice) {
                     return false;
@@ -788,7 +764,7 @@ public class ChatRoomActivity extends AppCompatActivity implements View.OnClickL
                         inputVoiceStopTime = System.currentTimeMillis();
                         if (!isAudioRecording)
                             break;
-                        if (startVoiceAnimation){
+                        if (isStartVoiceAnimation){
                             TLog.d(TAG, "onTouch: 手指松开被调用！");
                             if (inputVoiceStopTime - inputVoiceStartTime <= 999){
                                 ToastUtil.toast(ChatRoomActivity.this, getString(R.string.ChatRoomActivity_inputVoiceTime_Toast));
@@ -830,9 +806,6 @@ public class ChatRoomActivity extends AppCompatActivity implements View.OnClickL
         });
     }
 
-    private int level;
-    private Handler handler;
-
     private void audioAnimation() {
         handler = new Handler();
         level = 0;
@@ -856,7 +829,7 @@ public class ChatRoomActivity extends AppCompatActivity implements View.OnClickL
 
     private void onClickInputVoice() {
         if (!isClosing){
-            moreFunctionBox.setVisibility(View.GONE);
+            mMoreFunctionBox.setVisibility(View.GONE);
             isClosing = true;
         }
         if (isInputMessage){
@@ -864,16 +837,16 @@ public class ChatRoomActivity extends AppCompatActivity implements View.OnClickL
         }
         if (isInputVoice) {
             //输入文字
-            inputVoice.setImageResource(R.drawable.ic_voice_circle);
-            inputMessage.setGravity(Gravity.LEFT | Gravity.CENTER_VERTICAL);
-            inputMessage.setVisibility(View.VISIBLE);
+            mIconInputVoice.setImageResource(R.drawable.ic_voice_circle);
+            mInputMessage.setGravity(Gravity.LEFT | Gravity.CENTER_VERTICAL);
+            mInputMessage.setVisibility(View.VISIBLE);
             mInputVoiceBox.setVisibility(View.GONE);
             mInputVoiceBox.setOnTouchListener(null);
         } else {
             //输入语音
             onTouchInputMessageListener();
-            inputVoice.setImageResource(R.drawable.ic_keyboard);
-            inputMessage.setVisibility(View.GONE);
+            mIconInputVoice.setImageResource(R.drawable.ic_keyboard);
+            mInputMessage.setVisibility(View.GONE);
             mInputVoiceBox.setVisibility(View.VISIBLE);
             isInputMessage = false;
         }
@@ -884,7 +857,7 @@ public class ChatRoomActivity extends AppCompatActivity implements View.OnClickL
         if (isInputVoice) {
             return;
         }
-        String message = inputMessage.getText().toString();
+        String message = mInputMessage.getText().toString();
         if (TextUtils.isEmpty(message)) {
             return;
         }
@@ -902,13 +875,13 @@ public class ChatRoomActivity extends AppCompatActivity implements View.OnClickL
             case 2:     //回复消息
                 break;
         }
-        inputMessage.setText("");
+        mInputMessage.setText("");
     }
 
     /**
      * 发送@消息到指定用户*/
     private void sendAtMessage(String message) {
-        Editable editableText = inputMessage.getEditableText();
+        Editable editableText = mInputMessage.getEditableText();
         ImageSpan[] spans = editableText.getSpans(0, editableText.length(), ImageSpan.class);
         String[] atIdentifiers = new String[spans.length];
         for (int i = 0; i<spans.length; i++){
@@ -918,77 +891,24 @@ public class ChatRoomActivity extends AppCompatActivity implements View.OnClickL
             atIdentifiers[i] = atIdentifiers[i] + '|' + idx + '|' + name.length();
         }
 
-        ChatRecordEntity recordEntity = SendMessage.broadcastAtMessage(new SendAtMessageBean(message, receiverIdentifier, host,
-                receiverAvatarPath, receiverName, isGroup, atIdentifiers));
-        adapter.add(recordEntity);
+        ChatRecordEntity recordEntity = SendMessage.broadcastAtMessage(new SendAtMessageBean(message, mReceiverIdentifier, host,
+                mReceiverAvatarPath, mReceiverName, isGroup, atIdentifiers));
+        mAdapter.add(recordEntity);
     }
 
     /**
      * 发送普通消息到指定用户
      * @param message 发送的消息*/
     private void sendCommonMessage(String message){
-        ChatRecordEntity recordEntity = SendMessage.sendCommonMessage(new SendMessageBean(message, receiverIdentifier, host,
-                receiverAvatarPath, receiverName, isGroup));
-        adapter.add(recordEntity);
+        ChatRecordEntity recordEntity = SendMessage.sendCommonMessage(new SendMessageBean(message, mReceiverIdentifier, host,
+                mReceiverAvatarPath, mReceiverName, isGroup));
+        mAdapter.add(recordEntity);
     }
-
-    public static String millsToTime(long time) {
-        Date date = new Date(time);
-        return millsToTime(date);
-    }
-
-    public static boolean initMillToTmie(long time){
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(System.currentTimeMillis());
-        int nowDay = calendar.get(Calendar.DAY_OF_MONTH);
-        calendar.setTimeInMillis(time);
-        int day = calendar.get(Calendar.DAY_OF_MONTH);
-        if (nowDay < day){
-            return false;
-        }
-        return true;
-    }
-
-    public static String millsToTime(Date date){
-        int hours = date.getHours();
-        int minutes = date.getMinutes();
-        StringBuilder sb = new StringBuilder();
-        sb.append(hours);
-        sb.append(':');
-        if (minutes < 10){
-            sb.append(0);
-        }
-        sb.append(minutes);
-        return sb.toString();
-    }
-
-    public static String millToFullTime(long time){
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(new Date(time));
-        String fullTime = String.valueOf(calendar.get(Calendar.MONTH) + 1) + "月" + (calendar.get(Calendar.DAY_OF_MONTH))+ "日" + millsToTime(time);
-        calendar.clear();
-        return fullTime;
-    }
-
-    @Override
-    public void onBackPressed() {
-        super.onBackPressed();
-        MainActivity.go(ChatRoomActivity.this);
-        finish();
-    }
-
-    public OnScrollToPosition onScrollToPosition = new OnScrollToPosition() {
-        @Override
-        public void onLoadViewOver(int size) {
-            TLog.d(TAG, "onLoadViewOver: size = " + size);
-            recyclerView.scrollToPosition(size - 1);
-        }
-    };
 
     public void hidden(){
         if (!isInputVoice){
-            mHiddenSoftKeyboard = true;
-            moreFunctionBox.setVisibility(View.GONE);
+            isHiddenSoftKeyboard = true;
+            mMoreFunctionBox.setVisibility(View.GONE);
             isClosing = true;
             hintKeyBoard();
         }
@@ -997,57 +917,51 @@ public class ChatRoomActivity extends AppCompatActivity implements View.OnClickL
     //关闭软键盘
     public void hintKeyBoard() {
         isInputMessage = false;
-        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-        if (imm.isActive() && getCurrentFocus() != null) {
-            if (getCurrentFocus().getWindowToken() != null) {
-                imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
-            }
-        }
+        KeyBoardUtils.hintKeyBoard(this);
     }
 
     public void fold(){
         if (isClosing){
-            moreFunctionBox.setVisibility(View.VISIBLE);
+            mMoreFunctionBox.setVisibility(View.VISIBLE);
         }else {
-            moreFunctionBox.setVisibility(View.GONE);
+            mMoreFunctionBox.setVisibility(View.GONE);
         }
         isClosing = !isClosing;
     }
 
-    public boolean isShowingInput(){
-        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-        return imm.isActive() && getCurrentFocus() != null;
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == 2 && resultCode == RESULT_OK) {
+            ShowPictureActivity.goActivity(this,data.getData(),false);
+        } else if (requestCode == 3 && resultCode == RESULT_OK) {
+            //文件
+            String realFilePathFromUri = ContentUriUtil.getPath(this,data.getData());
+            String suffix = realFilePathFromUri.substring(realFilePathFromUri.lastIndexOf("."));
+            EventMessage eventMessage = new EventMessage();
+            eventMessage.setMessage(realFilePathFromUri);
+            if (suffix.equals(".mp4")){
+                eventMessage.setType(2);
+            }else if (suffix.equals(".jpg") || suffix.equals(".png")){
+                eventMessage.setType(1);
+            }else {
+                eventMessage.setType(4);
+            }
+            SendMessage.sendCommonMessage(eventMessage, new SendMessageBean("", mReceiverIdentifier, host,
+                    mReceiverAvatarPath, mReceiverName, isGroup),false);
+        }
+        super.onActivityResult(requestCode, resultCode, data);
     }
 
-    //弹出软键盘
-    public void showInput(final EditText et) {
-        isInputMessage = true;
-        et.requestFocus();
-        InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
-        imm.showSoftInput(et, InputMethodManager.SHOW_IMPLICIT);
-    }
 
-    public static String getFilePathFromContentUri(Uri contentUri,
-                                                   ContentResolver contentResolver) {
-        String filePath;
-        String[] filePathColumn = {MediaStore.MediaColumns.DATA};
-
-        Cursor cursor = contentResolver.query(contentUri, filePathColumn, null, null, null);
-
-        TLog.d(TAG, "getFilePathFromContentUri: cursor == null: " + (cursor == null));
-        cursor.moveToFirst();
-
-        int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
-        filePath = cursor.getString(columnIndex);
-        cursor.close();
-        return filePath;
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        MainActivity.go(ChatRoomActivity.this);
+        finish();
     }
 
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
-        if (event.getKeyCode() == KeyEvent.KEYCODE_0) {
-            TLog.d(TAG, "dispatchKeyEvent: 00000");
-        }
         return super.dispatchKeyEvent(event);
     }
 
@@ -1059,18 +973,15 @@ public class ChatRoomActivity extends AppCompatActivity implements View.OnClickL
 
     @Override
     public boolean onDown(MotionEvent e) {
-        TLog.d(TAG, "onDown: 被调用");
         inputVoiceStartTime = System.currentTimeMillis();
-        startVoiceAnimation = false;
+        isStartVoiceAnimation = false;
         return true;
     }
 
     @Override
     public void onShowPress(MotionEvent e) {
         if (MyMediaPlayerManager.getsInstance().isPlaying())MyMediaPlayerManager.getsInstance().stop();
-        TLog.d(TAG, "onShowPress: 被调用");
-        startVoiceAnimation = true;
-        TLog.d(TAG, "onTouch: down");
+        isStartVoiceAnimation = true;
         myAudioManager = new MyAudioManager();
         myAudioManager.startAudioRecordOnly(ChatRoomActivity.this);
         mAudioView.setVisibility(View.VISIBLE);
@@ -1081,7 +992,6 @@ public class ChatRoomActivity extends AppCompatActivity implements View.OnClickL
 
     @Override
     public boolean onSingleTapUp(MotionEvent e) {
-        TLog.d(TAG, "onSingleTapUp: 被调用");
         return false;
     }
 
@@ -1100,6 +1010,7 @@ public class ChatRoomActivity extends AppCompatActivity implements View.OnClickL
         return false;
     }
 
+    @Override
     protected void onResume() {
         super.onResume();
         if (!isClosing && isInputMessage){
