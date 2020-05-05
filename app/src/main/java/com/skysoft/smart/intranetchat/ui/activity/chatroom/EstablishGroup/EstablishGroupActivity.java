@@ -42,19 +42,19 @@ import java.util.List;
 
 public class EstablishGroupActivity extends BaseActivity {
     private static String TAG = EstablishGroupActivity.class.getSimpleName();
-    private ListView mContactListView;
-    private EstablishGroupAdapter mAdapter;
+    private boolean isGroup;
+    private String receiverIdentifier;
     private TextView mCancel;
     private TextView mConfirm;
-    private String receiverIdentifier;
-    private boolean isGroup;
+
+    private ListView mContactListView;
+    private EstablishGroupAdapter mAdapter;
     private List<GroupMemberEntity> groupMemberEntities;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_establish_group);
-        setStatusView(R.id.custom_status_bar_background);
         mContactListView = findViewById(R.id.establish_group_list);
         mCancel = findViewById(R.id.establish_group_cancel);
         mConfirm = findViewById(R.id.establish_group_confirm);

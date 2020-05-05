@@ -15,8 +15,8 @@
 
     <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/contact_head"
-        android:layout_width="@dimen/dp_40"
-        android:layout_height="@dimen/dp_60"
+        android:layout_width="@dimen/dp_50"
+        android:layout_height="@dimen/dp_70"
         android:layout_marginLeft="@dimen/dp_20"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"/>
@@ -30,8 +30,7 @@
         android:layout_centerVertical="true"
         android:layout_marginStart="@dimen/dp_10"
         android:gravity="center|left"
-        android:textColor="@color/color_black"
-        android:textSize="@dimen/sp_22"
+        style="@style/MessageTitleTextStyle"
         app:layout_constraintStart_toEndOf="@+id/contact_head"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
