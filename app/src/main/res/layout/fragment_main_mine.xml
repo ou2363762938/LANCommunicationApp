@@ -8,14 +8,86 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:background="@color/activityOrFragmentBackgroundColor">
 
+    <include
+        layout="@layout/base_title"/>
 
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/mine_info_head_constraint"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1">
-        <include
-            layout="@layout/layout_mine_info_show"/>
-    </LinearLayout>
+        android:layout_height="wrap_content"
+        style="@style/ItemStyle"
+        android:layout_marginTop="@dimen/dp_0">
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/mine_info_head"
+            android:layout_width="@dimen/dp_60"
+            android:layout_height="@dimen/dp_60"
+            android:src="@drawable/default_head"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:gravity="center_vertical"
+            style="@style/TextStyleDark"
+            android:text="头像"/>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/mine_info_name_constraint"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        style="@style/ItemStyle">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            style="@style/TextStyleDark"
+            android:text="昵称"/>
+
+        <TextView
+            android:id="@+id/mine_info_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            style="@style/TextStyle"
+            android:text="oliver"/>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/mine_info_status_constraint"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        style="@style/ItemStyle">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            style="@style/TextStyleDark"
+            android:text="状态"
+            />
+        <TextView
+            android:id="@+id/mine_info_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            style="@style/TextStyle"
+            android:text="在线"/>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
 </LinearLayout>

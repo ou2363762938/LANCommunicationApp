@@ -28,11 +28,11 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.text.TextUtils;
-import android.util.EventLog;
 
+import com.skysoft.smart.intranetchat.customize.StatusBarLayout;
+import com.skysoft.smart.intranetchat.customize.TitleLinearLayout;
 import com.skysoft.smart.intranetchat.model.net_model.SendMessage;
-import com.skysoft.smart.intranetchat.model.network.bean.NotificationMessageBean;
-import com.skysoft.smart.intranetchat.model.network.bean.ReplayMessageBean;
+import com.skysoft.smart.intranetchat.tools.customstatusbar.CustomStatusBarBackground;
 import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 import android.widget.RemoteViews;
 import android.widget.TextView;
@@ -1067,6 +1067,8 @@ public class IntranetChatApplication extends Application {
             senderMyHeartbeat.schedule(mSendMyHeartbeat,2000,1300);
             Timer confirmMonitorHeartbeat = new Timer();
             confirmMonitorHeartbeat.schedule(mConfirmMonitorHeartbeat,2300,1300);
+            StatusBarLayout.sRootLayoutHeight = CustomStatusBarBackground.getStatusBarHeight(this);
+            TitleLinearLayout.sLayoutHeight = getResources().getDimensionPixelOffset(R.dimen.dp_55);
         }
     }
 

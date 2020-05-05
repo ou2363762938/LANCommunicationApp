@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_height="wrap_content">
+    <com.skysoft.smart.intranetchat.customize.StatusBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_60"/>
+    <com.skysoft.smart.intranetchat.customize.TitleLinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_60">
+        <TextView
+            android:id="@+id/page_title"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            style="@style/TitleStyle"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_marginStart="@dimen/dp_20"/>
+
+        <TextView
+            android:id="@+id/page_establish_group"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="@style/TitleStyle"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_marginEnd="@dimen/dp_20"/>
+    </com.skysoft.smart.intranetchat.customize.TitleLinearLayout>
+</LinearLayout>

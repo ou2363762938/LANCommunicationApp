@@ -22,7 +22,51 @@
     </style>
 
     <style name="TitleStyle" >
-        <item name="android:textColor">@android:color/black</item>
-        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/titleTextColor</item>
+        <item name="android:textSize">@dimen/titleTextSize</item>
+    </style>
+
+    <style name="ItemStyle">
+        <item name="android:paddingStart">@dimen/dp_20</item>
+        <item name="android:paddingEnd">@dimen/dp_20</item>
+        <item name="android:paddingTop">@dimen/dp_10</item>
+        <item name="android:paddingBottom">@dimen/dp_10</item>
+        <item name="android:layout_width">@dimen/dp_60</item>
+        <item name="android:background">@color/itemBackgroundColor</item>
+        <item name="android:layout_marginTop">@dimen/dp_3</item>
+    </style>
+
+    <style name="TextStyleDark">
+        <item name="android:textColor">@color/textColorDark</item>
+        <item name="android:textSize">@dimen/textSizeDark</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:singleLine">true</item>
+    </style>
+
+    <style name="TextStyle">
+        <item name="android:textColor">@color/textColor</item>
+        <item name="android:textSize">@dimen/textSize</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:singleLine">true</item>
+    </style>
+
+    <style name="MessageTitleTextStyle">
+        <item name="android:textSize">@dimen/textSize</item>
+        <item name="android:textColor">@color/textColorDark</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:singleLine">true</item>
+    </style>
+
+    <style name="MessageContentTextStyle">
+        <item name="android:textSize">@dimen/messageTextSize</item>
+        <item name="android:textColor">@color/messageTextColor</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:singleLine">true</item>
+    </style>
+
+    <style name="TimeStyle">
+        <item name="android:textSize">@dimen/timeTextSize</item>
+        <item name="android:textColor">@color/timeTextColor</item>
+        <item name="android:layout_width">@dimen/dp_140</item>
     </style>
 </resources>

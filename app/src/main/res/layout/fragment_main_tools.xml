@@ -5,23 +5,14 @@
 * Description: [PT-40][Intranet Chat] [APP][UI] Home page ui
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
-    <View
-        android:id="@+id/custom_status_bar_background"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
-    <LinearLayout
-        android:id="@+id/fragment_main_tools_layout_first"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/dp_55"
-        android:orientation="vertical"
-        android:background="@drawable/custom_gradient_main_title">
-        <include
-            layout="@layout/layout_title"/>
-    </LinearLayout>
+    android:layout_height="match_parent"
+    android:background="@color/activityOrFragmentBackgroundColor">
+
+    <include
+        layout="@layout/base_title"/>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -52,7 +43,7 @@
                 android:textSize="@dimen/sp_16"/>
         </LinearLayout>
         <LinearLayout
-            android:id="@+id/tools__linear_clock"
+            android:id="@+id/tools_linear_clock"
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="@dimen/dp_120"
@@ -76,7 +67,7 @@
                 android:textSize="@dimen/sp_16"/>
         </LinearLayout>
         <LinearLayout
-        android:id="@+id/tools__linear_calendar"
+        android:id="@+id/tools_linear_calendar"
         android:layout_width="0dp"
         android:layout_weight="1"
         android:layout_height="@dimen/dp_120"

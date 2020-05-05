@@ -5,6 +5,7 @@
  */
 package com.skysoft.smart.intranetchat;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -16,6 +17,8 @@ import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.text.TextUtils;
+import android.widget.FrameLayout;
+
 import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -72,7 +75,7 @@ public class MainActivity extends AppCompatActivity{
         CustomStatusBarBackground.customStatusBarTransparent(this);
         initView();
         setEnterFragment();
-        setView();
+        setBottomNavigationBar();
         //B: 监听网络状况 ,Oliver Ou,2019/11/15
         initReceiver();
         //E: 监听网络状况 ,Oliver Ou,2019/11/15
@@ -106,33 +109,32 @@ public class MainActivity extends AppCompatActivity{
             ToastUtil.timingToast(MainActivity.this,getString(R.string.quitApp_toast_text),1000);
         }
     }
-    private void initView() {
-        mBottomNavigationBar = (BottomNavigationBar) findViewById(R.id.bottom_navigation_bar_main);
-        IntranetChatApplication.setmTextBadgeItem(new TextBadgeItem());
-        textBadgeItem = IntranetChatApplication.getmTextBadgeItem();
-        //B: [PT-80][Intranet Chat] [APP][UI] TextBadgeItem 一直为红色,Allen Luo,2019/11/12
 
+    private void initView() {
+        mBottomNavigationBar = findViewById(R.id.bottom_navigation_bar_main);
+    }
+
+    private void setBottomNavigationBar() {
+        textBadgeItem = new TextBadgeItem();
+        IntranetChatApplication.setmTextBadgeItem(textBadgeItem);
         if (IntranetChatApplication.getmTotalUnReadNumber() == 0){
             textBadgeItem.hide();
         }else {
             textBadgeItem.show().setText(String.valueOf(IntranetChatApplication.getmTotalUnReadNumber()));
-
         }
-        //E: [PT-80][Intranet Chat] [APP][UI] TextBadgeItem 一直为红色,Allen Luo,2019/11/12
-    }
-    private void setView() {
+
         mBottomNavigationBar.setMode(BottomNavigationBar. MODE_SHIFTING)
                 .setBackgroundStyle(BottomNavigationBar.BACKGROUND_STYLE_STATIC)
                 .setActiveColor(R.color.color_white);
 
-        mBottomNavigationBar.addItem(new BottomNavigationItem(R.drawable.ic_fragment_main_message_click, "消息").setActiveColorResource(R.color.color_blue)
+        mBottomNavigationBar.addItem(new BottomNavigationItem(R.drawable.ic_fragment_main_message_click, "消息").setActiveColorResource(R.color.bottomNavigationBarActiveColor)
                 .setInactiveIcon(ContextCompat.getDrawable(MainActivity.this, R.drawable.ic_fragment_main_message_default)).setInActiveColorResource(R.color.color_black)
                 .setBadgeItem(textBadgeItem))
-                .addItem(new BottomNavigationItem(R.drawable.ic_fragment_main_contact_click, "联系人").setActiveColorResource(R.color.color_blue)
+                .addItem(new BottomNavigationItem(R.drawable.ic_fragment_main_contact_click, "联系人").setActiveColorResource(R.color.bottomNavigationBarActiveColor)
                         .setInactiveIcon(ContextCompat.getDrawable(MainActivity.this, R.drawable.ic_fragment_main_contact_default)).setInActiveColorResource(R.color.color_black))
-                .addItem(new BottomNavigationItem(R.drawable.ic_fragment_main_tools_click, "工具").setActiveColorResource(R.color.color_blue)
+                .addItem(new BottomNavigationItem(R.drawable.ic_fragment_main_tools_click, "工具").setActiveColorResource(R.color.bottomNavigationBarActiveColor)
                         .setInactiveIcon(ContextCompat.getDrawable(MainActivity.this, R.drawable.ic_fragment_main_tools_default)).setInActiveColorResource(R.color.color_black))
-                .addItem(new BottomNavigationItem(R.drawable.ic_fragment_main_mine_click, "个人").setActiveColorResource(R.color.color_blue)
+                .addItem(new BottomNavigationItem(R.drawable.ic_fragment_main_mine_click, "个人").setActiveColorResource(R.color.bottomNavigationBarActiveColor)
                         .setInactiveIcon(ContextCompat.getDrawable(MainActivity.this, R.drawable.ic_fragment_main_mine_default)).setInActiveColorResource(R.color.color_black))
                 .setFirstSelectedPosition(0)
                 .initialise();
@@ -194,6 +196,7 @@ public class MainActivity extends AppCompatActivity{
         });
     }
     //B: [PT-79] [Intranet Chat] [APP][UI] BottomNavigationBar 控件优化,Allen Luo,2019/11/13
+
     public void setEnterFragment(){
         sFragmentManager = getSupportFragmentManager();
         FragmentTransaction sFragmentTransaction = getSupportFragmentManager().beginTransaction();

@@ -48,4 +48,13 @@ public class CustomStatusBarBackground {
         customStatusBar.height = statusBarHeight;
         view.setBackground(context.getResources().getDrawable(color));
     }
+
+    public static int getStatusBarHeight(Context context) {
+        int resourceId = context.getResources().getIdentifier("status_bar_height", "dimen", "android");
+        if (resourceId < 0) {
+            return -1;
+        }
+        //根据资源ID获取响应的尺寸值
+        return context.getResources().getDimensionPixelSize(resourceId);
+    }
 }

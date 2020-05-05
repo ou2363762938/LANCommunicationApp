@@ -10,8 +10,8 @@
     android:viewportHeight="1024">
   <path
       android:pathData="M192,64L128,64v896h768L896,64L192,64zM832,896L192,896L192,128h640v768z"
-      android:fillColor="#1296db"/>
+      android:fillColor="@color/bottomNavigationBarActiveColor"/>
   <path
       android:pathData="M320,224h384v64H320zM320,416h64v64h-64zM480,416h64v64h-64zM640,416h64v64h-64zM320,576h64v64h-64zM480,576h64v64h-64zM640,576h64v64h-64zM320,736h64v64h-64zM480,736h64v64h-64zM640,736h64v64h-64z"
-      android:fillColor="#1296db"/>
+      android:fillColor="@color/bottomNavigationBarActiveColor"/>
 </vector>

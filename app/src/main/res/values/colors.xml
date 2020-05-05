@@ -22,4 +22,16 @@
     <color name="custom_spinner_textColor">#251300</color>
     <color name="gradient_main_title_startColor">#7DAFDF</color>
     <color name="gradient_main_title_endColor">#1285E7</color>
+
+    <color name="itemBackgroundColor">#F9FBFC</color>
+    <color name="activityOrFragmentBackgroundColor">#E8E9E9</color>
+
+    <color name="textColor">#A09C9C</color>
+    <color name="textColorDark">#181818</color>
+    <color name="timeTextColor">#312E2E</color>
+    <color name="messageTextColor">#A7A6A6</color>
+    <color name="titleTextColor">#130000</color>
+
+    <color name="bottomNavigationBarActiveColor">#B3E2FC</color>
+    <color name="bottomNavigationBarInactiveColor">#070707</color>
 </resources>
