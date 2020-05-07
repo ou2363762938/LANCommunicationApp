@@ -400,6 +400,9 @@
     <dimen name="contentTextSize">14sp</dimen>
     <dimen name="titleTextSize">18sp</dimen>
 
+    <dimen name="chatRoomContactNameTextSize">10sp</dimen>
+    <dimen name="chatRoomMessageTextSize">16sp</dimen>
+
     <dimen name="dp_m_60">-60dp</dimen>
     <dimen name="dp_m_30">-30dp</dimen>
     <dimen name="dp_m_20">-20dp</dimen>

@@ -16,18 +16,15 @@ import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.TextUtils;
 
-import com.skysoft.smart.intranetchat.model.network.bean.UserInfoBean;
+import com.skysoft.smart.intranetchat.tools.ChatRoom.BindRecord;
 import com.skysoft.smart.intranetchat.tools.ChatRoom.RoomUtils;
 import com.skysoft.smart.intranetchat.tools.CreateNotifyBitmap;
 import com.skysoft.smart.intranetchat.tools.GsonTools;
 import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 
 import android.text.style.ImageSpan;
-import android.view.ActionMode;
 import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -72,21 +69,37 @@ import static com.skysoft.smart.intranetchat.ui.activity.chatroom.ChatRoom.ChatR
 public class ChatRoomMessageAdapter extends RecyclerView.Adapter<ChatRoomMessageViewHolder> implements View.OnTouchListener {
     private static String TAG = ChatRoomMessageAdapter.class.getSimpleName();
     private Context context;
-    private List<ChatRecordEntity> messageBeanList = new ArrayList<>();
-    private String mineAvatarPath;
-    private OnScrollToPosition onScrollToPosition;
-    private ChatRoomMessageViewHolder holder;
+
+    private String mMineAvatarPath;
     private String mReceiverIdentifier;
+
     private int mTopPosition;
+
     private boolean mFirstLoadHistory = true;
-    private View mInflate;
-    private RecyclerView mPopupRecyclerView;
-    private ArrayList<String> mHasCode = new ArrayList<>();
-    private int mLongClickPosition = 0;     //当前被长按的记录的位置
-    private OnClickReplayOrNotify mOnClickReplayOrNotify;
-    private ChatRoomMessageViewHolder mLongClickHolder;
     private boolean isUpLongClickAvatar = true;
     private boolean isGroup;
+
+    private View mInflate;
+
+    private List<ChatRecordEntity> messageBeanList = new ArrayList<>();
+    private RecyclerView mPopupRecyclerView;
+    private ArrayList<String> mHasCode = new ArrayList<>();
+
+    private OnClickReplayOrNotify mOnClickReplayOrNotify;
+    private OnScrollToPosition onScrollToPosition;
+    private ChatRoomMessageViewHolder mLongClickHolder;
+    private ChatRoomMessageViewHolder holder;
+
+    private BindRecord mBindRecord;
+
+    public ChatRoomMessageAdapter(Context context, String mMineAvatarPath, String receiverIdentifier, Boolean isGroup) {
+        this.context = context;
+        this.mMineAvatarPath = mMineAvatarPath;
+        this.mReceiverIdentifier = receiverIdentifier;
+        this.isGroup = isGroup;
+        this.mBindRecord = new BindRecord(context,this);
+        this.mInflate = LayoutInflater.from(context).inflate(R.layout.chat_message_popup_window, null);
+    }
 
     public boolean isGroup() {
         return isGroup;
@@ -128,11 +141,8 @@ public class ChatRoomMessageAdapter extends RecyclerView.Adapter<ChatRoomMessage
         this.mReceiverIdentifier = mReceiverIdentifier;
     }
 
-    public ChatRoomMessageAdapter(Context context, String mineAvatarPath, String receiverIdentifier, Boolean isGroup) {
-        this.context = context;
-        this.mineAvatarPath = mineAvatarPath;
-        this.mReceiverIdentifier = receiverIdentifier;
-        this.isGroup = isGroup;
+    public View getInflate() {
+        return mInflate;
     }
 
     @NonNull
@@ -219,289 +229,35 @@ public class ChatRoomMessageAdapter extends RecyclerView.Adapter<ChatRoomMessage
 
     //加载视屏的预览图
     private void bindVideo(ChatRoomMessageViewHolder holder, ChatRecordEntity bean) {
-        ImageView thumbnail = null;
-        switch (bean.getIsReceive()){
-            case ChatRoomConfig.RECEIVE_VIDEO:
-                thumbnail = holder.getSenderVideoThumbnail();
-                break;
-            case ChatRoomConfig.SEND_VIDEO:
-                thumbnail = holder.getMineVideoThumbnail();
-                break;
-        }
-        if (TextUtils.isEmpty(bean.getPath())){
-            //视频预览图路径为空时判断正在下载或者接收已经失败
-            onLoading(thumbnail,bean);
-        }else {
-            Glide.with(context).load(bean.getPath()).into(new ImageViewTarget<Drawable>(thumbnail) {
-                @Override
-                protected void setResource(Drawable resource) {
-                    this.view.setBackground(resource);
-                    this.view.setImageResource(R.drawable.ic_play_video);
-                }
-            });
-        }
-        thumbnail.setVisibility(View.VISIBLE);
-        thumbnail.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (QuickClickListener.isFastClick()) {
-                    new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                            if (!TextUtils.isEmpty(bean.getFileName())){
-                                VideoPlayActivity.goActivity(context, bean.getFileName());
-                            }
-                        }
-                    }).start();
-                }
-            }
-        });
-
-        thumbnail.setOnLongClickListener(new OnLongClickRecord(bean, holder));
+        mBindRecord.bindVideo(holder,bean);
     }
 
     //加载文件
     private void bindFile(ChatRoomMessageViewHolder holder, ChatRecordEntity bean) {
-        ConstraintLayout file = null;
-        String size = computingFileSize(bean.getLength());
-        TLog.d(TAG, "bindFile: size = " + size);
-        switch (bean.getIsReceive()){
-            case ChatRoomConfig.RECEIVE_FILE:
-                holder.getSenderFileName().setText(bean.getFileName());
-                holder.getSenderFileSize().setText(size);
-                holder.getSenderFile().setVisibility(View.VISIBLE);
-                file = holder.getSenderFile();
-                break;
-            case ChatRoomConfig.SEND_FILE:
-                holder.getMineFileName().setText(bean.getFileName());
-                holder.getMineFileSize().setText(size);
-                holder.getMineFile().setVisibility(View.VISIBLE);
-                file = holder.getMineFile();
-                break;
-        }
-
-//        file.setOnLongClickListener(new OnLongClickRecord(bean, holder));
+        mBindRecord.bindFile(holder,bean);
     }
 
     //加载图片
     private void bindImage(ChatRoomMessageViewHolder holder, ChatRecordEntity bean) {
-        ImageView image = null;
-        switch (bean.getIsReceive()){
-            case ChatRoomConfig.RECEIVE_IMAGE:
-                image = holder.getSenderImage();
-                break;
-            case ChatRoomConfig.SEND_IMAGE:
-                image = holder.getMineImage();
-                break;
-        }
-        if (TextUtils.isEmpty(bean.getPath())){
-            TLog.d(TAG, "bindImage: path = null");
-            //图片路径为空时判断正在下载或者接收已经失败
-            onLoading(image,bean);
-            return;
-        }
-        Glide.with(context).load(bean.getPath()).into(image);
-        image.setVisibility(View.VISIBLE);
-        image.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (QuickClickListener.isFastClick()) {
-                    String path = bean.getPath();
-                    PictureShowActivity.goActivity(context, path);
-                }
-            }
-        });
-
-        image.setOnLongClickListener(new OnLongClickRecord(bean, holder));
-    }
-
-    /**
-     * 未接收完图片和视频前显示正在加载*/
-    public void onLoading(ImageView image,ChatRecordEntity bean){
-        if (bean.isReceiveSuccess()){
-            FileEntity fileEntity = IntranetChatApplication.getMonitorReceiveFile().get(bean.getContent());
-            if (fileEntity != null && fileEntity.getType() != Config.STEP_DOWN_LOAD_FAILURE && System.currentTimeMillis() - fileEntity.getTime() > 10*60*100){
-                Glide.with(context).load(R.drawable.ic_file_damage_fill).into(image);
-                bean.setReceiveSuccess(false);
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        MyDataBase.getInstance().getChatRecordDao().update(bean);
-                    }
-                }).start();
-            }else {
-                Glide.with(context).load(R.color.color_gray_dark).into(new ImageViewTarget<Drawable>(image) {
-                    @Override
-                    protected void setResource(Drawable resource) {
-                        this.view.setBackground(resource);
-                        this.view.setBackgroundResource(R.drawable.ic_loading);
-                    }
-                });
-            }
-        }else {
-            Glide.with(context).load(R.drawable.ic_file_damage_fill).into(image);
-        }
+        mBindRecord.bindImage(holder,bean);
     }
 
     //加载语音
     private void bindVoice(ChatRoomMessageViewHolder holder, ChatRecordEntity bean) {
-        LinearLayout voice = null;
-        TextView voiceLength = null;
-        switch (bean.getIsReceive()) {
-            case ChatRoomConfig.RECEIVE_VOICE:
-                holder.getSenderVoice().setVisibility(View.VISIBLE);
-                voiceLength = holder.getSenderVoiceLength();
-                voice = holder.getSenderVoice();
-                break;
-            case ChatRoomConfig.SEND_VOICE:
-                voiceLength = holder.getMineVoiceLength();
-                voice = holder.getMineVoice();
-                break;
-            default:
-                bean.getIsReceive();
-                break;
-        }
-
-        voiceLength.setText(String.valueOf(bean.getLength()));
-        LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) voiceLength.getLayoutParams();
-        double percent = (double) bean.getLength() / ChatRoomConfig.MAX_VOICE_LENGTH;
-        int width = (int) (percent * ChatRoomConfig.MAX_VOICE_TEXT_VIEW_LENGTH) + ChatRoomConfig.BASE_VOICE_LENGTH;
-        layoutParams.width = width;
-        voiceLength.setLayoutParams(layoutParams);
-        voiceLength.setText(String.valueOf(bean.getLength()));
-        voice.setVisibility(View.VISIBLE);
-        voice.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (QuickClickListener.isFastClick()) {
-                    if (bean != null && !TextUtils.isEmpty(bean.getPath())){
-                        onClickVoice(bean.getPath());
-                    }
-                }
-            }
-        });
-
-        voice.setOnLongClickListener(new OnLongClickRecord(bean, holder));
+        mBindRecord.bindVoice(holder,bean);
     }
 
     //加载文本内容
     private void bindText(ChatRoomMessageViewHolder holder, ChatRecordEntity bean) {
-        TextView message = null;
-        if (bean.getIsReceive() == ChatRoomConfig.RECEIVE_MESSAGE){
-            holder.getSenderMessage().setText(bean.getContent());
-            holder.getSenderMessage().setVisibility(View.VISIBLE);
-            message = holder.getSenderMessage();
-        }else {
-            holder.getMineMessage().setText(bean.getContent());
-            holder.getMineMessage().setVisibility(View.VISIBLE);
-            message = holder.getMineMessage();
-        }
-
-        message.setOnLongClickListener(new OnLongClickRecord(bean, holder));
+        mBindRecord.bindText(holder,bean);
     }
 
     private void bindAtText(ChatRoomMessageViewHolder holder, ChatRecordEntity bean){
-        TextView message = null;
-        if (bean.getIsReceive() == ChatRoomConfig.RECEIVE_AT_MESSAGE){
-            holder.getSenderMessage().setText(bean.getContent());
-            holder.getSenderMessage().setVisibility(View.VISIBLE);
-            message = holder.getSenderMessage();
-
-            String at = bean.getFileName();
-            buildNotify(at,holder.getSenderMessage());
-        }else {
-            holder.getMineMessage().setText(bean.getContent());
-            holder.getMineMessage().setVisibility(View.VISIBLE);
-            message = holder.getMineMessage();
-        }
-
-        message.setOnLongClickListener(new OnLongClickRecord(bean, holder));
-    }
-
-    /**
-     * 根据唯一标识符寻找本地名字替代@后的名字
-     * @param at @队列
-     * @param message */
-    private void buildNotify(String at,TextView message){
-        if (!TextUtils.isEmpty(at)){
-            Editable editableText = message.getEditableText();
-
-            String[] array = (String[]) GsonTools.formJson(at, String[].class);
-            for (int i = array.length-1; i >= 0; i--){
-                String[] split = array[i].split("\\|");
-
-                int st = Integer.parseInt(split[1]);        //at开始位置
-                int length = Integer.parseInt(split[2]);    //用户名长度
-
-                ContactEntity entity = IntranetChatApplication.sContactMap.get(split[0]);
-                if (null != entity){
-                    editableText.replace(st+1,st+length+1,entity.getName());
-                }else if (split[0].equals(IntranetChatApplication.getsMineUserInfo().getIdentifier())){
-                    String name = IntranetChatApplication.getsMineUserInfo().getName();
-                    SpannableStringBuilder spannableString = new SpannableStringBuilder("@"+name);    //构建SpannableStringBuilder
-                    Bitmap bitmap = CreateNotifyBitmap.notifyBitmap(context,"@"+name);      //构建内容为notify的bitmap
-                    ImageSpan imageSpan = new ImageSpan(context,bitmap);      //构建内容为bitmap的ImageSpan
-                    spannableString.setSpan(imageSpan,
-                            0,name.length()+1,
-                            Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);        //SpannableStringBuilder添加ImageSpan
-
-                    editableText.replace(st,st+length+1,spannableString);
-                }
-            }
-
-            message.setText(editableText);
-        }
+        mBindRecord.bindAtText(holder,bean);
     }
 
     private void bindAvatar(ChatRoomMessageViewHolder holder, ChatRecordEntity bean,  boolean sender){
-        if (sender){
-            ContactEntity next = IntranetChatApplication.sContactMap.get(bean.getSender());
-            if (null == next){
-                throw new NullPointerException("can not found this contact");
-            }
-            //填充头像
-            if (!TextUtils.isEmpty(next.getAvatarPath())){
-                Glide.with(context).load(next.getAvatarPath()).into(holder.getSenderAvatar());
-            }else {
-                Glide.with(context).load(R.drawable.default_head).into(holder.getSenderAvatar());
-            }
-            //填充用户名
-            if (!TextUtils.isEmpty(next.getName())){
-                holder.getSenderName().setText(next.getName());
-            }
-            holder.getSenderName().setVisibility(View.VISIBLE);
-            holder.getSenderAvatar().setVisibility(View.VISIBLE);
-            //单击事件
-            holder.getSenderAvatar().setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (isUpLongClickAvatar && QuickClickListener.isFastClick()){       //防止长按后立即触发单击事件
-                        UserInfoShowActivity.go(context,next.getName(),next.getAvatarPath(),bean.getSender());
-                    }
-                }
-            });
-
-            //长按头像显示@*****
-            holder.getSenderAvatar().setOnLongClickListener(new View.OnLongClickListener() {
-                @Override
-                public boolean onLongClick(View v) {
-                    if (null != mOnClickReplayOrNotify){
-                        //在输入框中显示@***
-                        mOnClickReplayOrNotify.onClickNotify(bean,holder.getSenderName().getText().toString());
-                    }
-                    isUpLongClickAvatar = false;        //正在长按avatar，avatar的单击事件不能触发
-                    v.setOnTouchListener(ChatRoomMessageAdapter.this::onTouch);     //监听松开avatar
-                    return false;
-                }
-            });
-        }else {
-            if (!TextUtils.isEmpty(mineAvatarPath)){
-                Glide.with(context).load(mineAvatarPath).into(holder.getMineAvatar());
-            }else {
-                Glide.with(context).load(R.drawable.default_head).into(holder.getMineAvatar());
-            }
-            holder.getMineAvatar().setVisibility(View.VISIBLE);
-        }
+        mBindRecord.bindAvatar(holder,bean,sender,mMineAvatarPath);
     }
 
     @Override
@@ -518,40 +274,7 @@ public class ChatRoomMessageAdapter extends RecyclerView.Adapter<ChatRoomMessage
     }
 
     private void bindCall(ChatRoomMessageViewHolder holder, ChatRecordEntity bean){
-        LinearLayout callBox = null;
-        switch (bean.getIsReceive()){
-            case ChatRoomConfig.RECEIVE_VOICE_CALL:
-                holder.getSenderCallBox().setVisibility(View.VISIBLE);
-                Glide.with(context).load(R.drawable.ic_voice_call).into(holder.getSenderCallImage());
-                holder.getSenderCallText().setText(bean.getContent());
-                break;
-            case ChatRoomConfig.RECEIVE_VIDEO_CALL:
-                holder.getSenderCallBox().setVisibility(View.VISIBLE);
-                Glide.with(context).load(R.drawable.ic_video_call).into(holder.getSenderCallImage());
-                holder.getSenderCallText().setText(bean.getContent());
-                break;
-            case ChatRoomConfig.SEND_VOICE_CALL:
-                holder.getMineCallBox().setVisibility(View.VISIBLE);
-                Glide.with(context).load(R.drawable.ic_voice_call).into(holder.getMineCallImage());
-                holder.getMineCallText().setText(bean.getContent());
-                break;
-            case ChatRoomConfig.SEND_VIDEO_CALL:
-                holder.getMineCallBox().setVisibility(View.VISIBLE);
-                Glide.with(context).load(R.drawable.ic_video_call).into(holder.getMineCallImage());
-                holder.getMineCallText().setText(bean.getContent());
-                break;
-        }
-        if (bean.getLength() == -1){
-            holder.getSenderCallImage().setColorFilter(R.color.color_gray_dark);
-            holder.getSenderCallText().setTextColor(context.getResources().getColor(R.color.color_gray_dark));
-        }
-        if (bean.getIsReceive() == ChatRoomConfig.RECEIVE_VOICE_CALL || bean.getIsReceive() == ChatRoomConfig.RECEIVE_VIDEO_CALL){
-            callBox = holder.getSenderCallBox();
-        }else {
-            callBox = holder.getMineCallBox();
-        }
-
-        callBox.setOnLongClickListener(new OnLongClickRecord(bean, holder));
+        mBindRecord.bindCall(holder,bean);
     }
 
     @Override
@@ -637,15 +360,6 @@ public class ChatRoomMessageAdapter extends RecyclerView.Adapter<ChatRoomMessage
         }
     }
 
-    //当点击语音框时，播放语音
-    public void onClickVoice(String path) {
-        if (sIsAudioRecording){
-            return;
-        }
-        MyMediaPlayerManager.getsInstance().play(path);
-//        1572865304716
-    }
-
     public static String createVideoThumbnailFile(String path) {
         TLog.d(TAG, "createVideoThumbnailFile: onReceiveAndSaveFile 1 path = " + path);
         Bitmap bitmap = createVideoThumbnail(path);
@@ -677,28 +391,6 @@ public class ChatRoomMessageAdapter extends RecyclerView.Adapter<ChatRoomMessage
         return position;
     }
 
-    private String computingFileSize(long length){
-        StringBuilder sb = new StringBuilder();
-        String[] unit = {"B","K","M","G","P"};
-        int level = 0;
-        int value = 1024;
-        while(length > value){
-            value *= 1024;
-            level++;
-        }
-        int m = (int) (length / (value / 1024));
-        if (m > 700){
-            sb.append(0);
-            sb.append('.');
-            sb.append(m/10);
-            sb.append(unit[level + 1]);
-        }else {
-            sb.append(m);
-            sb.append(unit[level]);
-        }
-        return sb.toString();
-    }
-
     //获得视屏文件的第一帧图
     private static Bitmap createVideoThumbnail(String filePath) {
         Bitmap bitmap = null;
@@ -723,127 +415,41 @@ public class ChatRoomMessageAdapter extends RecyclerView.Adapter<ChatRoomMessage
         return bitmap;
     }
 
-    public static int makeDropDownMeasureSpec(int measureSpec){
-        int mode = 0;
-        if (measureSpec == ViewGroup.LayoutParams.WRAP_CONTENT){
-            mode = View.MeasureSpec.UNSPECIFIED;
-        }else {
-            mode = View.MeasureSpec.EXACTLY;
-        }
-        return View.MeasureSpec.makeMeasureSpec(View.MeasureSpec.getSize(measureSpec),mode);
+    public void setPopupRecyclerView(RecyclerView recyclerView) {
+        this.mPopupRecyclerView = recyclerView;
     }
 
-    /**
-     * 弹出popupWindow
-     * @param view 被长按的控件，popupWindow围绕view显示
-     * @param chatRecordEntity 被长按的控件对应的聊天记录
-     * @param relativeY 控件相对于聊天室顶部的相对距离
-     * @param nameHeight 对方名字的高度*/
-    public void showPopupMenu(View view, ChatRecordEntity chatRecordEntity, int relativeY, int nameHeight){
-        if (null == mInflate){
-            mInflate = LayoutInflater.from(context).inflate(R.layout.chat_message_popup_window, null);
-        }
-
-        PopupWindow popupWindow = new PopupWindow(mInflate,ViewGroup.LayoutParams.WRAP_CONTENT,ViewGroup.LayoutParams.WRAP_CONTENT);
-
-        if (null == mPopupRecyclerView){
-            mPopupRecyclerView = mInflate.findViewById(R.id.chat_message_popup_window);
-
-            LinearLayoutManager linearLayoutManager = new LinearLayoutManager(context,LinearLayoutManager.HORIZONTAL,false);
-            mPopupRecyclerView.setLayoutManager(linearLayoutManager);
-            mPopupRecyclerView.addItemDecoration(new DividerItemDecoration(context,DividerItemDecoration.HORIZONTAL));
-        }
-
-        //popupWindow弹出的内容
-        PopupWindowAdapter adapter = new PopupWindowAdapter(context,chatRecordEntity,popupWindow,ChatRoomMessageAdapter.this);
-        mPopupRecyclerView.setAdapter(adapter);
-
-        //设置popupWindow点击外部消失
-        popupWindow.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        popupWindow.setOutsideTouchable(true);
-        popupWindow.setTouchable(true);
-        popupWindow.setFocusable(true);
-
-        //测量popupWindow的长宽
-        View contentView = popupWindow.getContentView();
-        contentView.measure(makeDropDownMeasureSpec(popupWindow.getWidth()),
-                makeDropDownMeasureSpec(popupWindow.getHeight()));
-
-        int offsetX = 0;
-        int offsetY = -(contentView.getMeasuredHeight() + view.getHeight());
-
-        //如果是接收的消息，popupWindow相对于view靠左，反之靠右
-        if (chatRecordEntity.getIsReceive() == ChatRoomConfig.SEND_FILE
-                || chatRecordEntity.getIsReceive() == ChatRoomConfig.SEND_IMAGE
-                || chatRecordEntity.getIsReceive() == ChatRoomConfig.SEND_MESSAGE
-                || chatRecordEntity.getIsReceive() == ChatRoomConfig.SEND_VIDEO
-                || chatRecordEntity.getIsReceive() == ChatRoomConfig.SEND_VIDEO_CALL
-                || chatRecordEntity.getIsReceive() == ChatRoomConfig.SEND_VOICE
-                || chatRecordEntity.getIsReceive() == ChatRoomConfig.SEND_VOICE_CALL
-                || chatRecordEntity.getIsReceive() == ChatRoomConfig.SEND_AT_MESSAGE
-                || chatRecordEntity.getIsReceive() == ChatRoomConfig.SEND_REPLAY_MESSAGE){
-            TLog.d(TAG, "showPopupMenu: right");
-            offsetX = -(contentView.getMeasuredWidth() - view.getWidth());
-        }
-
-        //判断popupWindow在view上方或者下方
-        if (relativeY < contentView.getMeasuredHeight()){
-            offsetY = 0;
-        }else {
-            offsetY -= nameHeight;
-        }
-
-        //显示popupWindow
-        popupWindow.showAsDropDown(view,offsetX,offsetY,Gravity.LEFT);
-    }
-
-    private class OnLongClickRecord implements View.OnLongClickListener{
-        private ChatRecordEntity mRecordEntity;     //被长按的记录
-        private ChatRoomMessageViewHolder holder;   //被长按的holder
-
-        public OnLongClickRecord(ChatRecordEntity mRecordEntity, ChatRoomMessageViewHolder holder) {
-            this.mRecordEntity = mRecordEntity;
-            this.holder = holder;
-        }
-
-        @Override
-        public boolean onLongClick(View v) {
-            mLongClickPosition = holder.getAdapterPosition();       //记录长按的位置
-            mLongClickHolder = holder;
-            showPopupMenu(v,mRecordEntity,holder.getBox().getTop() + holder.getBox().getScrollX(),  //计算view到聊天室顶部的距离
-                    holder.getSenderName().getVisibility() == View.VISIBLE ? holder.getSenderName().getHeight() : 0);
-            return false;
-        }
+    public RecyclerView getPopupRecyclerView() {
+        return this.mPopupRecyclerView;
     }
 
     /**
      * 删除聊天记录*/
-    public void deleteChatRecord(){
-        int position = mLongClickPosition;      //记录长按位置
+    public void deleteChatRecord(int position){
+        int finalPosition = position;
 
         ChatRecordEntity[] deleteEntities = new ChatRecordEntity[2];    //被删除的两条记录
         boolean common = true;      //普通情况下只删除选中的那条记录
-        if (mLongClickPosition != 0 &&      //不是第一条记录
-                messageBeanList.get(mLongClickPosition-1).getType() == ChatRoomConfig.RECORD_TIME &&    //上一条记录是时间
-                (messageBeanList.size()-1 == mLongClickPosition ||      //最后一条
-                        messageBeanList.get(mLongClickPosition+1).getType() == ChatRoomConfig.RECORD_TIME)){        //下一条记录是时间
+        if (position != 0 &&      //不是第一条记录
+                messageBeanList.get(position-1).getType() == ChatRoomConfig.RECORD_TIME &&    //上一条记录是时间
+                (messageBeanList.size()-1 == position ||      //最后一条
+                        messageBeanList.get(position+1).getType() == ChatRoomConfig.RECORD_TIME)){        //下一条记录是时间
             common = false;
-            mLongClickPosition --;
-        }else if (mLongClickPosition == 0 &&       //第一条记录
-                messageBeanList.get(1).getType() == ChatRoomConfig.RECORD_TIME){    //第二条记录是时间
-            common = false;
+            position --;
+        }else if (position == 0) {    //第一条记录,第二条记录是时间
+            common = !(messageBeanList.size() > 1 && messageBeanList.get(1).getType() == ChatRoomConfig.RECORD_TIME);
         }
         //如果满足上诉条件任意一条，deleteEntities[0]为时间记录，deleteEntities[1]为聊天记录
         //反之，deleteEntities[0]为当前选中的记录
-        deleteEntities[0] = messageBeanList.get(mLongClickPosition);
+        deleteEntities[0] = messageBeanList.get(position);
 
         if (!common){
             //deleteEntities[1]为聊天记录，deleteEntities[0]为时间记录
-            deleteEntities[1] = messageBeanList.get(mLongClickPosition+1);
-            messageBeanList.remove(mLongClickPosition+1);   //从列表中移除mLongClickPosition+1指向的记录
+            deleteEntities[1] = messageBeanList.get(position+1);
+            messageBeanList.remove(position+1);   //从列表中移除position+1指向的记录
         }
 
-        messageBeanList.remove(mLongClickPosition);     //从列表中移除mLongClickPosition指向的记录
+        messageBeanList.remove(position);     //从列表中移除position指向的记录
         notifyDataSetChanged();
 
         new Thread(new Runnable() {
@@ -851,7 +457,7 @@ public class ChatRoomMessageAdapter extends RecyclerView.Adapter<ChatRoomMessage
             public void run() {
                 ChatRecordDao chatRecordDao = MyDataBase.getInstance().getChatRecordDao();
 
-                if (position == 0){     //长按第一条记录，判断显示的第一条记录在数据库的上一条记录是否是时间记录
+                if (finalPosition == 0){     //长按第一条记录，判断显示的第一条记录在数据库的上一条记录是否是时间记录
                     ChatRecordEntity recordBeforeTime = chatRecordDao.getLatestRecordBeforeTime(deleteEntities[0].getReceiver(), deleteEntities[0].getTime(), deleteEntities[0].getId());
                     if (null != recordBeforeTime && recordBeforeTime.getType() == ChatRoomConfig.RECORD_TIME){
                         chatRecordDao.delete(recordBeforeTime);
@@ -868,11 +474,11 @@ public class ChatRoomMessageAdapter extends RecyclerView.Adapter<ChatRoomMessage
         }).start();
     }
 
-    /**
-     * 回复消息*/
-    public void replayChatRecord(){
-        if (null != mLongClickHolder && null != mOnClickReplayOrNotify){
-            mOnClickReplayOrNotify.onClickReplay(messageBeanList.get(mLongClickPosition),mLongClickHolder.getSenderName().getText().toString());
-        }
-    }
+//    /**
+//     * 回复消息*/
+//    public void replayChatRecord(){
+//        if (null != mLongClickHolder && null != mOnClickReplayOrNotify){
+//            mOnClickReplayOrNotify.onClickReplay(messageBeanList.get(mLongClickPosition),mLongClickHolder.getSenderName().getText().toString());
+//        }
+//    }
 }

@@ -484,7 +484,6 @@ public class ChatRoomActivity extends BaseActivity implements View.OnClickListen
             public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
                 super.onScrollStateChanged(recyclerView, newState);
                 if (newState == RecyclerView.SCROLL_STATE_IDLE){
-                    TLog.d(TAG, "onScrollStateChanged: 底部 TopPosition = " + mAdapter.getTopPosition());
                     if (!isRefresh){
                         isRefresh = true;
                         return;
@@ -508,12 +507,6 @@ public class ChatRoomActivity extends BaseActivity implements View.OnClickListen
                                         more = number - mAdapter.getItemCount();
                                     }
                                     List<ChatRecordEntity> all = chatRecordDao.getAll(mReceiverIdentifier, start, more);
-                                    if (start == 0){
-                                        Iterator<ChatRecordEntity> iterator = all.iterator();
-                                        while (iterator.hasNext()){
-                                            TLog.d(TAG, "run: " + iterator.next().toString());
-                                        }
-                                    }
                                     if (all != null && all.size() != 0){
                                         EventBus.getDefault().post(all);
                                     }

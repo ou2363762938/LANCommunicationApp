@@ -69,4 +69,25 @@
         <item name="android:textColor">@color/timeTextColor</item>
         <item name="android:layout_width">@dimen/dp_140</item>
     </style>
+
+    <style name="ChatRoomContactName">
+        <item name="android:textSize">@dimen/chatRoomContactNameTextSize</item>
+        <item name="android:textColor">@color/messageTextColor</item>
+    </style>
+
+    <style name="ChatRoomMessage">
+        <item name="android:textSize">@dimen/chatRoomMessageTextSize</item>
+        <item name="android:textColor">@color/textColorDark</item>
+        <item name="android:layout_marginStart">@dimen/dp_10</item>
+        <item name="android:layout_marginEnd">@dimen/dp_10</item>
+        <item name="android:padding">@dimen/dp_10</item>
+        <item name="android:maxWidth">@dimen/dp_290</item>
+        <item name="android:maxEms">11</item>
+        <item name="android:singleLine">false</item>
+        <item name="android:maxLines">4</item>
+        <item name="android:focusable">false</item>
+        <item name="android:editable">false</item>
+        <item name="android:textIsSelectable">false</item>
+        <item name="android:background">@drawable/bg_message_box</item>
+    </style>
 </resources>
