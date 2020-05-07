@@ -24,6 +24,8 @@ import com.skysoft.smart.intranetchat.bean.SendAtMessageBean;
 import com.skysoft.smart.intranetchat.tools.ChatRoom.KeyBoardUtils;
 import com.skysoft.smart.intranetchat.tools.ChatRoom.RoomUtils;
 import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
+
+import android.util.Log;
 import android.view.GestureDetector;
 import android.view.Gravity;
 import android.view.KeyEvent;
@@ -173,6 +175,7 @@ public class ChatRoomActivity extends BaseActivity implements View.OnClickListen
         public void onSoftKeyboardStateChangedListener(boolean isKeyBoardShow, int keyboardHeight, int screenSize) {
             if (!isInputMessage && isKeyBoardShow && !isHiddenSoftKeyboard){
                 isInputMessage = true;
+                mBlankFunctionBox.setVisibility(View.VISIBLE);
                 mRecyclerView.scrollToPosition(mAdapter.getItemCount() - 1);
             }
             if (!isKeyBoardShow && !isClosing && isInputMessage){
@@ -180,6 +183,9 @@ public class ChatRoomActivity extends BaseActivity implements View.OnClickListen
                 isClosing = true;
                 isInputMessage = false;
                 mInputMessage.clearFocus();
+            }
+            if (!isKeyBoardShow) {
+                mBlankFunctionBox.setVisibility(View.GONE);
             }
             if (isClosing){
                 isInputMessage = false;
@@ -467,6 +473,7 @@ public class ChatRoomActivity extends BaseActivity implements View.OnClickListen
         ViewGroup.LayoutParams layoutParams = mMoreFunctionBox.getLayoutParams();
         layoutParams.height = IntranetChatApplication.getsEquipmentInfoEntity().getSoftInputHeight();
         mMoreFunctionBox.setLayoutParams(layoutParams);
+        mBlankFunctionBox.setLayoutParams(layoutParams);
 
         mInputMessage.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
@@ -828,8 +835,7 @@ public class ChatRoomActivity extends BaseActivity implements View.OnClickListen
         if (isInputMessage){
             hintKeyBoard();
         }
-        if (isInputVoice) {
-            //输入文字
+        if (mInputMessage.getVisibility() == View.GONE) {
             mIconInputVoice.setImageResource(R.drawable.ic_voice_circle);
             mInputMessage.setGravity(Gravity.LEFT | Gravity.CENTER_VERTICAL);
             mInputMessage.setVisibility(View.VISIBLE);

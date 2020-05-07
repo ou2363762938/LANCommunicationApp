@@ -90,4 +90,18 @@
         <item name="android:textIsSelectable">false</item>
         <item name="android:background">@drawable/bg_message_box</item>
     </style>
+
+    <style name="InputMessageBox">
+        <item name="android:layout_weight">7</item>
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:padding">@dimen/dp_10</item>
+        <item name="android:textSize">@dimen/chatRoomMessageTextSize</item>
+        <item name="android:maxLength">30</item>
+        <item name="android:minLines">1</item>
+        <item name="android:focusable">true</item>
+        <item name="android:maxEms">11</item>
+        <item name="android:background">@drawable/bg_message_input</item>
+        <item name="android:layout_gravity">center_vertical</item>
+    </style>
 </resources>

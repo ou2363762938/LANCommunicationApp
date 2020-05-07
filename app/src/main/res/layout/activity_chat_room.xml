@@ -146,29 +146,14 @@
             android:layout_marginEnd="@dimen/dp_3"/>
         <EditText
             android:id="@+id/chat_room_input_message"
-            android:layout_width="0dp"
-            android:layout_weight="7"
-            android:padding="@dimen/dp_10"
-            android:maxLength="30"
-            android:layout_height="wrap_content"
-            android:minLines="1"
-            android:focusable="true"
-            android:textSize="@dimen/sp_18"
-            android:maxEms="11"
-            android:background="@drawable/bg_message_input"
-            android:gravity="center_vertical"
-            android:layout_gravity="center_vertical"/>
+            style="@style/InputMessageBox"/>
         <TextView
             android:id="@+id/chat_room_input_voice_box"
             android:visibility="gone"
-            android:layout_width="0dp"
-            android:layout_weight="5"
-            android:padding="@dimen/dp_5"
-            android:layout_height="match_parent"
+            style="@style/InputMessageBox"
+
             android:gravity="center"
-            android:textSize="@dimen/sp_16"
-            android:text="@string/hold_down_the_talk"
-            android:background="@drawable/bg_message_input" />
+            android:text="@string/hold_down_the_talk"/>
         <ImageView
             android:id="@+id/chat_room_more_function"
             android:layout_width="0dp"
