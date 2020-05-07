@@ -391,6 +391,18 @@
     <dimen name="notification_name__textSize">14sp</dimen>
     <dimen name="notification_message__height">40dp</dimen>
     <dimen name="notification_message__textSize">20sp</dimen>
+
+    <dimen name="textSizeDark">18sp</dimen>
+    <dimen name="textSize">16sp</dimen>
+    <dimen name="messageTextSize">12sp</dimen>
+    <dimen name="timeTextSize">10sp</dimen>
+
+    <dimen name="contentTextSize">14sp</dimen>
+    <dimen name="titleTextSize">18sp</dimen>
+
+    <dimen name="chatRoomContactNameTextSize">10sp</dimen>
+    <dimen name="chatRoomMessageTextSize">16sp</dimen>
+
     <dimen name="dp_m_60">-60dp</dimen>
     <dimen name="dp_m_30">-30dp</dimen>
     <dimen name="dp_m_20">-20dp</dimen>

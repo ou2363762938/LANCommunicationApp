@@ -7,10 +7,10 @@
 <com.skysoft.smart.intranetchat.ui.SwipeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/list_message_item"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:background="@color/itemBackgroundColor">
 
     <LinearLayout
         android:layout_width="wrap_content"
@@ -42,41 +42,43 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/list_message"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
+            android:gravity="center_vertical">
             <de.hdodenhof.circleimageview.CircleImageView
                 android:id="@+id/head"
-                android:layout_width="@dimen/dp_40"
+                android:layout_width="@dimen/dp_50"
                 android:layout_height="@dimen/dp_70"
                 android:layout_marginLeft="@dimen/dp_20"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"/>
 
-            <TextView
-                android:id="@+id/name"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="@dimen/dp_230"
                 android:layout_height="wrap_content"
-                android:textSize="@dimen/sp_18"
-                style="@style/TitleStyle"
-                android:layout_marginLeft="@dimen/dp_14"
-                android:layout_marginTop="@dimen/dp_8"
-                app:layout_constraintStart_toEndOf="@+id/head"
                 app:layout_constraintTop_toTopOf="parent"
-                android:gravity="left"/>
-
-            <TextView
-                android:id="@+id/message"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:gravity="left"
-                android:textSize="@dimen/sp_18"
-                android:singleLine="true"
-                android:ellipsize="end"
-                android:layout_marginLeft="@dimen/dp_14"
-                android:layout_marginBottom="@dimen/dp_8"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/head"
-                app:layout_constraintEnd_toStartOf="@+id/unread_number"/>
+                android:orientation="vertical">
+                <TextView
+                    android:id="@+id/name"
+                    android:layout_width="@dimen/dp_190"
+                    android:layout_height="@dimen/dp_24"
+                    style="@style/MessageTitleTextStyle"
+                    android:text="@string/app_name"
+                    android:layout_marginLeft="@dimen/dp_14"
+                    app:layout_constraintStart_toEndOf="@+id/head"
+                    app:layout_constraintTop_toTopOf="parent"/>
+
+                <TextView
+                    android:id="@+id/message"
+                    android:layout_width="@dimen/dp_230"
+                    android:layout_height="@dimen/dp_20"
+                    style="@style/MessageContentTextStyle"
+                    android:layout_marginStart="@dimen/dp_14"
+                    android:layout_marginTop="@dimen/dp_5"
+                    android:text="mmm"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/head"/>
+            </LinearLayout>
 
             <TextView
                 android:id="@+id/message_time"
@@ -85,6 +87,8 @@
                 android:gravity="left|center"
                 android:layout_marginTop="@dimen/dp_12"
                 android:layout_marginRight="@dimen/dp_15"
+                style="@style/TimeStyle"
+                android:text="2020-5-18"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 

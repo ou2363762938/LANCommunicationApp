@@ -12,6 +12,7 @@ import com.skysoft.smart.intranetchat.bean.SendAtMessageBean;
 import com.skysoft.smart.intranetchat.bean.SendReplayMessageBean;
 import com.skysoft.smart.intranetchat.model.network.bean.NotificationMessageBean;
 import com.skysoft.smart.intranetchat.model.network.bean.ReplayMessageBean;
+import com.skysoft.smart.intranetchat.tools.ChatRoom.RoomUtils;
 import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 
 import com.skysoft.smart.intranetchat.R;
@@ -210,7 +211,7 @@ public class SendMessage {
             next.setContent(sendMessageBean.getMessage());
             next.setHost(sendMessageBean.getHost());
             next.setUnReadNumber(0);
-            next.setContentTime(ChatRoomActivity.millsToTime(System.currentTimeMillis()));
+            next.setContentTime(RoomUtils.millsToTime(System.currentTimeMillis()));
             next.setContentTimeMill(System.currentTimeMillis());
             next.setStatus(com.skysoft.smart.intranetchat.model.network.Config.STATUS_ONLINE);
             next.setUserName(sendMessageBean.getName());
@@ -253,7 +254,7 @@ public class SendMessage {
     public static LatestChatHistoryEntity adapterToLatest(SendMessageBean sendMessageBean) {
         LatestChatHistoryEntity latestChatHistoryEntity = new LatestChatHistoryEntity();
         latestChatHistoryEntity.setContentTimeMill(System.currentTimeMillis());
-        latestChatHistoryEntity.setContentTime(ChatRoomActivity.millsToTime(System.currentTimeMillis()));
+        latestChatHistoryEntity.setContentTime(RoomUtils.millsToTime(System.currentTimeMillis()));
         latestChatHistoryEntity.setContent(sendMessageBean.getMessage());
         latestChatHistoryEntity.setHost(sendMessageBean.getHost());
         latestChatHistoryEntity.setStatus(com.skysoft.smart.intranetchat.model.network.Config.STATUS_ONLINE);

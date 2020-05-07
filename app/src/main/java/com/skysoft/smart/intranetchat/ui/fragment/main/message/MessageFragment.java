@@ -5,55 +5,55 @@
  */
 package com.skysoft.smart.intranetchat.ui.fragment.main.message;
 
-import android.os.Bundle;
-import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
-import android.view.LayoutInflater;
+
+import com.skysoft.smart.intranetchat.app.BaseFragment;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ListView;
 import android.widget.TextView;
 
 import com.skysoft.smart.intranetchat.R;
 import com.skysoft.smart.intranetchat.app.IntranetChatApplication;
-import com.skysoft.smart.intranetchat.tools.customstatusbar.CustomStatusBarBackground;
 import com.skysoft.smart.intranetchat.tools.listsort.MessageListSort;
-import com.skysoft.smart.intranetchat.tools.QuickClickListener;
 import com.skysoft.smart.intranetchat.ui.activity.chatroom.EstablishGroup.EstablishGroupActivity;
 
-import androidx.annotation.NonNull;
-import androidx.fragment.app.Fragment;
-
-
-public class MessageFragment extends Fragment {
+public class MessageFragment extends BaseFragment implements View.OnClickListener {
 
     private static String TAG = MessageFragment.class.getSimpleName();
-    private ListView messageListView;
+    private ListView mMessageListView;
     private TextView mEstablishGroup;
-    private View statusBar;
+    private TextView mPageTitle;
 
-    public View onCreateView(@NonNull LayoutInflater inflater,
-                             ViewGroup container, Bundle savedInstanceState) {
+    @Override
+    protected int getLayout() {
+        return R.layout.fragment_main_message;
+    }
 
+    @Override
+    protected void initView(View view) {
+        mPageTitle = view.findViewById(R.id.page_title);
+        mMessageListView = view.findViewById(R.id.list_main_message);
+        mEstablishGroup = view.findViewById(R.id.page_establish_group);
+        mEstablishGroup.setOnClickListener(this::onClick);
+    }
+
+    @Override
+    protected  void initData() {
         MessageListSort.CollectionsList(IntranetChatApplication.getMessageList());
-        View root = inflater.inflate(R.layout.fragment_main_message, container, false);
-        statusBar = root.findViewById(R.id.custom_status_bar_background);
-        CustomStatusBarBackground.drawableViewStatusBar(getContext(),R.drawable.custom_gradient_main_title,statusBar);
-        TextView title = root.findViewById(R.id.page_title);
-        title.setText("消息");
-        messageListView = root.findViewById(R.id.list_main_message);
         IntranetChatApplication.setsMessageListAdapter(new MessageListAdapter(IntranetChatApplication.getMessageList(),getContext()));
-        messageListView.setAdapter(IntranetChatApplication.getsMessageListAdapter());
-        mEstablishGroup = root.findViewById(R.id.page_establish_group);
+        mMessageListView.setAdapter(IntranetChatApplication.getsMessageListAdapter());
+
+        mPageTitle.setText("消息");
         mEstablishGroup.setText(getResources().getText(R.string.MessageFragment_mEstablishGroup));
-        mEstablishGroup.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (QuickClickListener.isFastClick(300)) {
-                    TLog.d(TAG, "onClick: ");
-                    EstablishGroupActivity.go(getActivity(), "group", false);
-                }
-            }
-        });
-        return root;
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.page_establish_group:
+                EstablishGroupActivity.go(getActivity(), "group", false);
+                break;
+                default:
+                    break;
+        }
     }
 }

@@ -22,6 +22,7 @@ import androidx.fragment.app.Fragment;
 
 import com.bumptech.glide.Glide;
 import com.skysoft.smart.intranetchat.R;
+import com.skysoft.smart.intranetchat.app.BaseFragment;
 import com.skysoft.smart.intranetchat.tools.QuickClickListener;
 import com.skysoft.smart.intranetchat.ui.activity.camera.ClipImageActivity;
 import com.skysoft.smart.intranetchat.ui.activity.camera.ShowPictureActivity;
@@ -38,7 +39,7 @@ import static com.skysoft.smart.intranetchat.model.camera.manager.MyCameraManage
 import static com.skysoft.smart.intranetchat.model.camera.manager.MyCameraManager.OPEN_FLASH;
 
 
-public class CameraFragment extends Fragment implements View.OnClickListener {
+public class CameraFragment extends BaseFragment implements View.OnClickListener {
 
     private static final String TAG = "debug " + CameraFragment.class.getSimpleName() + " ";
 
@@ -65,14 +66,13 @@ public class CameraFragment extends Fragment implements View.OnClickListener {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        isCircle = getArguments().getBoolean("type", false);
-        return inflater.inflate(R.layout.fragment_camera, container, false);
+    protected int getLayout() {
+        return R.layout.fragment_camera;
     }
 
-    @SuppressLint("ClickableViewAccessibility")
     @Override
-    public void onViewCreated(final View view, Bundle savedInstanceState) {
+    protected void initView(View view) {
+        super.initView(view);
         view.findViewById(R.id.fragment_camera2_take_picture).setOnClickListener(this);
         view.findViewById(R.id.fragment_camera2_change_camera_id).setOnClickListener(this);
         view.findViewById(R.id.fragment_camera2_open_lighting).setOnClickListener(this);
@@ -88,6 +88,11 @@ public class CameraFragment extends Fragment implements View.OnClickListener {
         mForcusView = new FocusView(getContext());
         mForcusView.setVisibility(View.GONE);
         mRootView.addView(mForcusView);
+    }
+
+    @Override
+    protected void initData() {
+        super.initData();
         mCameraManager = new MyCameraManager(getActivity(), mTextureView, mForcusView);
         setLightningImg();
         EventBus.getDefault().register(this);

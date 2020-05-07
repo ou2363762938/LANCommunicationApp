@@ -4,6 +4,8 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
+
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,14 +27,22 @@ import androidx.recyclerview.widget.RecyclerView;
 public class PopupWindowAdapter extends RecyclerView.Adapter<PopupWindowAdapter.PopupWindowHolder> {
     private static final String TAG = "PopupWindowAdapter";
     private Context mContext;
+    private int mPosition;
     private List<String> mItemList;
     private PopupWindow mPopupWindow;   //关闭popupWindow
     private ChatRecordEntity mChatRecordEntity;     //长按的消息记录
     private ChatRoomMessageAdapter mChatAdapter;
 
-    public PopupWindowAdapter(Context mContext,ChatRecordEntity mChatRecordEntity, PopupWindow mPopupWindow, ChatRoomMessageAdapter mChatAdapter) {
+    public PopupWindowAdapter(Context mContext,
+                              ChatRecordEntity mChatRecordEntity,
+                              PopupWindow mPopupWindow,
+                              ChatRoomMessageAdapter mChatAdapter,
+                              int position) {
         this.mContext = mContext;
         this.mChatRecordEntity = mChatRecordEntity;
+        this.mPosition = position;
+        Log.d(TAG, "---------->>receive : " + mChatRecordEntity.getIsReceive());
+        Log.d(TAG, "---------->>record : " + mChatRecordEntity.getType());
         //判断长按的消息记录
         switch (mChatRecordEntity.getType()){
             case ChatRoomConfig.RECORD_TEXT:
@@ -47,9 +57,9 @@ public class PopupWindowAdapter extends RecyclerView.Adapter<PopupWindowAdapter.
                 }
                 break;
             case ChatRoomConfig.RECORD_VOICE:
-                if (mChatRecordEntity.getIsReceive() == ChatRoomConfig.RECEIVE_VOICE && mChatAdapter.isGroup()){
-                    mItemList = Arrays.asList(mContext.getResources().getStringArray(R.array.popup_window_item_voice));
-                }
+            case ChatRoomConfig.RECORD_CALL:
+                Log.d(TAG, "-------Voice : Call---------");
+                mItemList = Arrays.asList(mContext.getResources().getStringArray(R.array.popup_window_item_voice));
                 break;
             case ChatRoomConfig.RECORD_IMAGE:
             case ChatRoomConfig.RECORD_VIDEO:
@@ -64,6 +74,7 @@ public class PopupWindowAdapter extends RecyclerView.Adapter<PopupWindowAdapter.
                 }
                 break;
         }
+        Log.d(TAG, "---------Size : " + mItemList.size());
         this.mPopupWindow = mPopupWindow;
         this.mChatAdapter = mChatAdapter;
     }
@@ -94,7 +105,7 @@ public class PopupWindowAdapter extends RecyclerView.Adapter<PopupWindowAdapter.
                     delete();
                 }else if (clickContent.equals(mContext.getResources().getString(R.string.replay))){
                     //点击回复
-                    mChatAdapter.replayChatRecord();
+//                    mChatAdapter.replayChatRecord();
                 }
                 mPopupWindow.dismiss();
             }
@@ -128,7 +139,7 @@ public class PopupWindowAdapter extends RecyclerView.Adapter<PopupWindowAdapter.
         view.findViewById(R.id.delete_record).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mChatAdapter.deleteChatRecord();
+                mChatAdapter.deleteChatRecord(mPosition);
                 dialog.dismiss();
             }
         });

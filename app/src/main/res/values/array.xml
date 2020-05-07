@@ -26,6 +26,5 @@
 
     <array name="popup_window_item_voice">
         <item>@string/delete</item>
-        <item>@string/replay</item>
     </array>
 </resources>

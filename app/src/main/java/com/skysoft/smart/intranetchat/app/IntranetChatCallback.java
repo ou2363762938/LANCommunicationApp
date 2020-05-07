@@ -44,6 +44,7 @@ import com.skysoft.smart.intranetchat.model.network.bean.ReceiveAndSaveFileBean;
 import com.skysoft.smart.intranetchat.model.network.bean.ReplayMessageBean;
 import com.skysoft.smart.intranetchat.model.network.bean.UserInfoBean;
 import com.skysoft.smart.intranetchat.model.network.bean.VoiceCallDataBean;
+import com.skysoft.smart.intranetchat.tools.ChatRoom.RoomUtils;
 import com.skysoft.smart.intranetchat.tools.GsonTools;
 import com.skysoft.smart.intranetchat.tools.HandleReceivedUserInfo;
 import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
@@ -607,7 +608,7 @@ public class IntranetChatCallback extends IIntranetChatAidlInterfaceCallback.Stu
                                                                     String avatarPath,String receiver,String sender,
                                                                     String userName,String host){
         LatestChatHistoryEntity latestChatHistoryEntity = new LatestChatHistoryEntity();
-        latestChatHistoryEntity.setContentTime(ChatRoomActivity.millsToTime(time));
+        latestChatHistoryEntity.setContentTime(RoomUtils.millsToTime(time));
         latestChatHistoryEntity.setContent(content);
         latestChatHistoryEntity.setUserHeadIdentifier(avatarIdentifier);
         latestChatHistoryEntity.setUserHeadPath(avatarPath);

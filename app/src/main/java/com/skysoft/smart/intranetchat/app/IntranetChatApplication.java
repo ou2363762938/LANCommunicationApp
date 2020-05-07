@@ -28,11 +28,12 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.text.TextUtils;
-import android.util.EventLog;
 
+import com.skysoft.smart.intranetchat.customize.StatusBarLayout;
+import com.skysoft.smart.intranetchat.customize.TitleLinearLayout;
 import com.skysoft.smart.intranetchat.model.net_model.SendMessage;
-import com.skysoft.smart.intranetchat.model.network.bean.NotificationMessageBean;
-import com.skysoft.smart.intranetchat.model.network.bean.ReplayMessageBean;
+import com.skysoft.smart.intranetchat.tools.ChatRoom.RoomUtils;
+import com.skysoft.smart.intranetchat.tools.customstatusbar.CustomStatusBarBackground;
 import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 import android.widget.RemoteViews;
 import android.widget.TextView;
@@ -575,7 +576,7 @@ public class IntranetChatApplication extends Application {
             next.setStatus(latestChatHistoryEntity.getStatus());
             next.setContent(latestChatHistoryEntity.getContent());
             next.setContentTimeMill(System.currentTimeMillis());
-            next.setContentTime(ChatRoomActivity.millsToTime(next.getContentTimeMill()));
+            next.setContentTime(RoomUtils.millsToTime(next.getContentTimeMill()));
             MessageListSort.CollectionsList(sLatestChatHistoryList);
 
             setUnReadNumber(next,latestChatHistoryEntity,messageBean);
@@ -672,7 +673,7 @@ public class IntranetChatApplication extends Application {
         historyEntity.setContent(messageBean.getMsg());     //记录聊天内容
         historyEntity.setContentTimeMill(messageBean.getTimeStamp());       //记录聊天时间
         //将毫秒数时间转为String
-        historyEntity.setContentTime(ChatRoomActivity.millsToTime(historyEntity.getContentTimeMill()));
+        historyEntity.setContentTime(RoomUtils.millsToTime(historyEntity.getContentTimeMill()));
         MessageListSort.CollectionsList(sLatestChatHistoryList);        //对记录排序
 
         setUnReadNumber(historyEntity,historyEntity,messageBean);       //设置未读数
@@ -947,7 +948,7 @@ public class IntranetChatApplication extends Application {
             historyEntity.setUserName(establishGroupBean.getmGroupName());
             historyEntity.setContent(content);
             historyEntity.setContentTimeMill(System.currentTimeMillis());
-            historyEntity.setContentTime(ChatRoomActivity.millsToTime(historyEntity.getContentTimeMill()));
+            historyEntity.setContentTime(RoomUtils.millsToTime(historyEntity.getContentTimeMill()));
             MessageListSort.CollectionsList(sLatestChatHistoryList);
             sMessageListAdapter.notifyDataSetChanged();
             new Thread(new Runnable() {
@@ -1067,6 +1068,8 @@ public class IntranetChatApplication extends Application {
             senderMyHeartbeat.schedule(mSendMyHeartbeat,2000,1300);
             Timer confirmMonitorHeartbeat = new Timer();
             confirmMonitorHeartbeat.schedule(mConfirmMonitorHeartbeat,2300,1300);
+            StatusBarLayout.sRootLayoutHeight = CustomStatusBarBackground.getStatusBarHeight(this);
+            TitleLinearLayout.sLayoutHeight = getResources().getDimensionPixelOffset(R.dimen.dp_55);
         }
     }
 
@@ -1278,7 +1281,7 @@ public class IntranetChatApplication extends Application {
         RemoteViews mRemoteViews = new RemoteViews(getPackageName(), R.layout.notification_message);
         mRemoteViews.setTextViewText(R.id.notification_message, message.getMsg());
         mRemoteViews.setTextViewText(R.id.notification_name, name);
-        mRemoteViews.setTextViewText(R.id.notification_message_time, ChatRoomActivity.millsToTime(message.getTimeStamp()));
+        mRemoteViews.setTextViewText(R.id.notification_message_time, RoomUtils.millsToTime(message.getTimeStamp()));
         if (TextUtils.isEmpty(avatar)) {
             mRemoteViews.setImageViewResource(R.id.notification_avatar, R.drawable.default_head);
         } else {
@@ -1457,7 +1460,7 @@ public class IntranetChatApplication extends Application {
         if (null != next) {
             next.setContent(content);
             next.setContentTimeMill(System.currentTimeMillis());
-            next.setContentTime(ChatRoomActivity.millsToTime(next.getContentTimeMill()));
+            next.setContentTime(RoomUtils.millsToTime(next.getContentTimeMill()));
             if (sChatRoomMessageAdapter != null && !TextUtils.isEmpty(sChatRoomMessageAdapter.getReceiverIdentifier()) && sChatRoomMessageAdapter.getReceiverIdentifier().equals(next.getUserIdentifier())) {
                 next.setUnReadNumber(0);
             } else {
@@ -1487,7 +1490,7 @@ public class IntranetChatApplication extends Application {
             entity.setStatus(next.getStatus());
             entity.setGroup(0);
             entity.setContentTimeMill(System.currentTimeMillis());
-            entity.setContentTime(ChatRoomActivity.millsToTime(entity.getContentTimeMill()));
+            entity.setContentTime(RoomUtils.millsToTime(entity.getContentTimeMill()));
             entity.setUserIdentifier(identifier);
             entity.setSenderIdentifier(identifier);
             entity.setUserHeadIdentifier(nextContact.getAvatarIdentifier());
