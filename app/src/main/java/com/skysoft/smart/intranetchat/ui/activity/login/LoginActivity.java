@@ -11,6 +11,8 @@ import android.graphics.Rect;
 import android.os.Bundle;
 import android.text.TextUtils;
 import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
+
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewTreeObserver;
@@ -63,7 +65,25 @@ public class LoginActivity extends AppCompatActivity {
             }
         }
     };
-    private ViewTreeObserver.OnGlobalLayoutListener mLayoutChangeListener;
+    private ViewTreeObserver.OnGlobalLayoutListener mLayoutChangeListener = new ViewTreeObserver.OnGlobalLayoutListener() {
+        @Override
+        public void onGlobalLayout() {
+            Point screenSize = new Point();
+            getWindowManager().getDefaultDisplay().getSize(screenSize);
+
+            Rect rect = new Rect();
+            getWindow().getDecorView().getWindowVisibleDisplayFrame(rect);
+            int heightDifference = 0;
+            mMaxBottomHight = mMaxBottomHight < rect.bottom ? rect.bottom : mMaxBottomHight;
+            if (screenSize.y == mMaxBottomHight){
+                heightDifference = screenSize.y - rect.bottom;
+            }else {
+                heightDifference = screenSize.y - rect.bottom + rect.top;
+            }
+            boolean isKeyboardShowing = heightDifference > screenSize.y/3;
+            mOSSCL.onSoftKeyboardStateChangedListener(isKeyboardShowing,heightDifference,screenSize.y);
+        }
+    };;
     private String avatarPath = null;
 
     @BindView(R.id.activity_login_head)
@@ -88,25 +108,6 @@ public class LoginActivity extends AppCompatActivity {
         ButterKnife.bind(this);
         String mac = Mac.getMac(this);
         IntranetChatApplication.getsEquipmentInfoEntity().setMac(mac);
-        mLayoutChangeListener = new ViewTreeObserver.OnGlobalLayoutListener() {
-            @Override
-            public void onGlobalLayout() {
-                Point screenSize = new Point();
-                getWindowManager().getDefaultDisplay().getSize(screenSize);
-
-                Rect rect = new Rect();
-                getWindow().getDecorView().getWindowVisibleDisplayFrame(rect);
-                int heightDifference = 0;
-                mMaxBottomHight = mMaxBottomHight < rect.bottom ? rect.bottom : mMaxBottomHight;
-                if (screenSize.y == mMaxBottomHight){
-                    heightDifference = screenSize.y - rect.bottom;
-                }else {
-                    heightDifference = screenSize.y - rect.bottom + rect.top;
-                }
-                boolean isKeyboardShowing = heightDifference > screenSize.y/3;
-                mOSSCL.onSoftKeyboardStateChangedListener(isKeyboardShowing,heightDifference,screenSize.y);
-            }
-        };
         getWindow().getDecorView().getViewTreeObserver().addOnGlobalLayoutListener(mLayoutChangeListener);
     }
 
@@ -157,7 +158,7 @@ public class LoginActivity extends AppCompatActivity {
                     String userIdentifier;
                     Identifier identifier = new Identifier();
                     //B:[Intranet Chat] [APP][UI] Chat Room Oliver Ou 2019/11/4
-                    userIdentifier = identifier.getUserIdentifier(IntranetChatApplication.getsEquipmentInfoEntity().getMac());
+                    userIdentifier = identifier.getUserIdentifier(identifier.getSerialNumber(this));
                     //E:[Intranet Chat] [APP][UI] Chat Room Oliver Ou 2019/11/4
                     if (TextUtils.isEmpty(avatarPath)){
                         headIdentifier = identifier.getDefaultAvatarIdentifier();

@@ -272,7 +272,7 @@ public class IntranetChatCallback extends IIntranetChatAidlInterfaceCallback.Stu
 
     @Override
     public void onReceiveAskResource(String askResourceJson, String host) throws RemoteException {
-        TLog.d(TAG, "onReceiveAskResource: askResourceJson" + askResourceJson + ",host: " + host);
+//        TLog.d(TAG, "onReceiveAskResource: askResourceJson" + askResourceJson + ",host: " + host);
         if (host.equals(IntranetChatApplication.getHostIp())){
             return;
         }
