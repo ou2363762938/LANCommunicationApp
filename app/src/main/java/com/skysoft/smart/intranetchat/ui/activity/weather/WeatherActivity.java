@@ -2,6 +2,8 @@ package com.skysoft.smart.intranetchat.ui.activity.weather;
 
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.skysoft.smart.intranetchat.app.BaseActivity;
 import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -25,7 +27,7 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-public class WeatherActivity extends AppCompatActivity {
+public class WeatherActivity extends BaseActivity {
     TextView currentTemp, cityTemp, date, airQuality, pmIndex;
     private static final String TAG = "WeatherActivity";
     public List<Map<String,String>> listweather=new ArrayList<Map<String,String>>();

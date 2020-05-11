@@ -58,7 +58,7 @@ public class MineFragment extends BaseFragment implements View.OnClickListener{
     @Override
     protected void initView(View root) {
         mTvName = root.findViewById(R.id.mine_info_name);
-        root.findViewById(R.id.mine_info_head_constraint).setOnClickListener(this::onClick);
+        root.findViewById(R.id.mine_info_name_constraint).setOnClickListener(this::onClick);
         mCiAvatar = root.findViewById(R.id.mine_info_head);
         root.findViewById(R.id.mine_info_head_constraint).setOnClickListener(this::onClick);
         mTvStatus = root.findViewById(R.id.mine_info_status);
