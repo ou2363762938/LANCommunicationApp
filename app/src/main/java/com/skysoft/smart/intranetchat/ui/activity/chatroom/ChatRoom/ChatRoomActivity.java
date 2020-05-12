@@ -612,6 +612,14 @@ public class ChatRoomActivity extends BaseActivity implements View.OnClickListen
         }
     }
 
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onReceiveMessageRecord(ChatRecordEntity recordEntity) {
+        TLog.d(TAG,"------> " + recordEntity.toString());
+        mAdapter.add(recordEntity);
+        mAdapter.notifyDataSetChanged();
+        myHost = recordEntity.getHost();
+    }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -741,8 +749,8 @@ public class ChatRoomActivity extends BaseActivity implements View.OnClickListen
 //            mBlankFunctionBox.setVisibility(View.GONE);
             KeyBoardUtils.hintKeyBoard(this);
         } else if (isOpeningKeyboard) {
-            mBlankFunctionBox.setVisibility(View.VISIBLE);
-            mMoreFunctionBox.setVisibility(View.GONE);
+//            mBlankFunctionBox.setVisibility(View.VISIBLE);
+            mMoreFunctionBox.setVisibility(View.INVISIBLE);
             KeyBoardUtils.showInput(this,mInputMessage);
         }
     }

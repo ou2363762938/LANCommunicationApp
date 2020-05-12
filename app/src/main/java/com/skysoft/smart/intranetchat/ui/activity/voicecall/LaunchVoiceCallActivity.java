@@ -75,7 +75,7 @@ public class LaunchVoiceCallActivity extends AppCompatActivity {
                 VoiceCall.hungUpVoiceCall(host);
                 IntranetChatApplication.setInCall(false);
                 EventBus.getDefault().post(new RecordCallBean(mIdentifier,ChatRoomConfig.CALL_REFUSE_LAUNCH_MINE,host,true));
-                finish();
+                LaunchVoiceCallActivity.this.finish();
             }
         });
 
@@ -92,7 +92,7 @@ public class LaunchVoiceCallActivity extends AppCompatActivity {
                     VoiceCall.hungUpVoiceCall(host);
                     IntranetChatApplication.setInCall(false);
                     EventBus.getDefault().post(new RecordCallBean(mIdentifier,ChatRoomConfig.CALL_DIE_LAUNCH,host,true));
-                    finish();
+                    LaunchVoiceCallActivity.this.finish();
                 }
             }
         };
@@ -154,7 +154,7 @@ public class LaunchVoiceCallActivity extends AppCompatActivity {
             }
             IntranetChatApplication.setInCall(false);
             EventBus.getDefault().post(new RecordCallBean(mIdentifier,ChatRoomConfig.CALL_REFUSE_LAUNCH,host,true));
-            finish();
+            LaunchVoiceCallActivity.this.finish();
         }
 
         @Override
@@ -168,7 +168,7 @@ public class LaunchVoiceCallActivity extends AppCompatActivity {
             TLog.d(TAG, "onReceiveConsentOutTime: ");
             IntranetChatApplication.setInCall(false);
             EventBus.getDefault().post(new RecordCallBean(mIdentifier,ChatRoomConfig.CALL_OUT_TIME_ANSWER,host,true));
-            finish();
+            LaunchVoiceCallActivity.this.finish();
         }
 
         @Override

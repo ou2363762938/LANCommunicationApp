@@ -7,6 +7,7 @@ package com.skysoft.smart.intranetchat.app;
 
 import android.os.RemoteException;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.skysoft.smart.intranetchat.IIntranetChatAidlInterfaceCallback;
 import com.skysoft.smart.intranetchat.app.impl.OnEstablishCallConnect;
@@ -28,6 +29,7 @@ import com.skysoft.smart.intranetchat.database.table.GroupEntity;
 import com.skysoft.smart.intranetchat.database.table.GroupMemberEntity;
 import com.skysoft.smart.intranetchat.database.table.LatestChatHistoryEntity;
 import com.skysoft.smart.intranetchat.database.table.RefuseGroupEntity;
+import com.skysoft.smart.intranetchat.model.chat.Message;
 import com.skysoft.smart.intranetchat.model.net_model.EstablishGroup;
 import com.skysoft.smart.intranetchat.model.net_model.Login;
 import com.skysoft.smart.intranetchat.model.net_model.SendMessage;
@@ -134,18 +136,8 @@ public class IntranetChatCallback extends IIntranetChatAidlInterfaceCallback.Stu
 
     @Override
     public void onReceiveMessage(String messageJson, String host) throws RemoteException {
-        TLog.d(TAG, "notification: messageJson: " + messageJson + ", host: " + host);
-        if (host.equals(IntranetChatApplication.getHostIp())){
-            return;
-        }
-//        Login.requestUserInfo(host);  //请求心跳数据
-        MessageBean messageBean = (MessageBean) GsonTools.formJson(messageJson,MessageBean.class);
-        if (messageBean.getSender().equals(IntranetChatApplication.getsMineUserInfo().getIdentifier())){
-            return;
-        }
-
-        messageBean.setHost(host);
-        handleMessageBean(messageBean);
+        Log.d(TAG, "---------> : " + messageJson);
+        Message.getInstance().ReceiveMessage(messageJson,host);
     }
 
     @Override

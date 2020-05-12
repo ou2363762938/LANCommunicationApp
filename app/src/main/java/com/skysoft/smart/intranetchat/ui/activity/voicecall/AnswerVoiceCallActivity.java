@@ -79,7 +79,7 @@ public class AnswerVoiceCallActivity extends AppCompatActivity {
                 VoiceCall.refuseVoiceCall(host);
                 IntranetChatApplication.setInCall(false);
                 EventBus.getDefault().post(new RecordCallBean(mIdentifier,ChatRoomConfig.CALL_REFUSE_ANSWER_MINE,host,true));
-                finish();
+                AnswerVoiceCallActivity.this.finish();
             }
         });
 
@@ -105,7 +105,7 @@ public class AnswerVoiceCallActivity extends AppCompatActivity {
                 VoiceCall.responseConsentOutTime(host);
                 IntranetChatApplication.setInCall(false);
                 EventBus.getDefault().post(new RecordCallBean(mIdentifier,ChatRoomConfig.CALL_OUT_TIME_ANSWER,host,true));
-                finish();
+                AnswerVoiceCallActivity.this.finish();
             }
         };
         consentOutTimer.schedule(consentOutTask,60*1000);
@@ -119,7 +119,7 @@ public class AnswerVoiceCallActivity extends AppCompatActivity {
                     VoiceCall.hungUpVoiceCall(host);
                     IntranetChatApplication.setInCall(false);
                     EventBus.getDefault().post(new RecordCallBean(mIdentifier,ChatRoomConfig.CALL_DIE_ANSWER,host,true));
-                    finish();
+                    AnswerVoiceCallActivity.this.finish();
                 }
             }
         };
@@ -134,7 +134,7 @@ public class AnswerVoiceCallActivity extends AppCompatActivity {
             }
             IntranetChatApplication.setInCall(false);
             EventBus.getDefault().post(new RecordCallBean(mIdentifier,ChatRoomConfig.CALL_REFUSE_ANSWER,host,true));
-            finish();
+            AnswerVoiceCallActivity.this.finish();
         }
     };
 
@@ -163,7 +163,7 @@ public class AnswerVoiceCallActivity extends AppCompatActivity {
         VoiceCall.hungUpVoiceCall(host);
         IntranetChatApplication.setInCall(false);
         EventBus.getDefault().post(new RecordCallBean(mIdentifier,ChatRoomConfig.CALL_REFUSE_ANSWER_MINE,host,true));
-        finish();
+        AnswerVoiceCallActivity.this.finish();
     }
 
     @Override
