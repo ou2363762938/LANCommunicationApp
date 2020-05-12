@@ -730,7 +730,7 @@ public class IntranetChatApplication extends Application {
         //刷新头像
         ContactEntity next = sContactMap.get(receiveAndSaveFileBean.getSender());
         TLog.d(TAG, "onReceiveAndSaveFile: " + next.toString());
-        if (null != next) {
+        if (null != next && next.getAvatarIdentifier().equals(receiveAndSaveFileBean.getIdentifier())) {
             //确认是否在查看联系人界面
             if (TextUtils.isEmpty(sFilterIdentifier) || !sFilterIdentifier.equals(next.getIdentifier())) {
                 return;
@@ -793,6 +793,7 @@ public class IntranetChatApplication extends Application {
                 sFilterIdentifier = null;
             }
             sRequestAvatar = false;
+            Log.d(TAG, "-------------<><><>-------------");
             return;
         }
 
@@ -1562,6 +1563,7 @@ public class IntranetChatApplication extends Application {
      * @param identifier 联系人唯一标识符
      * @param avatarPath 联系人新头像地址*/
     public void updateContactAvatarInChatRoom(String identifier,String avatarPath){
+        Log.d(TAG, "----> 更新联系人在聊天室中的头像");
         if (sChatRoomMessageAdapter != null){
             ContactEntity contactEntity = sGroupContactMap.get(identifier);
             if (null != contactEntity){

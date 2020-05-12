@@ -166,7 +166,6 @@ public class ChatRoomActivity extends BaseActivity implements View.OnClickListen
             Rect rect = new Rect();
             getWindow().getDecorView().getWindowVisibleDisplayFrame(rect);
             int heightDifference = screenSize.y - rect.bottom;
-            Log.d(TAG, "------->Height Difference : " + heightDifference);
             boolean isKeyboardShowing = heightDifference > screenSize.y/3;
             mOSSCL.onSoftKeyboardStateChangedListener(isKeyboardShowing,heightDifference,screenSize.y);
         }
@@ -178,9 +177,6 @@ public class ChatRoomActivity extends BaseActivity implements View.OnClickListen
         @Override
         public void onSoftKeyboardStateChangedListener(boolean isKeyBoardShow, int keyboardHeight, int screenSize) {
             isKeyboardOpened = isKeyBoardShow;
-            Log.d(TAG, "-------> Height : " + mHeightDifference + ", Is Key : " + isKeyboardOpened);
-            Log.d(TAG, "---------> isKeyBoardShow : " + isKeyBoardShow);
-            Log.d(TAG, "---------> isClickMoreFunction : " + isClickMoreFunction);
 
             //开启软键盘
             if (mHeightDifference == 0 &&
@@ -201,7 +197,6 @@ public class ChatRoomActivity extends BaseActivity implements View.OnClickListen
                 mInputMessage.clearFocus();
             }
             mHeightDifference = keyboardHeight;
-            Log.d(TAG, "--------------------------------------------------------------------\n");
         }
     };
 
@@ -723,7 +718,6 @@ public class ChatRoomActivity extends BaseActivity implements View.OnClickListen
     /**
      * 开启多功能框，关闭空白框，关闭软键盘*/
     private void openMoreFunction() {
-        Log.d(TAG, "-------------Open More Function Box");
 //        if (mMoreFunctionBox.getVisibility() != View.VISIBLE) {
 //            mMoreFunctionBox.setVisibility(View.VISIBLE);
 //        }
@@ -740,7 +734,6 @@ public class ChatRoomActivity extends BaseActivity implements View.OnClickListen
      * 关闭多功能框，关闭软键盘
      * @param isClosingKeyboard 是否关闭软键盘*/
     private void closeMoreFunction(boolean isClosingKeyboard, boolean isOpeningKeyboard) {
-        Log.d(TAG, "-------------Close More Function Box : " + isKeyboardOpened);
 //        if (mMoreFunctionBox.getVisibility() == View.VISIBLE) {
 //            mMoreFunctionBox.setVisibility(View.INVISIBLE);
 //        }
@@ -786,9 +779,6 @@ public class ChatRoomActivity extends BaseActivity implements View.OnClickListen
         int inputMessageVisibility = mInputMessage.getVisibility();
         int moreFunctionBoxVisibility = mMoreFunctionBox.getVisibility();
         int blankFunctionBoxVisibility = mBlankFunctionBox.getVisibility();
-        Log.d(TAG, "------>Input : " + inputMessageVisibility +
-                " , More : " + moreFunctionBoxVisibility +
-                " , Blank : " + blankFunctionBoxVisibility);
         if (inputMessageVisibility == 0) {      //输入文字
             if (moreFunctionBoxVisibility != 0) {       //多功能框不可见
                 openMoreFunction();

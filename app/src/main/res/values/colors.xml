@@ -35,4 +35,6 @@
     <color name="bottomNavigationBarActiveColor">#1296db</color>
     <color name="bottomNavigationBarInactiveColor">#070707</color>
     <color name="bottomNavigationBarBackgroundColor">#F8F7F4</color>
+
+    <color name="imageRecordBackgroundColor">#A39D9D</color>
 </resources>
