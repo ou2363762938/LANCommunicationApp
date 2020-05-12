@@ -5,7 +5,6 @@
  */
 package com.skysoft.smart.intranetchat;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -14,11 +13,14 @@ import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.RemoteException;
+import android.provider.Settings;
 import android.text.TextUtils;
-import android.widget.FrameLayout;
+import android.util.Log;
 
+import com.skysoft.smart.intranetchat.tools.Identifier;
 import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -47,6 +49,9 @@ import com.skysoft.smart.intranetchat.ui.fragment.main.mine.MineFragment;
 import com.skysoft.smart.intranetchat.ui.fragment.main.tool.ToolsFragment;
 
 import org.greenrobot.eventbus.EventBus;
+
+import java.lang.reflect.Method;
+import java.security.Security;
 
 
 public class MainActivity extends AppCompatActivity{
@@ -79,7 +84,15 @@ public class MainActivity extends AppCompatActivity{
         //B: 监听网络状况 ,Oliver Ou,2019/11/15
         initReceiver();
         //E: 监听网络状况 ,Oliver Ou,2019/11/15
+        String serialNumber = null;
+//        serialNumber = Security.getProperty(Settings.Secure.ANDROID_ID);
+        serialNumber = new Identifier().getSerialNumber(this);
+        Log.d(TAG, "------->Serial Number : " + serialNumber);
+        //826c898ec440d6c6;826c898ec440d6c6
+        //64ee242befc61c2e
+        Log.d(TAG, IntranetChatApplication.sMineUserInfo.toString());
     }
+
     private long time;
     private boolean quit = false;
     @Override

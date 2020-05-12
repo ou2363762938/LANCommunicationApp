@@ -7,56 +7,28 @@ package com.skysoft.smart.intranetchat.ui.activity.chatroom.ChatRoom;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.Drawable;
 import android.media.MediaMetadataRetriever;
-import android.text.Editable;
-import android.text.SpannableStringBuilder;
-import android.text.Spanned;
 import android.text.TextUtils;
 
 import com.skysoft.smart.intranetchat.tools.ChatRoom.BindRecord;
 import com.skysoft.smart.intranetchat.tools.ChatRoom.RoomUtils;
-import com.skysoft.smart.intranetchat.tools.CreateNotifyBitmap;
-import com.skysoft.smart.intranetchat.tools.GsonTools;
 import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 
-import android.text.style.ImageSpan;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.PopupWindow;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.recyclerview.widget.DividerItemDecoration;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.target.ImageViewTarget;
 import com.skysoft.smart.intranetchat.R;
 import com.skysoft.smart.intranetchat.database.dao.ChatRecordDao;
 import com.skysoft.smart.intranetchat.model.net_model.SendFile;
-import com.skysoft.smart.intranetchat.model.network.Config;
 import com.skysoft.smart.intranetchat.tools.QuickClickListener;
-import com.skysoft.smart.intranetchat.ui.activity.camera.PictureShowActivity;
-import com.skysoft.smart.intranetchat.ui.activity.camera.VideoPlayActivity;
 
-import com.skysoft.smart.intranetchat.app.IntranetChatApplication;
-import com.skysoft.smart.intranetchat.model.camera.manager.MyMediaPlayerManager;
 import com.skysoft.smart.intranetchat.database.MyDataBase;
 import com.skysoft.smart.intranetchat.database.table.ChatRecordEntity;
-import com.skysoft.smart.intranetchat.database.table.ContactEntity;
-import com.skysoft.smart.intranetchat.database.table.FileEntity;
-import com.skysoft.smart.intranetchat.ui.activity.chatroom.PopupWindow.PopupWindowAdapter;
-import com.skysoft.smart.intranetchat.ui.activity.userinfoshow.UserInfoShowActivity;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -64,7 +36,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.skysoft.smart.intranetchat.ui.activity.chatroom.ChatRoom.ChatRoomActivity.sIsAudioRecording;
 
 public class ChatRoomMessageAdapter extends RecyclerView.Adapter<ChatRoomMessageViewHolder> implements View.OnTouchListener {
     private static String TAG = ChatRoomMessageAdapter.class.getSimpleName();

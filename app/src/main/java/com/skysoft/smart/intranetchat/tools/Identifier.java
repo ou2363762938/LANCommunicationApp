@@ -5,12 +5,20 @@
  */
 package com.skysoft.smart.intranetchat.tools;
 
+import android.content.Context;
+import android.provider.Settings;
 import android.text.TextUtils;
 import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 
 import java.security.MessageDigest;
 
 public class Identifier {
+
+    public String getSerialNumber(Context context) {
+        String serialNumber = null;
+        serialNumber = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
+        return serialNumber;
+    }
 
     public String getUserIdentifier(String userName){
         String ref = userName;

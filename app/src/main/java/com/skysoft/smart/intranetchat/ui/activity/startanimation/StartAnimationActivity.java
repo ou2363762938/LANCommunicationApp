@@ -12,6 +12,8 @@ import android.os.Bundle;
 
 import com.skysoft.smart.intranetchat.tools.ChatRoom.RoomUtils;
 import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
+
+import android.util.Log;
 import android.view.View;
 import android.view.animation.AccelerateInterpolator;
 import android.widget.ImageView;
@@ -105,14 +107,17 @@ public class StartAnimationActivity extends AppCompatActivity {
                 Map<String ,String > identifiers = new HashMap<>();
                 List<ContactEntity> deleteContact = new ArrayList<>();
                 int i = 0;
+                Log.d(TAG, "-----All Contact Size : " + allContact.size());
                 while (iterator.hasNext()){     //便利数据库获得的联系人
                     ContactEntity next = iterator.next();
                     next.setNotifyId(i++);      //联系人消息通知的唯一ID
 
+                    Log.d(TAG, "----->" + next.toString());
                     identifiers.put(next.getIdentifier(),next.getAvatarPath());
                     if (next.getGroup() == 0){
                         contactEntities.add(next.getIdentifier());
                         //记录此联系人
+                        Log.d(TAG, "-----> sContactMap Put " + next.getIdentifier());
                         IntranetChatApplication.sContactMap.put(next.getIdentifier(),next);
                     }else {
                         groupContactEntities.add(next.getIdentifier());

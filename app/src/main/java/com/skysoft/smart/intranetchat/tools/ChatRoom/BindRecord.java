@@ -184,7 +184,7 @@ public class BindRecord {
                     }
                 }).start();
             }else {
-                Glide.with(mContext).load(R.color.color_gray_dark).into(new ImageViewTarget<Drawable>(image) {
+                Glide.with(mContext).load(R.color.imageRecordBackgroundColor).into(new ImageViewTarget<Drawable>(image) {
                     @Override
                     protected void setResource(Drawable resource) {
                         this.view.setBackground(resource);

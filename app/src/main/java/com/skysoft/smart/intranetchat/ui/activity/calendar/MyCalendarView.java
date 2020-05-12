@@ -8,11 +8,12 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.skysoft.smart.intranetchat.R;
+import com.skysoft.smart.intranetchat.app.BaseActivity;
 import com.skysoft.smart.intranetchat.tools.toastutil.ToastUtil;
 
 import java.util.Calendar;
 
-public class MyCalendarView extends AppCompatActivity {
+public class MyCalendarView extends BaseActivity {
 
     final private static String TAG = "Toby_Test";
     private Toast sToast;

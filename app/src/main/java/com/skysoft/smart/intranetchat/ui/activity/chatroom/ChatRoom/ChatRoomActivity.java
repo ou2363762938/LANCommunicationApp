@@ -83,7 +83,6 @@ import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -137,17 +136,21 @@ public class ChatRoomActivity extends BaseActivity implements View.OnClickListen
     private int mNotifyId;
     private int mSendMessageType = 0;       //0 普通文字消息,1 @消息,2 回复消息
     private int level;
+    private int mHeightDifference = 0;
 
     private Handler handler;
 
-    private boolean isInputVoice = false;
-    private boolean isClosing = true;
+    private boolean isClickMoreFunction = false;
+    private boolean isKeyboardOpened = false;
+
+//    private boolean isInputVoice = false;
+//    private boolean isClosing = true;
     private boolean isGroup = false;
-    private boolean isInputMessage = false;
+//    private boolean isInputMessage = false;
     private boolean isRefresh = false;
     private boolean isUp = false;
     private boolean isStartVoiceAnimation;
-    private boolean isHiddenSoftKeyboard = false;
+//    private boolean isHiddenSoftKeyboard = false;
     private boolean isAudioRecording = false;
     public static boolean sIsAudioRecording = false;
 
@@ -173,23 +176,27 @@ public class ChatRoomActivity extends BaseActivity implements View.OnClickListen
 
         @Override
         public void onSoftKeyboardStateChangedListener(boolean isKeyBoardShow, int keyboardHeight, int screenSize) {
-            if (!isInputMessage && isKeyBoardShow && !isHiddenSoftKeyboard){
-                isInputMessage = true;
-                mBlankFunctionBox.setVisibility(View.VISIBLE);
-                mRecyclerView.scrollToPosition(mAdapter.getItemCount() - 1);
-            }
-            if (!isKeyBoardShow && !isClosing && isInputMessage){
-                mMoreFunctionBox.setVisibility(View.GONE);
-                isClosing = true;
-                isInputMessage = false;
+            isKeyboardOpened = isKeyBoardShow;
+
+            //开启软键盘
+            if (mHeightDifference == 0 &&
+                    keyboardHeight != 0 &&
+                    isKeyBoardShow) {
+                isClickMoreFunction = false;
+                //关闭软键盘
+            } else if (mInputMessage.getVisibility() == View.VISIBLE &&
+                    !isKeyBoardShow && mHeightDifference != 0 &&
+                    keyboardHeight == 0) {
+
+                if (!isClickMoreFunction && mMoreFunctionBox.getVisibility() != View.GONE) {
+                    mMoreFunctionBox.setVisibility(View.GONE);
+                }
+                if (mBlankFunctionBox.getVisibility() != View.GONE) {
+                    mBlankFunctionBox.setVisibility(View.GONE);
+                }
                 mInputMessage.clearFocus();
             }
-            if (!isKeyBoardShow) {
-                mBlankFunctionBox.setVisibility(View.GONE);
-            }
-            if (isClosing){
-                isInputMessage = false;
-            }
+            mHeightDifference = keyboardHeight;
         }
     };
 
@@ -475,12 +482,39 @@ public class ChatRoomActivity extends BaseActivity implements View.OnClickListen
         mMoreFunctionBox.setLayoutParams(layoutParams);
         mBlankFunctionBox.setLayoutParams(layoutParams);
 
+        mReplayReceiverMessage = findViewById(R.id.replay_receiver_message);
+        mReplayMessageBox = findViewById(R.id.replay_box);
+        mIconReplayImage = findViewById(R.id.replay_image);
+        mIconReplayCancel = findViewById(R.id.replay_cancel);
+
+        setListener();
+    }
+
+    private void setListener() {
+        mSendMessage.setOnClickListener(this);
+        mIconInputVoice.setOnClickListener(this);
+        mInputMessage.setOnClickListener(this::onClick);
+        mIconMoreFunction.setOnClickListener(this);
+        mIconBackImage.setOnClickListener(this::onClick);
+        //more function
+        mCameraBox.setOnClickListener(this::onClick);
+        mPhotoBox.setOnClickListener(this::onClick);
+        mFileBox.setOnClickListener(this::onClick);
+        mVoiceCallBox.setOnClickListener(this::onClick);
+        mVideoCallBox.setOnClickListener(this::onClick);
+        mCameraShootingBox.setOnClickListener(this::onClick);
+        mEstablishGroup.setOnClickListener(this::onClick);
+
+        mInputMessage.addTextChangedListener(mWatchInputMessage);        //监听输入框内容变化
+
+        mIconReplayCancel.setOnClickListener(this::onClick);
+
         mInputMessage.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
-                if (hasFocus && isClosing){
-                    mMoreFunctionBox.setVisibility(View.INVISIBLE);
-                    isClosing = false;
+                if (hasFocus && mMoreFunctionBox.getVisibility() == View.GONE){
+                    isClickMoreFunction = false;
+                    mBlankFunctionBox.setVisibility(View.VISIBLE);
                     mRecyclerView.scrollToPosition(mAdapter.getItemCount() - 1);
                 }
             }
@@ -530,33 +564,6 @@ public class ChatRoomActivity extends BaseActivity implements View.OnClickListen
                 isUp = dy < 0;
             }
         });
-
-        mReplayReceiverMessage = findViewById(R.id.replay_receiver_message);
-        mReplayMessageBox = findViewById(R.id.replay_box);
-        mIconReplayImage = findViewById(R.id.replay_image);
-        mIconReplayCancel = findViewById(R.id.replay_cancel);
-
-        setListener();
-    }
-
-    private void setListener() {
-        mSendMessage.setOnClickListener(this);
-        mIconInputVoice.setOnClickListener(this);
-        mInputMessage.setOnClickListener(this::onClick);
-        mIconMoreFunction.setOnClickListener(this);
-        mIconBackImage.setOnClickListener(this::onClick);
-        //more function
-        mCameraBox.setOnClickListener(this::onClick);
-        mPhotoBox.setOnClickListener(this::onClick);
-        mFileBox.setOnClickListener(this::onClick);
-        mVoiceCallBox.setOnClickListener(this::onClick);
-        mVideoCallBox.setOnClickListener(this::onClick);
-        mCameraShootingBox.setOnClickListener(this::onClick);
-        mEstablishGroup.setOnClickListener(this::onClick);
-
-        mInputMessage.addTextChangedListener(mWatchInputMessage);        //监听输入框内容变化
-
-        mIconReplayCancel.setOnClickListener(this::onClick);
     }
 
     @Override
@@ -614,7 +621,7 @@ public class ChatRoomActivity extends BaseActivity implements View.OnClickListen
 
     @Override
     public void onClick(View v) {
-
+        isClickMoreFunction = false;
         switch (v.getId()) {
             case R.id.chat_room_send_message:
                 if (!IntranetChatApplication.isNetWortState()) {
@@ -624,41 +631,13 @@ public class ChatRoomActivity extends BaseActivity implements View.OnClickListen
                 onClickSendMessage();
                 break;
             case R.id.chat_room_input_voice:
-                if (QuickClickListener.isFastClick(100)) {
-                    onClickInputVoice();
-                }
+//                if (QuickClickListener.isFastClick(100)) {
+//                    clickVoice();
+//                }
+                clickVoice();
                 break;
             case R.id.chat_room_more_function:
-                if (isInputVoice) {
-                    TLog.d(TAG, "onClick: 2");
-                    mMoreFunctionBox.setVisibility(View.VISIBLE);
-                    isClosing = false;
-                    mIconInputVoice.setImageResource(R.drawable.ic_voice_circle);
-                    mInputMessage.setGravity(Gravity.LEFT | Gravity.CENTER_VERTICAL);
-                    mInputMessage.setVisibility(View.VISIBLE);
-                    mInputVoiceBox.setVisibility(View.GONE);
-                    mInputVoiceBox.setOnTouchListener(null);
-                    isInputVoice = false;
-                    mRecyclerView.scrollToPosition(mAdapter.getItemCount() - 1);
-                    break;
-                }
-                if (isClosing && !isInputMessage) {
-                    TLog.d(TAG, "onClick: 4");
-                    mMoreFunctionBox.setVisibility(View.VISIBLE);
-                    isClosing = false;
-                    mRecyclerView.scrollToPosition(mAdapter.getItemCount() - 1);
-                    break;
-                }
-                if (isInputMessage) {
-                    isHiddenSoftKeyboard = true;
-                    hintKeyBoard();
-                    mMoreFunctionBox.setVisibility(View.VISIBLE);
-                } else {
-                    isHiddenSoftKeyboard = false;
-                    isInputMessage = true;
-                    KeyBoardUtils.showInput(this,mInputMessage);
-                    mMoreFunctionBox.setVisibility(View.INVISIBLE);
-                }
+                clickMoreFunction();
                 break;
             case R.id.chat_room_back:
                 MainActivity.go(ChatRoomActivity.this);
@@ -713,18 +692,15 @@ public class ChatRoomActivity extends BaseActivity implements View.OnClickListen
                 }
                 break;
             case R.id.chat_room_input_message:
-                isHiddenSoftKeyboard = false;
-                if (!isInputMessage && mInputMessage.hasFocus()) {
-                    if (isClosing) {
-                        mMoreFunctionBox.setVisibility(View.INVISIBLE);
-                        isClosing = false;
-                    }
-                }
+//                if (mMoreFunctionBox.getVisibility() != View.VISIBLE && mInputMessage.hasFocus()) {
+//                    mMoreFunctionBox.setVisibility(View.INVISIBLE);
+//                }
+                clickInputMessage();
                 break;
             case R.id.chat_room_input_voice_box:
-                if (!isClosing) {
-                    fold();
-                }
+//                if (mMoreFunctionBox.getVisibility() == View.VISIBLE) {
+//                    fold();
+//                }
                 break;
             case R.id.replay_cancel:    //关闭回复消息展示框
                 if (QuickClickListener.isFastClick()){
@@ -732,6 +708,95 @@ public class ChatRoomActivity extends BaseActivity implements View.OnClickListen
                     mSendMessageType = 1;
                 }
                 break;
+        }
+    }
+
+    private void clickInputMessage() {
+        isClickMoreFunction = false;
+    }
+
+    /**
+     * 开启多功能框，关闭空白框，关闭软键盘*/
+    private void openMoreFunction() {
+//        if (mMoreFunctionBox.getVisibility() != View.VISIBLE) {
+//            mMoreFunctionBox.setVisibility(View.VISIBLE);
+//        }
+        mMoreFunctionBox.setVisibility(View.VISIBLE);
+        mBlankFunctionBox.setVisibility(View.GONE);
+        KeyBoardUtils.hintKeyBoard(this);
+//        if (isKeyboardOpened) {
+//            mBlankFunctionBox.setVisibility(View.GONE);
+//            KeyBoardUtils.hintKeyBoard(this);
+//        }
+    }
+
+    /**
+     * 关闭多功能框，关闭软键盘
+     * @param isClosingKeyboard 是否关闭软键盘*/
+    private void closeMoreFunction(boolean isClosingKeyboard, boolean isOpeningKeyboard) {
+//        if (mMoreFunctionBox.getVisibility() == View.VISIBLE) {
+//            mMoreFunctionBox.setVisibility(View.INVISIBLE);
+//        }
+        if (isClosingKeyboard) {
+//            mBlankFunctionBox.setVisibility(View.GONE);
+            KeyBoardUtils.hintKeyBoard(this);
+        } else if (isOpeningKeyboard) {
+            mBlankFunctionBox.setVisibility(View.VISIBLE);
+            mMoreFunctionBox.setVisibility(View.GONE);
+            KeyBoardUtils.showInput(this,mInputMessage);
+        }
+    }
+
+    private void switchVoice() {
+        KeyBoardUtils.hintKeyBoard(this);
+        onTouchInputMessageListener();
+        mIconInputVoice.setImageResource(R.drawable.ic_keyboard);
+        mInputMessage.setVisibility(View.GONE);
+        mInputVoiceBox.setVisibility(View.VISIBLE);
+//        KeyBoardUtils.hintKeyBoard(this);
+        mMoreFunctionBox.setVisibility(View.GONE);
+        mBlankFunctionBox.setVisibility(View.GONE);
+
+    }
+
+    private void switchMessage(boolean isOpenKeyboard) {
+        mIconInputVoice.setImageResource(R.drawable.ic_voice_circle);
+        mInputMessage.setGravity(Gravity.LEFT | Gravity.CENTER_VERTICAL);
+        mInputMessage.setVisibility(View.VISIBLE);
+        mInputVoiceBox.setVisibility(View.GONE);
+        mInputVoiceBox.setOnTouchListener(null);
+        if (isOpenKeyboard) {
+            KeyBoardUtils.showInput(this,mInputMessage);
+        }
+    }
+
+    private void clickMoreFunction() {
+        //1. 输入文字，软键盘关闭 --》 打开多功能框
+        //1.2. 输入文字，多功能框打开 --》 关闭多功能框，开启空白框，打开软键盘
+        //2. 输入文字，软键盘打开 --》 开启多功能框，关闭空白框，关闭软键盘（区别主动关闭软键盘）
+        //3. 输入语音，软键盘关闭 --》 切换为文字输入，打开多功能框
+        isClickMoreFunction = true;
+        int inputMessageVisibility = mInputMessage.getVisibility();
+        int moreFunctionBoxVisibility = mMoreFunctionBox.getVisibility();
+        int blankFunctionBoxVisibility = mBlankFunctionBox.getVisibility();
+        if (inputMessageVisibility == 0) {      //输入文字
+            if (moreFunctionBoxVisibility != 0) {       //多功能框不可见
+                openMoreFunction();
+            } else {
+                closeMoreFunction(false,true);
+            }
+        } else {
+            switchMessage(false);
+            openMoreFunction();
+        }
+    }
+
+    private void clickVoice() {
+        int inputMessageVisibility = mInputMessage.getVisibility();
+        if (inputMessageVisibility == 0) {
+            switchVoice();
+        } else {
+            switchMessage(true);
         }
     }
 
@@ -755,8 +820,7 @@ public class ChatRoomActivity extends BaseActivity implements View.OnClickListen
         mInputVoiceBox.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-                TLog.d(TAG, "onTouch: isInputVoice = " + isInputVoice);
-                if (!isInputVoice) {
+                if (mInputMessage.getVisibility() == View.VISIBLE) {
                     return false;
                 }
                 switch (event.getAction()) {
@@ -827,33 +891,8 @@ public class ChatRoomActivity extends BaseActivity implements View.OnClickListen
         handler.removeMessages(0);
     }
 
-    private void onClickInputVoice() {
-        if (!isClosing){
-            mMoreFunctionBox.setVisibility(View.GONE);
-            isClosing = true;
-        }
-        if (isInputMessage){
-            hintKeyBoard();
-        }
-        if (mInputMessage.getVisibility() == View.GONE) {
-            mIconInputVoice.setImageResource(R.drawable.ic_voice_circle);
-            mInputMessage.setGravity(Gravity.LEFT | Gravity.CENTER_VERTICAL);
-            mInputMessage.setVisibility(View.VISIBLE);
-            mInputVoiceBox.setVisibility(View.GONE);
-            mInputVoiceBox.setOnTouchListener(null);
-        } else {
-            //输入语音
-            onTouchInputMessageListener();
-            mIconInputVoice.setImageResource(R.drawable.ic_keyboard);
-            mInputMessage.setVisibility(View.GONE);
-            mInputVoiceBox.setVisibility(View.VISIBLE);
-            isInputMessage = false;
-        }
-        isInputVoice = !isInputVoice;
-    }
-
     private void onClickSendMessage() {
-        if (isInputVoice) {
+        if (mInputMessage.getVisibility() != View.VISIBLE) {
             return;
         }
         String message = mInputMessage.getText().toString();
@@ -905,27 +944,18 @@ public class ChatRoomActivity extends BaseActivity implements View.OnClickListen
     }
 
     public void hidden(){
-        if (!isInputVoice){
-            isHiddenSoftKeyboard = true;
+        if (mInputMessage.getVisibility() == View.VISIBLE){
             mMoreFunctionBox.setVisibility(View.GONE);
-            isClosing = true;
-            hintKeyBoard();
+            KeyBoardUtils.hintKeyBoard(this);
         }
     }
 
-    //关闭软键盘
-    public void hintKeyBoard() {
-        isInputMessage = false;
-        KeyBoardUtils.hintKeyBoard(this);
-    }
-
     public void fold(){
-        if (isClosing){
+        if (mMoreFunctionBox.getVisibility() != View.VISIBLE){
             mMoreFunctionBox.setVisibility(View.VISIBLE);
         }else {
             mMoreFunctionBox.setVisibility(View.GONE);
         }
-        isClosing = !isClosing;
     }
 
     @Override
@@ -1012,7 +1042,7 @@ public class ChatRoomActivity extends BaseActivity implements View.OnClickListen
     @Override
     protected void onResume() {
         super.onResume();
-        if (!isClosing && isInputMessage){
+        if (mMoreFunctionBox.getVisibility() == View.VISIBLE && mInputMessage.getVisibility() == View.VISIBLE){
             hidden();
         }
     }

@@ -35,6 +35,8 @@ import com.skysoft.smart.intranetchat.model.net_model.SendMessage;
 import com.skysoft.smart.intranetchat.tools.ChatRoom.RoomUtils;
 import com.skysoft.smart.intranetchat.tools.customstatusbar.CustomStatusBarBackground;
 import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
+
+import android.util.Log;
 import android.widget.RemoteViews;
 import android.widget.TextView;
 
@@ -503,6 +505,8 @@ public class IntranetChatApplication extends Application {
                     return;
                 }
                 return;
+            } else {
+                Log.d(TAG, "-------Not Found Contact In List");
             }
             if (i == sContactList.size()) {
                 avatarDifferentDefault(contactEntity, false);
@@ -726,7 +730,7 @@ public class IntranetChatApplication extends Application {
         //刷新头像
         ContactEntity next = sContactMap.get(receiveAndSaveFileBean.getSender());
         TLog.d(TAG, "onReceiveAndSaveFile: " + next.toString());
-        if (null != next) {
+        if (null != next && next.getAvatarIdentifier().equals(receiveAndSaveFileBean.getIdentifier())) {
             //确认是否在查看联系人界面
             if (TextUtils.isEmpty(sFilterIdentifier) || !sFilterIdentifier.equals(next.getIdentifier())) {
                 return;
@@ -789,6 +793,7 @@ public class IntranetChatApplication extends Application {
                 sFilterIdentifier = null;
             }
             sRequestAvatar = false;
+            Log.d(TAG, "-------------<><><>-------------");
             return;
         }
 
@@ -1082,8 +1087,18 @@ public class IntranetChatApplication extends Application {
             while (iterator.hasNext()){
                 Map.Entry<String, Long> monitor = iterator.next();
                 //发送心跳
+                ContactEntity contactEntity = sContactMap.get(monitor.getKey());
+                if (contactEntity == null) {
+                    Log.d(TAG, "--------> Can not find contact");
+                    continue;
+                }
+                String host = contactEntity.getHost();
+                if (TextUtils.isEmpty(host)) {
+                    Log.d(TAG, "--------> Send My Heartbeat : contact host == null");
+                    continue;
+                }
                 SendRequest.sendHeartbeat(IntranetChatApplication.getsMineUserInfo().getIdentifier()
-                        ,sContactMap.get(monitor.getKey()).getHost());
+                        ,host);
                 monitor.setValue(System.currentTimeMillis());
             }
         }
@@ -1095,7 +1110,7 @@ public class IntranetChatApplication extends Application {
         @Override
         public void run() {
             Iterator<Map.Entry<String, Long>> iterator = sMonitor.entrySet().iterator();
-            List<String> outLineUser = null;        //需要移出监视列表的设备名单
+            List<String> outLineUser = new ArrayList<>();        //需要移出监视列表的设备名单
 
             while (iterator.hasNext()){     //确认每个设备的心跳
                 Map.Entry<String, Long> monitor = iterator.next();
@@ -1103,9 +1118,6 @@ public class IntranetChatApplication extends Application {
                 if (heartbeatTime > 3000){      //超过3秒没有心跳，认为设备已死亡，发送死亡通知，同时移出监视列表
                     Login.broadcastUserOutLine(monitor.getKey());       //发送死亡广播
                     TLog.d(TAG, "sendUserOutLine: " + IntranetChatApplication.sContactMap.get(monitor.getKey()).getName());
-                    if (null == outLineUser){
-                        outLineUser = new ArrayList<>();
-                    }
                     outLineUser.add(monitor.getKey());
                     EventBus.getDefault().post(new FoundUserOutLineBean(monitor.getKey(),1));
                 }else if (heartbeatTime > 2400){        //超过2.4秒没有心跳，认为设备假死亡，向设备请求心跳
@@ -1118,7 +1130,7 @@ public class IntranetChatApplication extends Application {
                     SendRequest.sendRequestHeartbeat(IntranetChatApplication.getsMineUserInfo().getIdentifier()
                             ,contactEntity.getHost());
                 }
-                TLog.d(TAG, "run: heartbeatTime = " + heartbeatTime + ", identifier = " + monitor.getKey());
+//                TLog.d(TAG, "run: heartbeatTime = " + heartbeatTime + ", identifier = " + monitor.getKey());
             }
 
             if (null != outLineUser){
@@ -1551,6 +1563,7 @@ public class IntranetChatApplication extends Application {
      * @param identifier 联系人唯一标识符
      * @param avatarPath 联系人新头像地址*/
     public void updateContactAvatarInChatRoom(String identifier,String avatarPath){
+        Log.d(TAG, "----> 更新联系人在聊天室中的头像");
         if (sChatRoomMessageAdapter != null){
             ContactEntity contactEntity = sGroupContactMap.get(identifier);
             if (null != contactEntity){
