@@ -7,6 +7,7 @@ package com.skysoft.smart.intranetchat.database.table;
 
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
+import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 
 @Entity(tableName = "chat_record")
@@ -35,6 +36,8 @@ public class ChatRecordEntity {
     @ColumnInfo(name = "receive_success")
     private boolean receiveSuccess = true;
     //E:记录文件是否已经接收失败,Oliver Ou,2019/11/28
+    @Ignore
+    private String host;
 
     public int getId() {
         return id;
@@ -142,5 +145,13 @@ public class ChatRecordEntity {
 
     public void setSender(String sender) {
         this.sender = sender;
+    }
+
+    public String getHost() {
+        return host;
+    }
+
+    public void setHost(String host) {
+        this.host = host;
     }
 }

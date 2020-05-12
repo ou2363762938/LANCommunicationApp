@@ -29,8 +29,10 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.text.TextUtils;
 
+import com.skysoft.smart.intranetchat.bean.chat.MessageSignal;
 import com.skysoft.smart.intranetchat.customize.StatusBarLayout;
 import com.skysoft.smart.intranetchat.customize.TitleLinearLayout;
+import com.skysoft.smart.intranetchat.model.chat.Message;
 import com.skysoft.smart.intranetchat.model.net_model.SendMessage;
 import com.skysoft.smart.intranetchat.tools.ChatRoom.RoomUtils;
 import com.skysoft.smart.intranetchat.tools.customstatusbar.CustomStatusBarBackground;
@@ -608,100 +610,20 @@ public class IntranetChatApplication extends Application {
     }
 
     /**
-     * 处理接受到的文字类消息
-     * @param messageBean 接收到的文字类消息*/
+     * 处理接受到的文字类消息*/
     @Subscribe(threadMode = ThreadMode.MAIN)
-    public void handleMessage(MessageBean messageBean) {
-        updateHeartbeat(messageBean.getSender());       //更新心跳包
+    public void handleMessage(MessageSignal signal) {
+        updateHeartbeat(signal.getBean().getSender());       //更新心跳包
 
-        ChatRecordEntity recordEntity = SendMessage.initChatRecordEntity(messageBean);      //初始化聊天记录
-        recordEntity.setSender(messageBean.getSender());
-
-        switch (messageBean.getType()){
-            case 0:
-                recordEntity.setIsReceive(ChatRoomConfig.RECEIVE_MESSAGE);
-                break;
-            case 1:
-                recordEntity.setIsReceive(ChatRoomConfig.RECEIVE_AT_MESSAGE);
-                break;
-            case 2:
-                recordEntity.setIsReceive(ChatRoomConfig.RECEIVE_REPLAY_MESSAGE);
-                break;
-        }
-        TLog.d(TAG,"recordEntity " + recordEntity.toString());
-
-        //如果当前处于messageBean对应的聊天室
-        if (sChatRoomMessageAdapter != null && sChatRoomMessageAdapter.getReceiverIdentifier().equals(recordEntity.getReceiver())){
-            sChatRoomMessageAdapter.add(recordEntity);      //记录
-        }else {
-            //添加记录到数据库中
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    ChatRecordDao chatRecordDao = MyDataBase.getInstance().getChatRecordDao();
-                    long latestRecordTime = chatRecordDao.getLatestRecordTime(recordEntity.getReceiver());
-                    if (latestRecordTime != 0 && recordEntity.getTime() - latestRecordTime > 2*60*1000){
-                        ChatRecordEntity recordTime = ChatRoomMessageAdapter.generatorTimeRecord(recordEntity.getReceiver(),latestRecordTime);
-                        chatRecordDao.insert(recordTime);
-                    }
-                    chatRecordDao.insert(recordEntity);
-                }
-            }).start();
-        }
-
-        boolean create = false;     //是否新建最近记录
-        LatestChatHistoryEntity historyEntity = sLatestChatHistoryMap.get(messageBean.getReceiver());
-        if (null == historyEntity){     //新建最近记录
-            create = true;
-            sLatestChatHistoryList.add(messageBean.getReceiver());      //添加到最近记录列表中
-
-            historyEntity = new LatestChatHistoryEntity();
-            boolean isGroup = !messageBean.getReceiver().endsWith(messageBean.getSender());     //是否为群聊
-            historyEntity.setGroup( isGroup ? 0 : 1);
-
-            ContactEntity contactEntity = null;     //设置记录对应聊天室参数
-            if (isGroup){
-                contactEntity = sGroupContactMap.get(messageBean.getReceiver());
-            }else {
-                contactEntity = sContactMap.get(messageBean.getReceiver());
-            }
-
-            historyEntity.setUserName(contactEntity.getName());     //聊天室名
-            historyEntity.setStatus(contactEntity.getStatus());        //聊天室状态
-            historyEntity.setUserHeadPath(contactEntity.getAvatarPath());       //聊天室头像地址
-            historyEntity.setUserHeadIdentifier(contactEntity.getAvatarIdentifier());   //聊天室头像唯一标识符
-            sLatestChatHistoryMap.put(messageBean.getReceiver(),historyEntity);     //添加到Map中
-        }
-
-        historyEntity.setHost(messageBean.getHost());       //记录IP
-        historyEntity.setContent(messageBean.getMsg());     //记录聊天内容
-        historyEntity.setContentTimeMill(messageBean.getTimeStamp());       //记录聊天时间
-        //将毫秒数时间转为String
-        historyEntity.setContentTime(RoomUtils.millsToTime(historyEntity.getContentTimeMill()));
-        MessageListSort.CollectionsList(sLatestChatHistoryList);        //对记录排序
-
-        setUnReadNumber(historyEntity,historyEntity,messageBean);       //设置未读数
-
-        LatestChatHistoryEntity finalHistoryEntity = historyEntity;     //准备更新数据库
-        if (!create){
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    MyDataBase.getInstance().getLatestChatHistoryDao().update(finalHistoryEntity);
-                }
-            }).start();
-        }else {
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    MyDataBase.getInstance().getLatestChatHistoryDao().insert(finalHistoryEntity);
-                }
-            }).start();
-        }
+        setUnReadNumber(signal.isIn(),true,signal.getBean());
     }
 
-    private void setUnReadNumber(LatestChatHistoryEntity next,LatestChatHistoryEntity latestChatHistoryEntity,MessageBean messageBean){
-        if (sChatRoomMessageAdapter != null && !TextUtils.isEmpty(sChatRoomMessageAdapter.getReceiverIdentifier()) && sChatRoomMessageAdapter.getReceiverIdentifier().equals(next.getUserIdentifier())) {
+    private void setUnReadNumber(LatestChatHistoryEntity next,
+                                 LatestChatHistoryEntity latestChatHistoryEntity,
+                                 MessageBean messageBean){
+        if (sChatRoomMessageAdapter != null &&
+                !TextUtils.isEmpty(sChatRoomMessageAdapter.getReceiverIdentifier()) &&
+                sChatRoomMessageAdapter.getReceiverIdentifier().equals(next.getUserIdentifier())) {
             next.setUnReadNumber(0);
             sMessageListAdapter.notifyDataSetChanged();
         } else if (latestChatHistoryEntity.getType() != Config.FILE_AVATAR){
@@ -709,6 +631,19 @@ public class IntranetChatApplication extends Application {
             sMessageListAdapter.notifyDataSetChanged();
             addTotalUnReadNumber();
             notification(messageBean, latestChatHistoryEntity.getHost());
+        }
+    }
+
+    private void setUnReadNumber(boolean isIn,
+                                 boolean isDataSetChanged,
+                                 MessageBean messageBean) {
+        if (!isIn) {
+            addTotalUnReadNumber();
+            notification(messageBean,messageBean.getHost());
+        }
+
+        if (isDataSetChanged) {
+            sMessageListAdapter.notifyDataSetChanged();
         }
     }
 
@@ -1064,18 +999,25 @@ public class IntranetChatApplication extends Application {
         int pid = android.os.Process.myPid();
         sCreateProgress = pid;
         if (isCurrentProcess) {
-            MyDataBase.getInstance();
-            setContext(this);
             Intent intent = new Intent(this, IntranetChatServer.class);
             bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
             sCurrentProgress = pid;
-            Timer senderMyHeartbeat = new Timer();
-            senderMyHeartbeat.schedule(mSendMyHeartbeat,2000,1300);
-            Timer confirmMonitorHeartbeat = new Timer();
-            confirmMonitorHeartbeat.schedule(mConfirmMonitorHeartbeat,2300,1300);
-            StatusBarLayout.sRootLayoutHeight = CustomStatusBarBackground.getStatusBarHeight(this);
-            TitleLinearLayout.sLayoutHeight = getResources().getDimensionPixelOffset(R.dimen.dp_55);
+            init();
         }
+    }
+
+    public void init() {
+        MyDataBase.getInstance();
+        Message.init(this,sChatRoomMessageAdapter);
+        setContext(this);
+
+        Timer senderMyHeartbeat = new Timer();
+        senderMyHeartbeat.schedule(mSendMyHeartbeat,2000,1300);
+        Timer confirmMonitorHeartbeat = new Timer();
+        confirmMonitorHeartbeat.schedule(mConfirmMonitorHeartbeat,2300,1300);
+
+        StatusBarLayout.sRootLayoutHeight = CustomStatusBarBackground.getStatusBarHeight(this);
+        TitleLinearLayout.sLayoutHeight = getResources().getDimensionPixelOffset(R.dimen.dp_55);
     }
 
     /**
