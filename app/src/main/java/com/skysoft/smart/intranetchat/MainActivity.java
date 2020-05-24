@@ -23,6 +23,7 @@ import com.skysoft.smart.intranetchat.model.contact.ContactManager;
 import com.skysoft.smart.intranetchat.model.mine.MineInfoManager;
 import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentManager;
@@ -41,6 +42,7 @@ import com.skysoft.smart.intranetchat.model.network.bean.UserInfoBean;
 import com.skysoft.smart.intranetchat.server.IntranetChatServer;
 import com.skysoft.smart.intranetchat.tools.customstatusbar.CustomStatusBarBackground;
 import com.skysoft.smart.intranetchat.tools.toastutil.ToastUtil;
+import com.skysoft.smart.intranetchat.ui.activity.camera.ClipImageActivity;
 import com.skysoft.smart.intranetchat.ui.activity.videocall.AnswerVideoCallActivity;
 import com.skysoft.smart.intranetchat.ui.activity.voicecall.AnswerVoiceCallActivity;
 import com.skysoft.smart.intranetchat.ui.fragment.main.contact.ContactFragment;
@@ -356,5 +358,12 @@ public class MainActivity extends AppCompatActivity{
         }
     }
 
-    //E: 监听网络状况 ,Oliver Ou,2019/11/15
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        if (requestCode == 2 && resultCode == RESULT_OK) {
+            //图片
+            ClipImageActivity.goActivity(this, data.getData(),true);
+        }
+        super.onActivityResult(requestCode, resultCode, data);
+    }
 }

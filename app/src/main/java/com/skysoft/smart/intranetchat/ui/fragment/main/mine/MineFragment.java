@@ -21,6 +21,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
 
+import androidx.annotation.Nullable;
+
 import com.bumptech.glide.Glide;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.skysoft.smart.intranetchat.R;
@@ -33,12 +35,15 @@ import com.skysoft.smart.intranetchat.model.camera.entity.EventMessage;
 import com.skysoft.smart.intranetchat.database.MyDataBase;
 import com.skysoft.smart.intranetchat.model.network.bean.UserInfoBean;
 import com.skysoft.smart.intranetchat.tools.Identifier;
+import com.skysoft.smart.intranetchat.ui.activity.camera.ClipImageActivity;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 import de.hdodenhof.circleimageview.CircleImageView;
+
+import static android.app.Activity.RESULT_OK;
 
 
 public class MineFragment extends BaseFragment implements View.OnClickListener{
@@ -106,7 +111,7 @@ public class MineFragment extends BaseFragment implements View.OnClickListener{
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onReceiveEventMessage(EventMessage eventMessage){
         TLog.d(TAG, "onReceiveEventMessage: eventMessage.getType() = " + eventMessage.getType());
-        if (eventMessage.getType() == 4){
+        if (eventMessage.getType() == 1 || eventMessage.getType() == 4){
             if (!TextUtils.isEmpty(eventMessage.getMessage())){
                 Glide.with(getContext()).load(eventMessage.getMessage()).into(mCiAvatar);
 
@@ -205,5 +210,14 @@ public class MineFragment extends BaseFragment implements View.OnClickListener{
         intent.setAction(Intent.ACTION_PICK);
         intent.setType("image/*");
         startActivityForResult(intent, 2);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 2 && resultCode == RESULT_OK) {
+            //图片
+            ClipImageActivity.goActivity(getContext(), data.getData(),true);
+        }
     }
 }

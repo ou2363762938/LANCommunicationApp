@@ -108,7 +108,7 @@ public class LoginActivity extends AppCompatActivity {
     public void handleEventMessage(EventMessage eventMessage){
         TLog.d(TAG, "handleEventMessage: eventMessage.getMessage() = " + eventMessage.getMessage());
         //注册时获得头像
-        if (eventMessage.getType() == 4){
+        if (eventMessage.getType() == 1 || eventMessage.getType() == 4){
             if (!TextUtils.isEmpty(eventMessage.getMessage())){
                 Glide.with(this).load(eventMessage.getMessage()).into(mineHead);
                 avatarPath = eventMessage.getMessage();
@@ -185,8 +185,6 @@ public class LoginActivity extends AppCompatActivity {
         intent.setType("image/*");
         startActivityForResult(intent, 2);
     }
-
-
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
