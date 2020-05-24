@@ -36,6 +36,7 @@ public class LatestManager {
         mLatestMap = new HashMap<>();
         mLatestIndex = new HashMap<>();
         mHandlerThread = new HandlerThread(HANDLER_THREAD_NAME);
+        mHandlerThread.start();
         mHandler = new Handler(mHandlerThread.getLooper());
     }
     public static LatestManager getInstance() {

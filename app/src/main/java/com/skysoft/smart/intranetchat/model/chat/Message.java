@@ -27,7 +27,7 @@ import org.greenrobot.eventbus.EventBus;
 
 public class Message {
     private static final String TAG = "Message";
-    private static String sMineId = MineInfoManager.getInstance().getIdentifier();
+    private static String sMineId;
     private final String THREAD_NAME = "MessageThread";
     private Handler mHandler;
     private HandlerThread mHandlerThread;
@@ -35,7 +35,9 @@ public class Message {
 
     private Message() {
         mHandlerThread = new HandlerThread(THREAD_NAME);
+        mHandlerThread.start();
         mHandler = new Handler(mHandlerThread.getLooper());
+        sMineId = MineInfoManager.getInstance().getIdentifier();
     }
 
     public static void init(Context context) {

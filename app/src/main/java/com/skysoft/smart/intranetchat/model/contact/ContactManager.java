@@ -44,6 +44,7 @@ public class ContactManager {
         mContactIndex = new HashMap<>();
 
         mHandlerThread = new HandlerThread(CONTACT_THREAD);
+        mHandlerThread.start();
         mHandler = new Handler(mHandlerThread.getLooper());
 
         mWatchTimer = new Timer();

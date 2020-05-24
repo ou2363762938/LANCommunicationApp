@@ -29,6 +29,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.text.TextUtils;
 
+import com.skysoft.smart.intranetchat.bean.base.DeviceInfoBean;
 import com.skysoft.smart.intranetchat.bean.signal.MessageSignal;
 import com.skysoft.smart.intranetchat.customize.StatusBarLayout;
 import com.skysoft.smart.intranetchat.customize.TitleLinearLayout;
@@ -39,6 +40,7 @@ import com.skysoft.smart.intranetchat.database.table.RecordEntity;
 import com.skysoft.smart.intranetchat.model.avatar.AvatarManager;
 import com.skysoft.smart.intranetchat.model.chat.Message;
 import com.skysoft.smart.intranetchat.model.contact.ContactManager;
+import com.skysoft.smart.intranetchat.model.filemanager.FileManager;
 import com.skysoft.smart.intranetchat.model.filemanager.FilePath;
 import com.skysoft.smart.intranetchat.model.group.GroupManager;
 import com.skysoft.smart.intranetchat.model.latest.LatestManager;
@@ -264,7 +266,7 @@ public class IntranetChatApplication extends Application {
     public void onCreate() {
         super.onCreate();
         EventBus.getDefault().register(this);
-        MyDataBase.init(this);
+//        MyDataBase.init(this);
         sBaseTimeLine = initBaseTimeLine();
         boolean isCurrentProcess = getApplicationContext().getPackageName().equals
                 (getCurrentProcessName());
@@ -279,8 +281,11 @@ public class IntranetChatApplication extends Application {
     }
 
     public void init() {
-        MyDataBase.getInstance();
+        MyDataBase.init(this);
+        DeviceInfoBean.init(this);
+        MineInfoManager.init(this);
         Message.init(this);
+        FileManager.init(this);
         FilePath.init(this);
         setContext(this);
 

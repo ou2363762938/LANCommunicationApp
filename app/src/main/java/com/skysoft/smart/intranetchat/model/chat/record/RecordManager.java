@@ -40,6 +40,7 @@ public class RecordManager {
         mRecordAdapter = new RecordAdapter(context,receiver,group,mRecordList);
 
         mHandlerThread = new HandlerThread(HANDLER_THREAD_NAME);
+        mHandlerThread.start();
         mHandler = new Handler(mHandlerThread.getLooper());
 
         mHandler.post(new Runnable() {

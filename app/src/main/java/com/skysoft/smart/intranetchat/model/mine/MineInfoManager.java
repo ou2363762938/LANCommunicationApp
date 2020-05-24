@@ -25,6 +25,7 @@ public class MineInfoManager {
         mContext = context;
         mShared = context.getSharedPreferences(MINE,Context.MODE_PRIVATE);
         mEditor = mShared.edit();
+        userInfo = new UserInfoBean();
     }
 
     public static void init(Context context) {
@@ -114,6 +115,9 @@ public class MineInfoManager {
     }
 
     public UserInfoBean getUserInfo() {
+        if (TextUtils.isEmpty(name)) {
+            return userInfo;
+        }
         userInfo.setName(name);
         userInfo.setIdentifier(identifier);
         userInfo.setAvatarIdentifier(avatarIdentifier);
