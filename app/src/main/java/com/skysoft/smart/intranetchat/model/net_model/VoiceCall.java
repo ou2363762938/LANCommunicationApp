@@ -8,6 +8,7 @@ package com.skysoft.smart.intranetchat.model.net_model;
 import android.os.RemoteException;
 
 import com.skysoft.smart.intranetchat.app.IntranetChatApplication;
+import com.skysoft.smart.intranetchat.model.mine.MineInfoManager;
 import com.skysoft.smart.intranetchat.model.network.Config;
 import com.skysoft.smart.intranetchat.model.network.bean.AskBean;
 import com.skysoft.smart.intranetchat.model.network.bean.ResponseBean;
@@ -100,7 +101,7 @@ public class VoiceCall {
     }
 
     public static void responseInCall(String host){
-        ResponseBean responseBean = new ResponseBean(Config.RESPONSE_IN_CALL,IntranetChatApplication.getsMineUserInfo().getIdentifier());
+        ResponseBean responseBean = new ResponseBean(Config.RESPONSE_IN_CALL, MineInfoManager.getInstance().getIdentifier());
         try {
             IntranetChatApplication.sAidlInterface.sendResponse(GsonTools.toJson(responseBean),host);
         } catch (RemoteException e) {

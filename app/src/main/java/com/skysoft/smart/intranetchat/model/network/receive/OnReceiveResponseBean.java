@@ -13,7 +13,7 @@ import com.skysoft.smart.intranetchat.model.network.bean.DataPacketBean;
 import com.skysoft.smart.intranetchat.model.network.bean.ResourceManagerBean;
 import com.skysoft.smart.intranetchat.model.network.bean.ResponseBean;
 import com.skysoft.smart.intranetchat.model.network.call.VoiceCallThread;
-import com.skysoft.smart.intranetchat.model.network.file.AskFileThread;
+import com.skysoft.smart.intranetchat.model.network.file.SendFileContentThread;
 import com.skysoft.smart.intranetchat.model.network.manager.ResourceManager;
 import com.skysoft.smart.intranetchat.model.network.manager.Sender;
 import com.skysoft.smart.intranetchat.tools.GsonTools;
@@ -60,8 +60,12 @@ public class OnReceiveResponseBean {
                 break;
             case Config.RESPONSE_RESOURCE_OK:
                 //对方表示该资源可以被下载
-                AskFileThread askFileThread = new AskFileThread(host);
-                askFileThread.start();
+//                SendFileContentThread sendFileContentThread = new SendFileContentThread(host);
+//                sendFileContentThread.start();
+                break;
+            case Config.STEP_SUCCESS:
+            case Config.STEP_FAILURE:
+
                 break;
             case Config.RESPONSE_NOTHING_ASK:
                 TLog.d(TAG, "onReceiveResponseBean: RESPONSE_NOTHING_ASK");

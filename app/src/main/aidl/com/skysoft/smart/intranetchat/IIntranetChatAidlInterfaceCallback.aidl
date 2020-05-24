@@ -17,13 +17,16 @@ interface IIntranetChatAidlInterfaceCallback {
     void onReceiveRequest(String requestJson,String host);
 
     /*当接受到文件*/
-    void onReceiveFile(String fileJson,String host);
+    void onReceiveFileBean(String fileJson,String host);
 
     /*当接受到资源请求*/
     void onReceiveAskResource(String askResourceJson,String host);
 
     /*当接收文件并存储到本地*/
-    void onReceiveAndSaveFile(String sender,String receiver,String identifier,String path,String host);
+    void onReceiveAndSaveFile(String user,String receiver,String rid,String path,String host);
+
+    /**成功接收文件*/
+    void onReceiveFile(String receive,String host);
 
     /*当收到别人的语音电话请求*/
     void onReceiveVoiceCall(String userInfoJson,String host);
@@ -60,13 +63,15 @@ interface IIntranetChatAidlInterfaceCallback {
     void notifyClearQueue();
 
     /*当开始下载文件*/
-    void askFile(String identifier,String path);
+    void askFile(String rid,String path);
 
     /*当接收文件失败*/
-    void receiveFileFailure(String identifier);
+    void receiveFileFailure(String rid);
 
     /*当收到关于monitor的返回*/
-    void receiveMonitorResponse(int monitorResponse, String identifier);
+    void receiveMonitorResponse(int monitorResponse, String rid);
+
+    void receiveResponse(String response, String host);
 
     /*接收到@消息*/
     void receiveNotifyMessageBean(String notifyMessageJson, String host);
@@ -75,5 +80,5 @@ interface IIntranetChatAidlInterfaceCallback {
     void receiveReplayMessageBean(String replayMessageJson, String host);
 
     /*收到Identifier用户下线广播*/
-    void receiveUserOutLine(String identifier);
+    void receiveUserOutLine(String rid);
 }

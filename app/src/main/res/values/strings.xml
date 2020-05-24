@@ -16,7 +16,7 @@
     <string name="chat_room_word_limit">发送的文字不能超过30个</string>
     <string name="hold_down_the_talk">按住 说话</string>
     <string name="voice">语音</string>
-    <string name="image">图片</string>
+    <string name="picture">图片</string>
     <string name="video">视频</string>
     <string name="file">文件</string>
     <string name="text_start_vioce_invite">正在等待对方接受邀请</string>

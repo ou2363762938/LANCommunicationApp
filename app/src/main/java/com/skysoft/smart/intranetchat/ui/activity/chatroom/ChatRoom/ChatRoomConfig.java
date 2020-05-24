@@ -6,28 +6,15 @@
 package com.skysoft.smart.intranetchat.ui.activity.chatroom.ChatRoom;
 
 public class ChatRoomConfig {
-    public static final int RECEIVE_MESSAGE = 0;
-    public static final int SEND_MESSAGE = 1;
-    public static final int RECEIVE_VOICE = 2;
-    public static final int SEND_VOICE = 3;
-    public static final int RECEIVE_IMAGE = 4;
-    public static final int SEND_IMAGE = 5;
-    public static final int RECEIVE_VIDEO = 6;
-    public static final int SEND_VIDEO = 7;
-    public static final int RECEIVE_FILE = 8;
-    public static final int SEND_FILE = 9;
+    public static final int RECORD_TEXT = 0;
+    public static final int RECORD_FILE = 1;
+    public static final int RECORD_TIME = 2;
+    public static final int RECORD_CALL = 3;
 
-    public static final int RECORD_TEXT = 10;
-    public static final int RECORD_IMAGE = 11;
-    public static final int RECORD_VOICE = 12;
-    public static final int RECORD_VIDEO = 13;
-    public static final int RECORD_FILE = 14;
-    public static final int RECORD_TIME = 15;
-    public static final int RECORD_CALL = 16;
-    public static final int RECEIVE_VIDEO_CALL = 17;
-    public static final int SEND_VIDEO_CALL = 18;
-    public static final int RECEIVE_VOICE_CALL = 19;
-    public static final int SEND_VOICE_CALL = 20;
+    public static final int RECEIVE_VIDEO_CALL = 4;
+    public static final int SEND_VIDEO_CALL = 5;
+    public static final int RECEIVE_VOICE_CALL = 6;
+    public static final int SEND_VOICE_CALL = 7;
 
     public static final int RECORD_NOTIFY_MESSAGE = 21;     //@别人
     public static final int RECORD_REPLAY_MESSAGE = 22;     //回复消息

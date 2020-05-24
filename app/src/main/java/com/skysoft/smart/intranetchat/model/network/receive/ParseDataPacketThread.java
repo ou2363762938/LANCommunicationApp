@@ -7,7 +7,6 @@ package com.skysoft.smart.intranetchat.model.network.receive;
 
 import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 
-import com.google.gson.Gson;
 import com.skysoft.smart.intranetchat.model.network.bean.EstablishGroupBean;
 import com.skysoft.smart.intranetchat.model.network.bean.NotificationMessageBean;
 import com.skysoft.smart.intranetchat.model.network.bean.ReplayMessageBean;
@@ -55,7 +54,7 @@ public class ParseDataPacketThread extends Thread {
         }
         switch (dataPacketBean.getCode()){
             case Config.CODE_MESSAGE:
-                /*receive message*/
+                /*requestFile message*/
                 onReceiveMessageBean(dataPacketBean,host);
                 break;
             case Config.CODE_MESSAGE_NOTIFICATION:
@@ -65,19 +64,19 @@ public class ParseDataPacketThread extends Thread {
                 onReceiveReplayMessageBean(dataPacketBean,host);
                 break;
             case Config.CODE_USERINFO:
-                /*receive userInfo*/
+                /*requestFile userInfo*/
                 onReceiveUserInfoBean(dataPacketBean,host);
                 break;
             case Config.CODE_REQUEST:
-                /*receive request*/
+                /*requestFile requestFile*/
                 onReceiveRequestBean(dataPacketBean,host);
                 break;
             case Config.CODE_FILE:
-                /*receive file*/
+                /*requestFile file*/
                 onReceiveFileBean(dataPacketBean,host);
                 break;
             case Config.CODE_ASK_RESOURCE:
-                /*receive ask resource*/
+                /*requestFile ask resource*/
                 onReceiveAskResourceBean(dataPacketBean,host);
                 break;
             case Config.CODE_RESPONSE:
@@ -155,74 +154,70 @@ public class ParseDataPacketThread extends Thread {
 
         MonitorUdpReceivePortThread.broadcastReceive(Config.CODE_FILE,dataPacketBean.getData(),host);
 
-        //生成文件的存储目录
-        String path = PathManager.fromType(fileBean.getType());
-        ResourceManagerBean resourceManagerBean = new ResourceManagerBean(fileBean,path);
-        resourceManagerBean.setReceive(true);
-        ResourceManager.getInstance().setResource(fileBean.getFileUniqueIdentifier(),resourceManagerBean);
-
-        //只要不是普通文件(图片，语音，视频)，直接开始请求资源
-        if (fileBean.getType() != Config.FILE_COMMON){
-            AskResourceBean askResourceBean = new AskResourceBean();
-            askResourceBean.setResourceType(Config.RESOURCE_FILE);
-            askResourceBean.setResourceUniqueIdentifier(fileBean.getFileUniqueIdentifier());
-            Sender.sender(GsonTools.toJson(askResourceBean),Config.CODE_ASK_RESOURCE,host);
-        }
+//        //生成文件的存储目录
+//        String path = PathManager.fromType(fileBean.getType());
+//        ResourceManagerBean resourceManagerBean = new ResourceManagerBean(fileBean,path);
+//        resourceManagerBean.setReceive(true);
+//        ResourceManager.getInstance().setResource(fileBean.getRid(),resourceManagerBean);
+//
+//        //只要不是普通文件(图片，语音，视频)，直接开始请求资源
+//        if (fileBean.getType() != Config.FILE_COMMON){
+//            AskResourceBean askResourceBean = new AskResourceBean();
+//            askResourceBean.setResourceType(Config.RESOURCE_FILE);
+//            askResourceBean.setResourceUniqueIdentifier(fileBean.getRid());
+//            Sender.sender(GsonTools.toJson(askResourceBean),Config.CODE_ASK_RESOURCE,host);
+//        }
     }
 
     /*当从数据包获取到AskResourceBean时的处理方法*/
     private void onReceiveAskResourceBean(DataPacketBean dataPacketBean, String host) {
         TLog.d(TAG, "onReceiveAskResourceBean: " + host);
-        AskResourceBean askResourceBean = (AskResourceBean) GsonTools.formJson(dataPacketBean.getData(),AskResourceBean.class);
-        if (askResourceBean == null){
-            return;
-        }
+        MonitorUdpReceivePortThread.broadcastReceive(Config.CODE_ASK_RESOURCE,dataPacketBean.getData(),host);
+//        AskResourceBean askResourceBean = (AskResourceBean) GsonTools.formJson(dataPacketBean.getData(),AskResourceBean.class);
+//        if (askResourceBean == null){
+//            return;
+//        }
+//
+//        switch (askResourceBean.getResourceType()){
+//            case Config.REQUEST_MONITOR:
+//            case Config.REQUEST_BE_MONITOR:
+//            case Config.HEARTBEAT:
+//            case Config.REQUEST_HEARTBEAT:
+//                MonitorUdpReceivePortThread.broadcastReceive(Config.CODE_ASK_RESOURCE,dataPacketBean.getData(),host);
+//                return;
+//        }
 
-        TLog.d(TAG, "onReceiveAskResourceBean: " +  askResourceBean.getResourceUniqueIdentifier().equals(IntranetChatServer.sUserInfo.getIdentifier()));
-
-        switch (askResourceBean.getResourceType()){
-            case Config.REQUEST_MONITOR:
-            case Config.REQUEST_BE_MONITOR:
-            case Config.HEARTBEAT:
-            case Config.REQUEST_HEARTBEAT:
-                MonitorUdpReceivePortThread.broadcastReceive(Config.CODE_ASK_RESOURCE,dataPacketBean.getData(),host);
-                return;
-        }
-
-        TLog.d(TAG, "onReceiveAskResourceBean: found resource");
         /*没有找到资源*/
-        if(!ResourceManager.getInstance().exist(askResourceBean.getResourceUniqueIdentifier())){
-            ResponseSender.response(Config.RESPONSE_NOT_REQUEST_THIS_RESOURCE,askResourceBean.getResourceUniqueIdentifier(),host);
-            TLog.d(TAG, "onReceiveAskResourceBean: not found resource");
-            MonitorUdpReceivePortThread.broadcastReceive(Config.NOT_FOUND_RESOURCE,dataPacketBean.getData(),host);
-            return;
-        }
+//        if(!ResourceManager.getInstance().exist(askResourceBean.getResourceUniqueIdentifier())){
+//            ResponseSender.response(Config.RESPONSE_NOT_REQUEST_THIS_RESOURCE,
+//                    askResourceBean.getResourceUniqueIdentifier(),
+//                    host);
+//            TLog.d(TAG, "onReceiveAskResourceBean: not found resource");
+//            MonitorUdpReceivePortThread.broadcastReceive(Config.NOT_FOUND_RESOURCE,dataPacketBean.getData(),host);
+//            return;
+//        }
 
-        TLog.d(TAG, "onReceiveAskResourceBean: busy");
         /*设备忙碌*/
-        if (SocketManager.getInstance().getSocketNumber() == SocketManager.MAX_NUMBER){
-            ResourceManagerBean resource = ResourceManager.getInstance().getResource(askResourceBean.getResourceUniqueIdentifier());
-            if (resource.getDownLoadNum() != 0){
-                //已经有人下载成功
-                String transpondHost = resource.getDownLoadList();
-                ResponseSender.response(Config.RESPONSE_BUSY_TRANSPOND,askResourceBean.getResourceUniqueIdentifier(),host,transpondHost);
-            }else {
-                //暂时还没有人下载成功
-                ResponseSender.response(Config.RESPONSE_BUSY,askResourceBean.getResourceUniqueIdentifier(),host);
-            }
-            return;
-        }
+//        if (SocketManager.getInstance().getSocketNumber() == SocketManager.MAX_NUMBER){
+//            ResourceManagerBean resource = ResourceManager.getInstance().getResource(askResourceBean.getResourceUniqueIdentifier());
+//            if (resource.getDownLoadNum() != 0){
+//                //已经有人下载成功
+//                String transpondHost = resource.getDownLoadList();
+//                ResponseSender.response(Config.RESPONSE_BUSY_TRANSPOND,askResourceBean.getResourceUniqueIdentifier(),host,transpondHost);
+//            }else {
+//                //暂时还没有人下载成功
+//                ResponseSender.response(Config.RESPONSE_BUSY,askResourceBean.getResourceUniqueIdentifier(),host);
+//            }
+//            return;
+//        }
 
-        TLog.d(TAG, "onReceiveAskResourceBean: broadcast");
         MonitorUdpReceivePortThread.broadcastReceive(Config.CODE_ASK_RESOURCE,dataPacketBean.getData(),host);
 
-        TLog.d(TAG, "onReceiveAskResourceBean: add to wait");
         //添加资源到待发送列表
-        FileWaitToSend.getInstance().setWaitToSend(host,askResourceBean);
-
-        TLog.d(TAG, "onReceiveAskResourceBean: response");
-        //通知对方向我请求
-        ResponseSender.response(Config.RESPONSE_RESOURCE_OK,askResourceBean.getResourceUniqueIdentifier(),host);
+//        FileWaitToSend.getInstance().setWaitToSend(host,askResourceBean);
+//
+//        //通知对方向我请求
+//        ResponseSender.response(Config.RESPONSE_RESOURCE_OK,askResourceBean.getResourceUniqueIdentifier(),host);
     }
 
     /*当从数据包获取到RequestBean时的处理方法*/

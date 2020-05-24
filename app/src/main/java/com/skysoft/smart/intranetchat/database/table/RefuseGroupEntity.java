@@ -7,9 +7,10 @@ package com.skysoft.smart.intranetchat.database.table;
 
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
+import androidx.room.Index;
 import androidx.room.PrimaryKey;
 
-@Entity(tableName = "refuse_group")
+@Entity(tableName = "refuse_group",indices = @Index(value = "identifier"))
 public class RefuseGroupEntity {
     @PrimaryKey
     private int id;

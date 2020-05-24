@@ -9,7 +9,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/color_black"
-    tools:context=".ui.activity.videocall.AnswerVideoCallActivity">
+    tools:mContext=".ui.activity.videocall.AnswerVideoCallActivity">
     <View
         android:id="@+id/custom_status_bar_background"
         android:layout_width="match_parent"

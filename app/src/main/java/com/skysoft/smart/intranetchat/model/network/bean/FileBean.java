@@ -6,20 +6,29 @@
 package com.skysoft.smart.intranetchat.model.network.bean;
 
 public class FileBean {
-    private String fileName;
+    private String rid;
+    private String name;
     private String md5;
-    private long fileLength;
-    private String fileUniqueIdentifier;
     private String sender;
     private String receiver;
+    private long fileLength;
+    private int contentLength;
     private int type;
 
-    public String getFileName() {
-        return fileName;
+    public String getRid() {
+        return rid;
     }
 
-    public void setFileName(String fileName) {
-        this.fileName = fileName;
+    public void setRid(String rid) {
+        this.rid = rid;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getMd5() {
@@ -28,22 +37,6 @@ public class FileBean {
 
     public void setMd5(String md5) {
         this.md5 = md5;
-    }
-
-    public String getFileUniqueIdentifier() {
-        return fileUniqueIdentifier;
-    }
-
-    public void setFileUniqueIdentifier(String fileUniqueIdentifier) {
-        this.fileUniqueIdentifier = fileUniqueIdentifier;
-    }
-
-    public long getFileLength() {
-        return fileLength;
-    }
-
-    public void setFileLength(long fileLength) {
-        this.fileLength = fileLength;
     }
 
     public String getSender() {
@@ -62,6 +55,22 @@ public class FileBean {
         this.receiver = receiver;
     }
 
+    public long getFileLength() {
+        return fileLength;
+    }
+
+    public void setFileLength(long fileLength) {
+        this.fileLength = fileLength;
+    }
+
+    public int getContentLength() {
+        return contentLength;
+    }
+
+    public void setContentLength(int contentLength) {
+        this.contentLength = contentLength;
+    }
+
     public int getType() {
         return type;
     }
@@ -73,12 +82,13 @@ public class FileBean {
     @Override
     public String toString() {
         return "FileBean{" +
-                "fileName='" + fileName + '\'' +
+                "rid='" + rid + '\'' +
+                ", name='" + name + '\'' +
                 ", md5='" + md5 + '\'' +
-                ", fileLength=" + fileLength +
-                ", fileUniqueIdentifier='" + fileUniqueIdentifier + '\'' +
                 ", sender='" + sender + '\'' +
                 ", receiver='" + receiver + '\'' +
+                ", fileLength=" + fileLength +
+                ", contentLength=" + contentLength +
                 ", type=" + type +
                 '}';
     }

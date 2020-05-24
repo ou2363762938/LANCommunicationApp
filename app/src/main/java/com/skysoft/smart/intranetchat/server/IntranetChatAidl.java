@@ -5,7 +5,6 @@
  */
 package com.skysoft.smart.intranetchat.server;
 
-import android.nfc.Tag;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
@@ -109,6 +108,12 @@ public class IntranetChatAidl extends IIntranetChatAidlInterface.Stub {
     }
 
     @Override
+    public void sendFileContent(String rid,
+                                String path,
+                                String host) throws RemoteException {
+    }
+
+    @Override
     public void askResource(String askResourceJson, String host) throws RemoteException {
         send(askResourceJson,Config.CODE_ASK_RESOURCE,host);
     }
@@ -127,7 +132,7 @@ public class IntranetChatAidl extends IIntranetChatAidlInterface.Stub {
         FileBean fileBean = (FileBean) GsonTools.formJson(fileJson,FileBean.class);
         resourceSendRecord(fileJson,PathManager.fromType(fileBean.getType()),true,false);
         AskResourceBean askResourceBean = new AskResourceBean();
-        askResourceBean.setResourceUniqueIdentifier(fileBean.getFileUniqueIdentifier());
+        askResourceBean.setResourceUniqueIdentifier(fileBean.getRid());
         askResourceBean.setResourceType(Config.RESOURCE_FILE);
         Sender.sender(GsonTools.toJson(askResourceBean),Config.CODE_ASK_RESOURCE,host);
     }
@@ -237,7 +242,7 @@ public class IntranetChatAidl extends IIntranetChatAidlInterface.Stub {
 
     /*发送*/
     private void send(String data,int code,String host){
-        TLog.d(TAG, "send: host = " + host);
+        TLog.d(TAG, "notify: host = " + host);
         Sender.sender(data,code,host);
     }
 
@@ -252,12 +257,12 @@ public class IntranetChatAidl extends IIntranetChatAidlInterface.Stub {
         if (fileBean == null){
             TLog.d(TAG, "resourceSendRecord: ");
         }
-        boolean exist = ResourceManager.getInstance().exist(fileBean.getFileUniqueIdentifier());
+        boolean exist = ResourceManager.getInstance().exist(fileBean.getRid());
         if (!exist){
             ResourceManagerBean resourceManagerBean = new ResourceManagerBean(fileBean, path);
             resourceManagerBean.setReceive(receive);
             resourceManagerBean.setGroup(group);
-            ResourceManager.getInstance().setResource(fileBean.getFileUniqueIdentifier(),resourceManagerBean);
+            ResourceManager.getInstance().setResource(fileBean.getRid(),resourceManagerBean);
         }
     }
 }

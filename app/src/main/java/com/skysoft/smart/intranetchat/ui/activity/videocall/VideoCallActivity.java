@@ -22,6 +22,9 @@ import android.hardware.camera2.TotalCaptureResult;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
+
+import com.skysoft.smart.intranetchat.app.BaseCallActivity;
+import com.skysoft.smart.intranetchat.model.chat.record.RecordManager;
 import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 import android.view.Surface;
 import android.view.TextureView;
@@ -37,7 +40,6 @@ import com.skysoft.smart.intranetchat.app.IntranetChatApplication;
 import com.skysoft.smart.intranetchat.model.net_model.VoiceCall;
 import com.skysoft.smart.intranetchat.app.impl.OnEstablishCallConnect;
 import com.skysoft.smart.intranetchat.app.impl.OnReceiveCallHungUp;
-import com.skysoft.smart.intranetchat.bean.RecordCallBean;
 import com.skysoft.smart.intranetchat.model.camera.util.AppPermissionUtil;
 import com.skysoft.smart.intranetchat.model.camera.util.CameraUtil;
 import com.skysoft.smart.intranetchat.model.camera.videocall.Manager;
@@ -49,7 +51,7 @@ import org.greenrobot.eventbus.EventBus;
 
 import java.util.Arrays;
 
-public class VideoCallActivity extends AppCompatActivity implements View.OnClickListener {
+public class VideoCallActivity extends BaseCallActivity implements View.OnClickListener {
 
     private static final String TAG = "LCH_debug: " + VideoCallActivity.class.getSimpleName() + " ";
 
@@ -104,21 +106,13 @@ public class VideoCallActivity extends AppCompatActivity implements View.OnClick
                 VoiceCall.hungUpVoiceCall(host);
                 IntranetChatApplication.setInCall(false);
                 IntranetChatApplication.setEndCallTime(System.currentTimeMillis());
-                endCall(mIdentifier, host, isAnswer, false);
+                endCall(mIdentifier,isAnswer);
                 isHaungUp = true;
                 finish();
             }
         });
     }
 
-
-    public static void endCall(String identifier, String host, boolean isAnswer, boolean isVoice) {
-        if (isAnswer) {
-            EventBus.getDefault().post(new RecordCallBean(identifier, ChatRoomConfig.CALL_END_ANSWER, host, isVoice));
-        } else {
-            EventBus.getDefault().post(new RecordCallBean(identifier, ChatRoomConfig.CALL_END_LAUNCH, host, isVoice));
-        }
-    }
 
     private void init() {
         mOtherTexture = findViewById(R.id.activity_on_video_call_other);
@@ -138,7 +132,7 @@ public class VideoCallActivity extends AppCompatActivity implements View.OnClick
             }
             IntranetChatApplication.setInCall(false);
             IntranetChatApplication.setEndCallTime(System.currentTimeMillis());
-            endCall(mIdentifier, host, isAnswer, false);
+            endCall(mIdentifier,isAnswer);
             isHaungUp = true;
             finish();
         }
@@ -151,7 +145,7 @@ public class VideoCallActivity extends AppCompatActivity implements View.OnClick
             VoiceCall.hungUpVoiceCall(host);
             IntranetChatApplication.setInCall(false);
             IntranetChatApplication.setEndCallTime(System.currentTimeMillis());
-            endCall(mIdentifier, host, isAnswer, false);
+            endCall(mIdentifier, isAnswer);
         }
         try {
             mManager.stop();
@@ -168,7 +162,7 @@ public class VideoCallActivity extends AppCompatActivity implements View.OnClick
         VoiceCall.hungUpVoiceCall(host);
         IntranetChatApplication.setInCall(false);
         IntranetChatApplication.setEndCallTime(System.currentTimeMillis());
-        endCall(mIdentifier, host, isAnswer, false);
+        endCall(mIdentifier, isAnswer);
         isHaungUp = true;
         finish();
     }

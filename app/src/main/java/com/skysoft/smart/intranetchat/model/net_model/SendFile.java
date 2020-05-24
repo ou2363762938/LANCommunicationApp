@@ -75,8 +75,8 @@ public class SendFile {
         if(fileBean.getFileLength() == 0){
             return null;
         }
-        fileBean.setFileName(file.getName());
-        fileBean.setFileUniqueIdentifier(resourceUniqueIdentifier);
+        fileBean.setName(file.getName());
+        fileBean.setRid(resourceUniqueIdentifier);
         fileBean.setMd5(md5);
         fileBean.setReceiver(receiver);
         fileBean.setSender(sender);

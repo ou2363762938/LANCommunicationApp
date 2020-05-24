@@ -11,7 +11,7 @@ import android.os.RemoteException;
 import com.skysoft.smart.intranetchat.IIntranetChatAidlInterfaceCallback;
 import com.skysoft.smart.intranetchat.model.network.Config;
 import com.skysoft.smart.intranetchat.model.network.bean.VoiceCallDataBean;
-import com.skysoft.smart.intranetchat.model.network.file.SendFileThread;
+import com.skysoft.smart.intranetchat.model.network.file.ReceiveFileContentThread;
 import com.skysoft.smart.intranetchat.model.network.manager.SocketManager;
 import com.skysoft.smart.intranetchat.tools.GsonTools;
 
@@ -36,7 +36,8 @@ public class MonitorTcpReceivePortThread extends Thread {
             while (true){
                 Socket accept = serverSocket.accept();
                 SocketManager.getInstance().add();
-                SendFileThread sendFileThread = new SendFileThread(accept);
+                ReceiveFileContentThread sendFileThread =
+                        new ReceiveFileContentThread(accept);
                 sendFileThread.start();
             }
         } catch (IOException e) {

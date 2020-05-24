@@ -23,18 +23,21 @@ public interface FileDao {
     @Update
     void update(FileEntity entity);
 
+    @Delete
+    void delete(FileEntity... entities);
+
     @Update
     void updateList(List<FileEntity> entities);
 
-    @Query("select * from file_entity")
+    @Query("select * from file")
     List<FileEntity> getAll();
 
-    @Query("select * from file_entity where identifier = :identifier")
-    List<FileEntity> getFileEntity(String identifier);
+    @Query("select * from file where rid = :rid")
+    List<FileEntity> getFileEntity(String rid);
 
-    @Query("select * from file_entity where step != 85 and time > :timeLine")
+    @Query("select * from file where step != 85 and time > :timeLine")
     List<FileEntity> getAllFailure(long timeLine);
 
-    @Delete
-    void delete(FileEntity... entities);
+    @Query("select id from file order by id desc limit 1")
+    int getNewInsertId();
 }

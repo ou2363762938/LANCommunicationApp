@@ -48,6 +48,9 @@ interface IIntranetChatAidlInterface {
     /*向某个用户发送文件*/
     void sendFile(in String fileJson,in String path,in String host);
 
+    /**发送文件内容*/
+    void sendFileContent(in String rid, in String path, in String host);
+
     /*向某个用户请求资源*/
     void askResource(in String askResourceJson,in String host);
 
@@ -95,7 +98,7 @@ interface IIntranetChatAidlInterface {
      void hostChanged(in String host);
 
      /*广播identifier用户离线*/
-     void broadcastUserOutLine(String identifier);
+     void broadcastUserOutLine(String rid);
 
      void initUserInfoBean(String userInfoJson);
 }

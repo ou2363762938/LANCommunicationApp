@@ -22,7 +22,6 @@ public class Sender {
         DataPacketBean dataPacketBean = new DataPacketBean();
         dataPacketBean.setCode(code);
         dataPacketBean.setData(data);
-        TLog.d("Sender", "sender: ");
         SendDataPacket sdp = new SendDataPacket(GsonTools.toJson(dataPacketBean),host);
         sdp.start();
     }

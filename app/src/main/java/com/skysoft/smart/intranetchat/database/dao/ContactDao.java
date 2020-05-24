@@ -6,7 +6,6 @@
 package com.skysoft.smart.intranetchat.database.dao;
 
 import com.skysoft.smart.intranetchat.database.table.ContactEntity;
-import com.skysoft.smart.intranetchat.database.table.MineInfoEntity;
 
 import java.util.List;
 
@@ -18,7 +17,6 @@ import androidx.room.Update;
 
 @Dao
 public interface ContactDao {
-    //B:[Intranet Chat] [APP][UI] Chat Room, Oliver Ou, 2019/10/31
     @Insert
     void insert(ContactEntity... entities);
 
@@ -28,10 +26,12 @@ public interface ContactDao {
     @Delete
     void delete(List<ContactEntity> entities);
 
-    @Query("SELECT * FROM contact_info")
+    @Query("select * from contact")
     List<ContactEntity> getAllContact();
 
-    @Query("select * from contact_info where user_identifier =:userIdentifier")
-    ContactEntity getContact(String userIdentifier);
-    //E:[Intranet Chat] [APP][UI] Chat Room, Oliver Ou, 2019/10/31
+    @Query("select * from contact where identifier = :identifier")
+    ContactEntity getContact(String identifier);
+
+    @Query("select contact.id from contact order by id desc limit 1")
+    int getNewInsertId();
 }

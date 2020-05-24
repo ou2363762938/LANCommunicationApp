@@ -26,9 +26,6 @@ public interface GroupMemberDao {
     @Delete
     void delete(GroupMemberEntity... groupMemberEntities);
 
-    @Query("select * from group_member where group_identifier = :groupIdentifier")
-    List<GroupMemberEntity> getAllGroupMember(String groupIdentifier);
-
-    @Query("select * from group_member where group_identifier =:groupIdentifier and group_member_identifier =:memberIdentifier")
-    GroupMemberEntity getGroupMember(String groupIdentifier,String memberIdentifier);
+    @Query("select * from member where `group` = :group")
+    List<GroupMemberEntity> getMember(int group);
 }

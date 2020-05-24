@@ -12,47 +12,48 @@ import androidx.room.Ignore;
 import androidx.room.Index;
 import androidx.room.PrimaryKey;
 
-@Entity(tableName = "group_member",primaryKeys = {"group_identifier","group_member_identifier"}
-        ,indices = @Index(value = "group_identifier"))
+@Entity(tableName = "member",indices = @Index(value = "group"))
 public class GroupMemberEntity {
-    @ColumnInfo(name = "group_identifier")
-    @NonNull
-    private String groupIdentifier;
-    @ColumnInfo(name = "group_member_identifier")
-    @NonNull
-    private String groupMemberIdentifier;
-    @Ignore
-    private String host;
+    @PrimaryKey(autoGenerate = true)
+    private int id;
+    @ColumnInfo
+    private int group;
+    @ColumnInfo
+    private int contact;
 
-    public String getGroupIdentifier() {
-        return groupIdentifier;
+    public GroupMemberEntity() {
     }
 
-    public void setGroupIdentifier(String groupIdentifier) {
-        this.groupIdentifier = groupIdentifier;
+    public int getId() {
+        return id;
     }
 
-    public String getGroupMemberIdentifier() {
-        return groupMemberIdentifier;
+    public void setId(int id) {
+        this.id = id;
     }
 
-    public void setGroupMemberIdentifier(String groupMemberIdentifier) {
-        this.groupMemberIdentifier = groupMemberIdentifier;
+    public int getGroup() {
+        return group;
     }
 
-    public String getHost() {
-        return host;
+    public void setGroup(int group) {
+        this.group = group;
     }
 
-    public void setHost(String host) {
-        this.host = host;
+    public int getContact() {
+        return contact;
+    }
+
+    public void setContact(int contact) {
+        this.contact = contact;
     }
 
     @Override
     public String toString() {
         return "GroupMemberEntity{" +
-                ", groupIdentifier='" + groupIdentifier + '\'' +
-                ", groupMemberIdentifier='" + groupMemberIdentifier + '\'' +
+                "id=" + id +
+                ", group=" + group +
+                ", contact=" + contact +
                 '}';
     }
 }

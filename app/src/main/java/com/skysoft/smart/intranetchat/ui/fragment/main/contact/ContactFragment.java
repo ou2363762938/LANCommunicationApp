@@ -12,11 +12,29 @@ import android.widget.TextView;
 import com.skysoft.smart.intranetchat.R;
 import com.skysoft.smart.intranetchat.app.BaseFragment;
 import com.skysoft.smart.intranetchat.app.IntranetChatApplication;
+import com.skysoft.smart.intranetchat.bean.signal.AvatarSignal;
+import com.skysoft.smart.intranetchat.bean.signal.ContactSignal;
+import com.skysoft.smart.intranetchat.listener.AdapterOnClickListener;
+import com.skysoft.smart.intranetchat.model.contact.ContactListAdapter;
+import com.skysoft.smart.intranetchat.model.contact.ContactManager;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 public class ContactFragment extends BaseFragment {
 
     private ListView contactListView;
     private TextView mPageTitle;
+    private ContactListAdapter mContactAdapter;
+
+    private AdapterOnClickListener mListener = new AdapterOnClickListener(){
+        @Override
+        public void onItemClickListener(View view, Object obj, int position) {
+            //TODO 点击事件
+            super.onItemClickListener(view, obj, position);
+        }
+    };
 
     @Override
     protected int getLayout() {
@@ -31,8 +49,28 @@ public class ContactFragment extends BaseFragment {
 
     @Override
     protected void initData() {
+        EventBus.getDefault().register(this);
+
         mPageTitle.setText("联系人");
-        IntranetChatApplication.setsContactListAdapter(new ContactListAdapter(IntranetChatApplication.getsContactList(),getContext()));
-        contactListView.setAdapter(IntranetChatApplication.getsContactListAdapter());
+        mContactAdapter = ContactManager.getInstance().initAdapter(getContext());
+        mContactAdapter.setListener(mListener);
+        contactListView.setAdapter(mContactAdapter);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        EventBus.getDefault().unregister(this);
+        mContactAdapter = null;
+        ContactManager.getInstance().setAdapter(null);
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void receiveContactSignal(ContactSignal signal) {
+        mContactAdapter.notifyDataSetChanged();
+    }
+
+    public void receiveAvatarSignal(AvatarSignal signal) {
+        mContactAdapter.notifyDataSetChanged();
     }
 }

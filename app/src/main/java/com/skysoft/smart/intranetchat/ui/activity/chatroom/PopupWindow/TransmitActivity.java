@@ -12,6 +12,20 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+
+import com.google.gson.Gson;
+import com.skysoft.smart.intranetchat.database.table.ContactEntity;
+import com.skysoft.smart.intranetchat.database.table.FileEntity;
+import com.skysoft.smart.intranetchat.database.table.GroupEntity;
+import com.skysoft.smart.intranetchat.database.table.RecordEntity;
+import com.skysoft.smart.intranetchat.model.avatar.AvatarManager;
+import com.skysoft.smart.intranetchat.model.chat.Message;
+import com.skysoft.smart.intranetchat.model.chat.record.RecordManager;
+import com.skysoft.smart.intranetchat.model.contact.ContactManager;
+import com.skysoft.smart.intranetchat.model.filemanager.FileManager;
+import com.skysoft.smart.intranetchat.model.group.GroupManager;
+import com.skysoft.smart.intranetchat.model.latest.LatestManager;
+import com.skysoft.smart.intranetchat.tools.GsonTools;
 import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -29,16 +43,15 @@ import com.bumptech.glide.Glide;
 import com.skysoft.smart.intranetchat.R;
 import com.skysoft.smart.intranetchat.app.BaseActivity;
 import com.skysoft.smart.intranetchat.app.IntranetChatApplication;
-import com.skysoft.smart.intranetchat.bean.SendMessageBean;
+import com.skysoft.smart.intranetchat.bean.network.SendMessageBean;
 import com.skysoft.smart.intranetchat.database.MyDataBase;
-import com.skysoft.smart.intranetchat.database.dao.ChatRecordDao;
+import com.skysoft.smart.intranetchat.database.dao.RecordDao;
 import com.skysoft.smart.intranetchat.model.net_model.SendMessage;
-import com.skysoft.smart.intranetchat.bean.TransmitBean;
-import com.skysoft.smart.intranetchat.database.table.ChatRecordEntity;
-import com.skysoft.smart.intranetchat.database.table.LatestChatHistoryEntity;
+import com.skysoft.smart.intranetchat.bean.chat.TransmitBean;
+import com.skysoft.smart.intranetchat.database.table.LatestEntity;
 import com.skysoft.smart.intranetchat.model.camera.entity.EventMessage;
 import com.skysoft.smart.intranetchat.ui.activity.chatroom.ChatRoom.ChatRoomConfig;
-import com.skysoft.smart.intranetchat.ui.activity.chatroom.ChatRoom.ChatRoomMessageAdapter;
+import com.skysoft.smart.intranetchat.model.chat.record.RecordAdapter;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -47,11 +60,11 @@ import java.util.List;
 public class TransmitActivity extends BaseActivity implements View.OnClickListener{
     private static final String TAG = "TransmitActivity";
 
-    public static void startActivity(Context context, String message, int recordType, String transmitRoomIdentifier){
+    public static void startActivity(Context context, String message, int recordType, int receiver){
         Intent intent = new Intent(context,TransmitActivity.class);
         intent.putExtra("message",message);
         intent.putExtra("recordType",recordType);
-        intent.putExtra("transmitRoomIdentifier",transmitRoomIdentifier);
+        intent.putExtra("receiver",receiver);
         context.startActivity(intent);
     }
 
@@ -61,7 +74,8 @@ public class TransmitActivity extends BaseActivity implements View.OnClickListen
     private List<TransmitBean> mTransmitUsers;      //转发界面的最近聊天列表
     private String mMessage;
     private int mRecordType;        //转发消息的内型
-    private String mTransmitRoomIdentifier;     //转发消息的聊天室Identifier
+    private int mReceiver;     //转发消息的聊天室Identifier
+    private FileEntity mFile;
     private ScrollView mScroll;     //title以下的内容
     private ConstraintLayout mTitle;
     private LinearLayout mSearchInputBox;
@@ -117,7 +131,7 @@ public class TransmitActivity extends BaseActivity implements View.OnClickListen
         Intent intent = getIntent();
         mMessage = intent.getStringExtra("message");
         mRecordType = intent.getIntExtra("recordType",-1);
-        mTransmitRoomIdentifier = intent.getStringExtra("transmitRoomIdentifier");
+        mReceiver = intent.getIntExtra("receiver",-1);
     }
 
     private void initView() {
@@ -139,61 +153,58 @@ public class TransmitActivity extends BaseActivity implements View.OnClickListen
         mClearInputSearchKey.setOnClickListener(this::onClick);
         mCancelSearch.setOnClickListener(this::onClick);
         mInputSearchKey.addTextChangedListener(mInputSearchKeyListener);
-        mAdapter = new SearchResultAdapter(this, new OnSelectSearchResultListener() {
+        mAdapter = new SearchResultAdapter(this,
+                new OnSelectSearchResultListener() {
             @Override
             public void onSelectSearchResultListener(TransmitBean bean) {
                 closeSearchBox();
                 mTransmitUsers.add(bean);
                 showDialog(mTransmitUsers.size()-1);
             }
-        },mTransmitRoomIdentifier);
+        });
         mSearchResultList.setAdapter(mAdapter);
     }
 
     private void initData() {
-        mTransmitUsers = new ArrayList<>();
-        //获得显示内容
-        Iterator<String> iterator = IntranetChatApplication.getMessageList().iterator();
-        while (iterator.hasNext()){
-            LatestChatHistoryEntity next = IntranetChatApplication.sLatestChatHistoryMap.get(iterator.next());
-            //不转发给自己
-            if (next.getUserIdentifier().equals(mTransmitRoomIdentifier)){
-                continue;
-            }
-            TransmitBean transmitBean = new TransmitBean(next.getUserHeadPath(), next.getUserName(), next.getUserIdentifier(), next.getGroup() == 1 ? true : false, next.getHost());
-            //消息列表的host是空值
-            transmitBean.setmHost(next.getHost());
-            mTransmitUsers.add(transmitBean);
-        }
+        mTransmitUsers = LatestManager.getInstance().getTransmits(mReceiver);
 
         LayoutInflater inflater = LayoutInflater.from(this);
-        Iterator<TransmitBean> beanIterator = mTransmitUsers.iterator();
         int index = 0;
-        while (beanIterator.hasNext()){
+        for (TransmitBean bean:mTransmitUsers) {
             //加载联系人布局
             View view = inflater.inflate(R.layout.listview_main_contact, null);
             view.findViewById(R.id.contact_state).setVisibility(View.GONE);
             CircleImageView avatar = view.findViewById(R.id.contact_head);
             TextView name = view.findViewById(R.id.contact_name);
 
-            //取出加载内容
-            TransmitBean next = beanIterator.next();
-            if (!TextUtils.isEmpty(next.getmAvatarPath())){
-                Glide.with(this).load(next.getmAvatarPath()).into(avatar);
-            }else {
-                avatar.setImageResource(R.drawable.default_head);
+            if (bean.isGroup()) {
+                GroupEntity group = GroupManager.getInstance().getGroup(bean.getUser());
+                bean.setHost(group.getHost());
+                bean.setAvatar(group.getAvatar());
+                bean.setName(group.getName());
+            } else {
+                ContactEntity contact = ContactManager.getInstance().getContact(bean.getUser());
+                bean.setHost(contact.getHost());
+                bean.setAvatar(contact.getAvatar());
+                bean.setName(contact.getName());
             }
 
-            if (!TextUtils.isEmpty(next.getmUseName())){
-                name.setText(next.getmUseName());
+            //取出加载内容
+            AvatarManager.getInstance().loadContactAvatar(this,avatar,bean.getAvatar());
+
+            if (!TextUtils.isEmpty(bean.getName())){
+                name.setText(bean.getName());
             }else {
                 continue;
             }
+
             //设置背景为透明色
             view.setBackgroundColor(getResources().getColor(R.color.color_transparent));
             view.setOnClickListener(this::onClick);
 
-            mRecentlyChat.addView(view,index++,new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,LinearLayout.LayoutParams.WRAP_CONTENT));
+            mRecentlyChat.addView(view,
+                    index++,
+                    new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,LinearLayout.LayoutParams.WRAP_CONTENT));
         }
     }
 
@@ -225,17 +236,18 @@ public class TransmitActivity extends BaseActivity implements View.OnClickListen
         Button cancel = view.findViewById(R.id.transmit_cancel);        //取消按钮
         Button send = view.findViewById(R.id.transmit_send);        //确认按钮
 
-        TransmitBean transmitBean = mTransmitUsers.get(id);     //转发对象
-        if (!TextUtils.isEmpty(transmitBean.getmAvatarPath())){
-            Glide.with(TransmitActivity.this).load(transmitBean.getmAvatarPath()).into(avatar);
-        }
-        name.setText(transmitBean.getmUseName());
+        TransmitBean bean = mTransmitUsers.get(id);     //转发对象
+        AvatarManager.getInstance().loadContactAvatar(this,avatar,bean.getAvatar());
+        name.setText(bean.getName());
 
-        if (mRecordType == ChatRoomConfig.RECORD_IMAGE){
+        if (mRecordType == ChatRoomConfig.RECORD_FILE){
             //显示转发的图片，不显示图片路径
             message.setVisibility(View.GONE);
             image.setVisibility(View.VISIBLE);
-            Glide.with(TransmitActivity.this).load(mMessage).into(image);
+            if (mFile == null) {
+                mFile = (FileEntity) GsonTools.formJson(mMessage, FileEntity.class);
+            }
+            Glide.with(TransmitActivity.this).load(mFile.getPath()).into(image);
         }else {
             //显示转发的文字
             message.setText(mMessage);
@@ -250,26 +262,16 @@ public class TransmitActivity extends BaseActivity implements View.OnClickListen
                     String leave = leaveWord.getText().toString();      //获得输入的留言
                     TLog.d(TAG, "onClick: leave = " + leave);
 
-                    ChatRecordEntity messageRecord = null;
-                    ChatRecordEntity leaveRecord = null;
-
                     if (mRecordType == ChatRoomConfig.RECORD_TEXT){
                         //转发文字
-                        messageRecord = transmitMessage(id);
-                    }else if (mRecordType == ChatRoomConfig.RECORD_IMAGE){
+                        transmitMessage(mMessage,mTransmitUsers.get(id));
+                    }else if (mRecordType == ChatRoomConfig.RECORD_FILE){
                         //转发图片
-                        messageRecord = transmitFile(id);
+                        transmitFile(id);
                     }
                     if (!TextUtils.isEmpty(leave)){     //如果输入留言，转发留言
                         mMessage = leave;
-                        leaveRecord = transmitMessage(id);
-                        //同时向数据库写入转发记录和留言记录
-                        ChatRecordEntity[] entities = new ChatRecordEntity[2];
-                        entities[0] = messageRecord;
-                        entities[1] = leaveRecord;
-                        record(entities);
-                    }else {
-                        record(messageRecord);
+                        transmitMessage(leave,mTransmitUsers.get(id));
                     }
 
                     alertDialog.dismiss();
@@ -328,62 +330,31 @@ public class TransmitActivity extends BaseActivity implements View.OnClickListen
 
     /**
      * 转发文字
-     * @param i 转发对象在mTransmitUsers中的位置*/
-    private ChatRecordEntity transmitMessage(int i) {
-        return transmitMessage(mMessage,mTransmitUsers.get(i));
-    }
-
-    /**
-     * 转发文字
      * @param message 转发的文字
-     * @param transmitBean 转发对象*/
-    public static ChatRecordEntity transmitMessage(String message, TransmitBean transmitBean){
-        //转发消息
-        ChatRecordEntity recordEntity = SendMessage.sendCommonMessage(new SendMessageBean(message,
-                transmitBean.getmUserIdentifier(),
-                transmitBean.getmHost(),
-                transmitBean.getmAvatarPath(),
-                transmitBean.getmUseName(),
-                transmitBean.isGroup()));
+     * @param bean 转发对象*/
+    public static void transmitMessage(String message, TransmitBean bean){
+        if (bean.isGroup()) {
+            Message.getInstance().send(
+                    GroupManager.getInstance().getGroup(bean.getUser()),
+                    message);
+        } else {
+            Message.getInstance().send(
+                    ContactManager.getInstance().getContact(bean.getUser()),
+                    message);
+        }
 
-        return recordEntity;
+        RecordManager.getInstance().recordText(message,-1);
+        LatestManager.getInstance().send(bean.getUser(),message,bean.isGroup());
     }
 
     /**
      * 转发文件，目前仅支持图片和视频
      * @param i 转发对象在mTransmitUsers中的位置*/
-    private ChatRecordEntity transmitFile(int i){
-        int type = mMessage.equals(ChatRoomConfig.RECORD_VIDEO) ? 2 : 1;
-        ChatRecordEntity chatRecordEntity = SendMessage.sendCommonMessage(new EventMessage(mMessage, type),
-                new SendMessageBean(mMessage,
-                        mTransmitUsers.get(i).getmUserIdentifier(),
-                        mTransmitUsers.get(i).getmHost(),
-                        mTransmitUsers.get(i).getmAvatarPath(),
-                        mTransmitUsers.get(i).getmUseName(),
-                        mTransmitUsers.get(i).isGroup()),
-                true);
-        return chatRecordEntity;
-    }
-
-    /**
-     * 转发消息后增加聊天记录
-     * @param recordEntity 消息记录*/
-    public static void record(ChatRecordEntity... recordEntity){
-        //记录消息
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                ChatRecordDao chatRecordDao = MyDataBase.getInstance().getChatRecordDao();
-                //如果上次聊天时间超过现在2分钟，插入上次聊天时间
-                long latestRecordTime = chatRecordDao.getLatestRecordTime(recordEntity[0].getReceiver());
-                if (latestRecordTime != 0 && recordEntity[0].getTime() - latestRecordTime > 2*60*1000){
-                    ChatRecordEntity recordTime = ChatRoomMessageAdapter.generatorTimeRecord(recordEntity[0].getReceiver(),latestRecordTime);
-                    chatRecordDao.insert(recordTime);
-                }
-                //记录转发
-                chatRecordDao.insert(recordEntity);
-            }
-        }).start();
+    private void transmitFile(int i){
+        TransmitBean bean = mTransmitUsers.get(i);
+        FileManager.getInstance().notify(bean.getUser(),mFile,bean.isGroup());
+        RecordManager.getInstance().recordFile(mFile,-1);
+        LatestManager.getInstance().send(bean.getUser(),mFile,bean.isGroup());
     }
 
     @Override

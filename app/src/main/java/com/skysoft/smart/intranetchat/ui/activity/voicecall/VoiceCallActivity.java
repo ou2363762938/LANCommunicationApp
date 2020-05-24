@@ -9,6 +9,9 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
+
+import com.skysoft.smart.intranetchat.app.BaseCallActivity;
+import com.skysoft.smart.intranetchat.model.avatar.AvatarManager;
 import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 import android.view.View;
 import android.widget.ImageView;
@@ -27,7 +30,7 @@ import com.skysoft.smart.intranetchat.model.camera.manager.MyAudioManager;
 import com.skysoft.smart.intranetchat.tools.customstatusbar.CustomStatusBarBackground;
 import com.skysoft.smart.intranetchat.ui.activity.videocall.VideoCallActivity;
 
-public class VoiceCallActivity extends AppCompatActivity {
+public class VoiceCallActivity extends BaseCallActivity {
 
     private String TAG = VoiceCallActivity.class.getSimpleName();
     private ImageView hungUpCall;
@@ -36,7 +39,7 @@ public class VoiceCallActivity extends AppCompatActivity {
     private TextView mTime;
     private String host;
     private String name;
-    private String imgPath;
+    private int mAvatar;
     private MyAudioManager myAudioManager;
     private VioceCallPlay mVoicePlay;
     private String mIdentifier;
@@ -55,18 +58,14 @@ public class VoiceCallActivity extends AppCompatActivity {
         Bundle bundle = intent.getExtras();
         host = bundle.getString("host");
         name = bundle.getString("name");
-        imgPath = bundle.getString("imgPath");
+        mAvatar = bundle.getInt("avatar");
         mIdentifier = bundle.getString("identifier");
         isAnswer = bundle.getBoolean("answer");
         mTime = findViewById(R.id.activity_on_voice_call_time);
         mName = findViewById(R.id.activity_on_voice_call_name);
         headImg = findViewById(R.id.activity_on_voice_call_img);
         mName.setText(name);
-        if (!TextUtils.isEmpty(imgPath)){
-            Glide.with(this).load(imgPath).into(headImg);
-        }else {
-            Glide.with(this).load(R.drawable.default_head).into(headImg);
-        }
+        AvatarManager.getInstance().loadContactAvatar(this,headImg,mAvatar);
         mVoicePlay = new VioceCallPlay();
         myAudioManager = new MyAudioManager();
         myAudioManager.vioceCall();
@@ -77,7 +76,7 @@ public class VoiceCallActivity extends AppCompatActivity {
                 VoiceCall.hungUpVoiceCall(host);
                 IntranetChatApplication.setInCall(false);
                 IntranetChatApplication.setEndCallTime(System.currentTimeMillis());
-                VideoCallActivity.endCall(mIdentifier,host,isAnswer,true);
+                endCall(mIdentifier,isAnswer);
                 finish();
             }
         });
@@ -92,7 +91,7 @@ public class VoiceCallActivity extends AppCompatActivity {
             }
             IntranetChatApplication.setInCall(false);
             IntranetChatApplication.setEndCallTime(System.currentTimeMillis());
-            VideoCallActivity.endCall(mIdentifier,host,isAnswer,true);
+            endCall(mIdentifier,isAnswer);
             finish();
         }
     };
@@ -106,11 +105,16 @@ public class VoiceCallActivity extends AppCompatActivity {
         activity.startActivity(intent);
     }
 
-    public static void go(Activity activity, String host, String name, String imgPath, String identifier,boolean answer) {
+    public static void go(Activity activity,
+                          String host,
+                          String name,
+                          int avatar,
+                          String identifier,
+                          boolean answer) {
         Intent intent = new Intent(activity, VoiceCallActivity.class);
         Bundle bundle = new Bundle();
         bundle.putString("name", name);
-        bundle.putString("imgPath", imgPath);
+        bundle.putInt("avatar", avatar);
         bundle.putString("host", host);
         bundle.putString("identifier",identifier);
         bundle.putBoolean("answer",answer);
@@ -139,7 +143,7 @@ public class VoiceCallActivity extends AppCompatActivity {
         VoiceCall.hungUpVoiceCall(host);
         IntranetChatApplication.setInCall(false);
         IntranetChatApplication.setEndCallTime(System.currentTimeMillis());
-        VideoCallActivity.endCall(mIdentifier,host,isAnswer,true);
+        endCall(mIdentifier,isAnswer);
         finish();
     }
 }

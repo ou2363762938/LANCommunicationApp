@@ -29,7 +29,7 @@ public class RoomUtils {
         return millsToTime(date);
     }
 
-    public static boolean initMillToTmie(long time){
+    public static boolean initMillToTime(long time){
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(System.currentTimeMillis());
         int nowDay = calendar.get(Calendar.DAY_OF_MONTH);

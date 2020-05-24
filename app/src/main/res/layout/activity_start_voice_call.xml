@@ -8,7 +8,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/color_black"
-    tools:context=".ui.activity.voicecall.LaunchVoiceCallActivity">
+    tools:mContext=".ui.activity.voicecall.LaunchVoiceCallActivity">
     <View
         android:id="@+id/custom_status_bar_background"
         android:layout_width="match_parent"

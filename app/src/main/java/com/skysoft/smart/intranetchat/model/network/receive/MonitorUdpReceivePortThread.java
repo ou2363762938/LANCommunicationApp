@@ -1,7 +1,7 @@
 /***
  * Copyright (c) 2019 ASKEY Computer Corp. and/or its affiliates. All rights reserved.
  * Created by Oliver Ou on 2019/10/15
- * Description: [Intranet Chat] [APP] [Communication]Create a message receiver to receive UDP data.
+ * Description: [Intranet Chat] [APP] [Communication]Create a message receiver to requestFile UDP data.
  */
 package com.skysoft.smart.intranetchat.model.network.receive;
 
@@ -125,11 +125,13 @@ public class MonitorUdpReceivePortThread extends Thread {
                             broadcastItem.notifyClearQueue();
                             break;
                             //开始下载文件
-                        case Config.STEP_ASK_FILE:
+                        case Config.STEP_REQUEST:
                             broadcastItem.askFile(data,host);
                             break;
+                        case Config.STEP_RECEIVE:
+                            broadcastItem.onReceiveFile(data,host);
                             //下载文件失败（原因在对方）
-                        case Config.STEP_DOWN_LOAD_FAILURE:
+                        case Config.STEP_FAILURE:
                             broadcastItem.receiveFileFailure(data);
                             break;
                         case Config.RESPONSE_REFUSE_BE_MONITOR:

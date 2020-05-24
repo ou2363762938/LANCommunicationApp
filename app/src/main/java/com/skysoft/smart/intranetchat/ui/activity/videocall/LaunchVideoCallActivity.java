@@ -9,7 +9,12 @@ import android.app.Activity;
 import android.content.Intent;
 import android.graphics.SurfaceTexture;
 import android.os.Bundle;
-import android.text.TextUtils;
+
+import com.skysoft.smart.intranetchat.app.BaseCallActivity;
+import com.skysoft.smart.intranetchat.bean.signal.AvatarSignal;
+import com.skysoft.smart.intranetchat.model.avatar.AvatarManager;
+import com.skysoft.smart.intranetchat.model.chat.record.RecordManager;
+import com.skysoft.smart.intranetchat.model.mine.MineInfoManager;
 import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 import android.view.TextureView;
 import android.view.View;
@@ -18,14 +23,12 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.bumptech.glide.Glide;
 import com.skysoft.smart.intranetchat.R;
 import com.skysoft.smart.intranetchat.app.IntranetChatApplication;
 import com.skysoft.smart.intranetchat.model.net_model.VoiceCall;
 import com.skysoft.smart.intranetchat.app.impl.HandleVoiceCallResponse;
 import com.skysoft.smart.intranetchat.app.impl.OnReceiveCallHungUp;
-import com.skysoft.smart.intranetchat.bean.InCallBean;
-import com.skysoft.smart.intranetchat.bean.RecordCallBean;
+import com.skysoft.smart.intranetchat.bean.network.InCallBean;
 import com.skysoft.smart.intranetchat.model.camera.manager.MyShowCaptureManager;
 import com.skysoft.smart.intranetchat.model.camera.videocall.Sender;
 import com.skysoft.smart.intranetchat.tools.customstatusbar.CustomStatusBarBackground;
@@ -38,7 +41,7 @@ import org.greenrobot.eventbus.ThreadMode;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class LaunchVideoCallActivity extends AppCompatActivity {
+public class LaunchVideoCallActivity extends BaseCallActivity {
 
     private String TAG = LaunchVideoCallActivity.class.getSimpleName();
     private ImageView hungVideoCall;
@@ -52,7 +55,7 @@ public class LaunchVideoCallActivity extends AppCompatActivity {
     private Timer affirmWaitingTimer;
     private Timer requestConsentTimer;
     private String mIdentifier;
-    private String mImagePath;
+    private int mAvatar;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -72,32 +75,29 @@ public class LaunchVideoCallActivity extends AppCompatActivity {
 //        mShowCaptureManager = new MyShowCaptureManager(this, mTexture);
 //        mShowCaptureManager.startBackgroundThread();
 
+        mConfig = ChatRoomConfig.SEND_VIDEO_CALL;
         Intent intent = getIntent();
         Bundle bundle = intent.getExtras();
         host = bundle.getString("host");
         mIdentifier = bundle.getString("identifier");
         mName.setText(bundle.getString("name"));
-        mImagePath = bundle.getString("imgPath");
-        VoiceCall.startVideoCall(IntranetChatApplication.getsMineUserInfo(), host);
-        if (!TextUtils.isEmpty(mImagePath)){
-            Glide.with(this).load(mImagePath).into(mHeadImg);
-        }else {
-            Glide.with(this).load(R.drawable.default_head).into(mHeadImg);
-        }
+        mAvatar = bundle.getInt("avatar");
+        VoiceCall.startVideoCall(MineInfoManager.getInstance().getUserInfo(), host);
+        AvatarManager.getInstance().loadContactAvatar(this,mHeadImg,mAvatar);
 
         hungVideoCall.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 VoiceCall.hungUpVoiceCall(host);
                 IntranetChatApplication.setInCall(false);
-                EventBus.getDefault().post(new RecordCallBean(mIdentifier,ChatRoomConfig.CALL_REFUSE_LAUNCH_MINE,host,false));
+                endCall(getString(R.string.call_refuse_launch_mine));
                 finish();
             }
         });
 
         monitor();
         Sender.mInputDatasQueue.clear();
-        TLog.d(TAG, "onClick: send queen "+ Sender.mInputDatasQueue.size()+" receiver : "+IntranetChatApplication.getmDatasQueue().size());
+        TLog.d(TAG, "onClick: notify queen "+ Sender.mInputDatasQueue.size()+" receiver : "+IntranetChatApplication.getmDatasQueue().size());
 
         TLog.d(TAG, "onCreate: onReceiveInCall " + this);
     }
@@ -134,7 +134,7 @@ public class LaunchVideoCallActivity extends AppCompatActivity {
                 if (System.currentTimeMillis() - lastWaitingConsentCall > intervalTime) {
                     VoiceCall.hungUpVoiceCall(host);
                     IntranetChatApplication.setInCall(false);
-                    EventBus.getDefault().post(new RecordCallBean(mIdentifier,ChatRoomConfig.CALL_DIE_LAUNCH,host,false));
+                    endCall(getString(R.string.call_die));
                     finish();
                 }
             }
@@ -166,7 +166,7 @@ public class LaunchVideoCallActivity extends AppCompatActivity {
             if (!LaunchVideoCallActivity.this.host.equals(host)){
                 return;
             }
-            EventBus.getDefault().post(new RecordCallBean(mIdentifier,ChatRoomConfig.CALL_REFUSE_LAUNCH,host,false));
+            endCall(getString(R.string.call_refuse_launch));
             IntranetChatApplication.setInCall(false);
             finish();
         }
@@ -181,7 +181,7 @@ public class LaunchVideoCallActivity extends AppCompatActivity {
         public void onReceiveConsentOutTime() {
             TLog.d(TAG, "onReceiveConsentOutTime: ");
             IntranetChatApplication.setInCall(false);
-            EventBus.getDefault().post(new RecordCallBean(mIdentifier,ChatRoomConfig.CALL_OUT_TIME_LAUNCH,host,false));
+            endCall(getString(R.string.call_out_time));
             finish();
         }
 
@@ -192,7 +192,9 @@ public class LaunchVideoCallActivity extends AppCompatActivity {
                 return;
             }
 //            Toast.makeText(LaunchVideoCallActivity.this,"对方正在通话中",Toast.LENGTH_SHORT).show();
-            EventBus.getDefault().post(new RecordCallBean(mIdentifier,ChatRoomConfig.CALL_IN_CALL,host,false));
+            endCall(getString(R.string.call_in_call));
+//            EventBus.getDefault().post(new RecordCallBean
+//                    (mIdentifier,ChatRoomConfig.CALL_IN_CALL,host,false));
         }
     };
 
@@ -218,12 +220,24 @@ public class LaunchVideoCallActivity extends AppCompatActivity {
         inCall.schedule(inCallTask,1000);
     }
 
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void receiveAvatarSignal(AvatarSignal signal) {
+        if (mIdentifier.equals(signal.receiver)) {
+            AvatarManager.
+                    getInstance().
+                    loadContactAvatar(
+                            LaunchVideoCallActivity.this,
+                            mHeadImg,
+                            mAvatar);
+        }
+    }
+
     @Override
     public void onBackPressed() {
         super.onBackPressed();
         VoiceCall.hungUpVoiceCall(host);
         IntranetChatApplication.setInCall(false);
-        EventBus.getDefault().post(new RecordCallBean(mIdentifier,ChatRoomConfig.CALL_REFUSE_LAUNCH_MINE,host,false));
+        endCall(getString(R.string.call_refuse_launch_mine));
         finish();
     }
 
@@ -244,11 +258,11 @@ public class LaunchVideoCallActivity extends AppCompatActivity {
         activity.startActivity(intent);
     }
 
-    public static void go(Activity activity, String host, String name, String imgPath,String identifier) {
+    public static void go(Activity activity, String host, String name, int avatar,String identifier) {
         Intent intent = new Intent(activity, LaunchVideoCallActivity.class);
         Bundle bundle = new Bundle();
         bundle.putString("name", name);
-        bundle.putString("imgPath", imgPath);
+        bundle.putInt("avatar", avatar);
         bundle.putString("host", host);
         bundle.putString("identifier",identifier);
         intent.putExtras(bundle);
@@ -263,7 +277,7 @@ public class LaunchVideoCallActivity extends AppCompatActivity {
                 return;
             }
             IntranetChatApplication.setInCall(false);
-            EventBus.getDefault().post(new RecordCallBean(mIdentifier,ChatRoomConfig.CALL_REFUSE_LAUNCH,host,false));
+            endCall(getString(R.string.call_refuse_launch));
             finish();
         }
     };

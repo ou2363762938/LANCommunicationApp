@@ -28,4 +28,7 @@ public interface RefuseGroupDao {
 
     @Query("select * from refuse_group")
     List<RefuseGroupEntity> getAll();
+
+    @Query("select id from refuse_group order by id limit 1")
+    int getNewInsertId();
 }

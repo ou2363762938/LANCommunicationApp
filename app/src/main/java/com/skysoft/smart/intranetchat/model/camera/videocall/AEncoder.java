@@ -96,7 +96,7 @@ public class AEncoder {
                     }
                     addTag(outData, temp.length);
                     Sender.mInputDatasQueue.offer(outData);
-                    TLog.d(TAG, "AEncoder: send " + outData.length);
+                    TLog.d(TAG, "AEncoder: notify " + outData.length);
                 }
                 mediaCodec.releaseOutputBuffer(id, false);
             } catch (IllegalStateException e) {

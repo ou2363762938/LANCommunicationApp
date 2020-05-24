@@ -13,7 +13,7 @@ import com.skysoft.smart.intranetchat.model.network.bean.AskResourceBean;
 import com.skysoft.smart.intranetchat.tools.GsonTools;
 
 public class AskFile {
-    public void askFile(String identifier,String host){
+    public static void askFile(String identifier,String host){
         AskResourceBean askResourceBean = new AskResourceBean();
         askResourceBean.setResourceUniqueIdentifier(identifier);
         askResourceBean.setResourceType(Config.RESOURCE_FILE);

@@ -19,13 +19,24 @@ import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.text.style.ImageSpan;
 
+import com.google.gson.Gson;
 import com.skysoft.smart.intranetchat.app.BaseActivity;
-import com.skysoft.smart.intranetchat.bean.SendAtMessageBean;
+import com.skysoft.smart.intranetchat.bean.base.DeviceInfoBean;
+import com.skysoft.smart.intranetchat.bean.network.SendAtMessageBean;
+import com.skysoft.smart.intranetchat.bean.signal.AvatarSignal;
+import com.skysoft.smart.intranetchat.bean.signal.ChatSignal;
+import com.skysoft.smart.intranetchat.database.table.GroupEntity;
+import com.skysoft.smart.intranetchat.database.table.RecordEntity;
+import com.skysoft.smart.intranetchat.model.chat.Message;
+import com.skysoft.smart.intranetchat.model.chat.record.RecordAdapter;
+import com.skysoft.smart.intranetchat.model.chat.record.RecordManager;
+import com.skysoft.smart.intranetchat.model.contact.ContactManager;
+import com.skysoft.smart.intranetchat.model.latest.LatestManager;
+import com.skysoft.smart.intranetchat.model.network.bean.MessageBean;
 import com.skysoft.smart.intranetchat.tools.ChatRoom.KeyBoardUtils;
 import com.skysoft.smart.intranetchat.tools.ChatRoom.RoomUtils;
 import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 
-import android.util.Log;
 import android.view.GestureDetector;
 import android.view.Gravity;
 import android.view.KeyEvent;
@@ -43,15 +54,11 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
 import com.skysoft.smart.intranetchat.MainActivity;
 import com.skysoft.smart.intranetchat.R;
 import com.skysoft.smart.intranetchat.app.IntranetChatApplication;
-import com.skysoft.smart.intranetchat.bean.SendMessageBean;
+import com.skysoft.smart.intranetchat.bean.network.SendMessageBean;
 import com.skysoft.smart.intranetchat.model.net_model.SendMessage;
-import com.skysoft.smart.intranetchat.app.impl.OnReceiveMessage;
-import com.skysoft.smart.intranetchat.bean.GroupMembersBean;
-import com.skysoft.smart.intranetchat.bean.LoadResourceBean;
 import com.skysoft.smart.intranetchat.model.camera.manager.MyMediaPlayerManager;
 import com.skysoft.smart.intranetchat.model.camera.videocall.Sender;
 import com.skysoft.smart.intranetchat.tools.CreateNotifyBitmap;
@@ -63,14 +70,7 @@ import com.skysoft.smart.intranetchat.ui.activity.camera.VideoActivity;
 import com.skysoft.smart.intranetchat.model.camera.entity.EventMessage;
 import com.skysoft.smart.intranetchat.model.camera.manager.MyAudioManager;
 import com.skysoft.smart.intranetchat.model.camera.widget.AudioRecordMicView;
-import com.skysoft.smart.intranetchat.database.MyDataBase;
-import com.skysoft.smart.intranetchat.database.dao.ChatRecordDao;
-import com.skysoft.smart.intranetchat.database.table.ChatRecordEntity;
 import com.skysoft.smart.intranetchat.database.table.ContactEntity;
-import com.skysoft.smart.intranetchat.database.table.LatestChatHistoryEntity;
-import com.skysoft.smart.intranetchat.model.network.bean.FileBean;
-import com.skysoft.smart.intranetchat.model.network.bean.MessageBean;
-import com.skysoft.smart.intranetchat.server.IntranetChatServer;
 import com.skysoft.smart.intranetchat.tools.ContentUriUtil;
 import com.skysoft.smart.intranetchat.ui.activity.chatroom.EstablishGroup.EstablishGroupActivity;
 import com.skysoft.smart.intranetchat.ui.activity.login.OnSoftKeyboardStateChangedListener;
@@ -81,12 +81,8 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-
-import static com.skysoft.smart.intranetchat.MainActivity.CALL_FROM_OTHER;
 
 public class ChatRoomActivity extends BaseActivity implements View.OnClickListener,GestureDetector.OnGestureListener {
 
@@ -94,11 +90,10 @@ public class ChatRoomActivity extends BaseActivity implements View.OnClickListen
     private static long inputVoiceStopTime;
     private boolean sendVoice = true;
     private static String TAG = ChatRoomActivity.class.getSimpleName();
-    private String host;
-    private String myHost;
-    private String mReceiverName;
-    private String mReceiverAvatarPath;
-    private String mReceiverIdentifier;
+    private String mEntity;
+
+    private ContactEntity mContact;
+    private GroupEntity mGroup;
 
     private TextView mRoomName;
     private TextView mSendMessage;
@@ -114,7 +109,7 @@ public class ChatRoomActivity extends BaseActivity implements View.OnClickListen
     private ImageView mIconReplayImage;
     private ImageView mIconReplayCancel;
 
-    private ChatRoomMessageAdapter mAdapter;
+    private RecordAdapter mAdapter;
     private RecyclerView mRecyclerView;
 
     private LinearLayout mMoreFunctionBox;
@@ -133,6 +128,7 @@ public class ChatRoomActivity extends BaseActivity implements View.OnClickListen
     private MyAudioManager myAudioManager;
     private AudioRecordMicView mAudioView;
 
+    private int mReceiver;
     private int mNotifyId;
     private int mSendMessageType = 0;       //0 普通文字消息,1 @消息,2 回复消息
     private int level;
@@ -143,14 +139,10 @@ public class ChatRoomActivity extends BaseActivity implements View.OnClickListen
     private boolean isClickMoreFunction = false;
     private boolean isKeyboardOpened = false;
 
-//    private boolean isInputVoice = false;
-//    private boolean isClosing = true;
     private boolean isGroup = false;
-//    private boolean isInputMessage = false;
     private boolean isRefresh = false;
     private boolean isUp = false;
     private boolean isStartVoiceAnimation;
-//    private boolean isHiddenSoftKeyboard = false;
     private boolean isAudioRecording = false;
     public static boolean sIsAudioRecording = false;
 
@@ -203,29 +195,29 @@ public class ChatRoomActivity extends BaseActivity implements View.OnClickListen
     private OnClickReplayOrNotify mOnClickReplayOrNotify =
             new OnClickReplayOrNotify() {
         @Override
-        public void onClickReplay(ChatRecordEntity recordEntity, String name) {
-            mReplayMessageBox.setVisibility(View.VISIBLE);
+        public void onClickReplay(RecordEntity recordEntity, String name) {
+//            mReplayMessageBox.setVisibility(View.VISIBLE);
+//
+//            if (recordEntity.getIsReceive() == ChatRoomConfig.RECEIVE_MESSAGE){
+//                mIconReplayImage.setVisibility(View.GONE);
+//                mReplayReceiverMessage.setText(name);
+//                mReplayReceiverMessage.append(" :\n\t\t");
+//                mReplayReceiverMessage.append(recordEntity.getContent());
+//            }else if (recordEntity.getIsReceive() == ChatRoomConfig.RECEIVE_IMAGE){
+//                mReplayReceiverMessage.setText(name);
+//                mReplayReceiverMessage.append(" :");
+//                mIconReplayImage.setVisibility(View.VISIBLE);
+//                if (!TextUtils.isEmpty(recordEntity.getPath())){
+//                    Glide.with(ChatRoomActivity.this).load(recordEntity.getPath()).into(mIconReplayImage);
+//                }
+//            }
 
-            if (recordEntity.getIsReceive() == ChatRoomConfig.RECEIVE_MESSAGE){
-                mIconReplayImage.setVisibility(View.GONE);
-                mReplayReceiverMessage.setText(name);
-                mReplayReceiverMessage.append(" :\n\t\t");
-                mReplayReceiverMessage.append(recordEntity.getContent());
-            }else if (recordEntity.getIsReceive() == ChatRoomConfig.RECEIVE_IMAGE){
-                mReplayReceiverMessage.setText(name);
-                mReplayReceiverMessage.append(" :");
-                mIconReplayImage.setVisibility(View.VISIBLE);
-                if (!TextUtils.isEmpty(recordEntity.getPath())){
-                    Glide.with(ChatRoomActivity.this).load(recordEntity.getPath()).into(mIconReplayImage);
-                }
-            }
-
-            onClickNotify(recordEntity,name);
-            mSendMessageType = 2;
+//            onClickNotify(recordEntity,name);
+//            mSendMessageType = 2;
         }
 
         @Override
-        public void onClickNotify(ChatRecordEntity recordEntity, String name) {
+        public void onClickNotify(RecordEntity recordEntity, String name) {
             if (!mNotifyReceivers.containsValue(recordEntity.getSender())){     //未被@
                 mSendMessageType = 1;
                 String notify = " @" + name + " ";
@@ -243,7 +235,9 @@ public class ChatRoomActivity extends BaseActivity implements View.OnClickListen
                 //移动光标到SpannableStringBuilder后
                 mInputMessage.setSelection(start+notify.length());
                 //记录插入的ImageSpan
-                mNotifyReceivers.put(imageSpan,recordEntity.getSender());
+                mNotifyReceivers.put(imageSpan, ContactManager.
+                        getInstance().
+                        getContact(recordEntity.getSender()).getName());
             }
         }
     };
@@ -297,26 +291,6 @@ public class ChatRoomActivity extends BaseActivity implements View.OnClickListen
         }
     };
 
-    private OnReceiveMessage onReceiveMessage = new OnReceiveMessage() {
-        @Override
-        public void onReceiveMessage(MessageBean message, String host) {
-            if (message.getReceiver().equals(mReceiverIdentifier)){
-                ChatRoomActivity.this.host = host;
-            }
-        }
-
-        @Override
-        public void onReceiveFile(FileBean fileBean, String host) {
-            TLog.d(TAG, "onReceiveFile: ");
-            ChatRoomActivity.this.host = host;
-        }
-
-        @Override
-        public void onReceiveAndSaveFile(String sender, String receiver, String identifier, String path) {
-
-        }
-    };
-
     public OnScrollToPosition onScrollToPosition = new OnScrollToPosition() {
         @Override
         public void onLoadViewOver(int size) {
@@ -324,13 +298,10 @@ public class ChatRoomActivity extends BaseActivity implements View.OnClickListen
         }
     };
 
-    public static void go(Context context,String name,String avatar,String host,String identifier,boolean group){
+    public static void go(Context context,String entity,boolean group){
         Intent intent = new Intent(context,ChatRoomActivity.class);
         Bundle bundle = new Bundle();
-        bundle.putString(ChatRoomConfig.NAME,name);
-        bundle.putString(ChatRoomConfig.AVATAR,avatar);
-        bundle.putString(ChatRoomConfig.HOST,host);
-        bundle.putString(ChatRoomConfig.IDENTIFIER,identifier);
+        bundle.putString(ChatRoomConfig.NAME,entity);
         bundle.putBoolean(ChatRoomConfig.GROUP,group);
         intent.putExtras(bundle);
         context.startActivity(intent);
@@ -340,7 +311,7 @@ public class ChatRoomActivity extends BaseActivity implements View.OnClickListen
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat_room);
-        IntranetChatApplication.getsCallback().setOnReceiveMessage(onReceiveMessage);
+//        IntranetChatApplication.getsCallback().setOnReceiveMessage(onReceiveMessage);
         EventBus.getDefault().register(this);
         sGestureDetector = new GestureDetector(ChatRoomActivity.this,this);
         initView();
@@ -350,47 +321,32 @@ public class ChatRoomActivity extends BaseActivity implements View.OnClickListen
 
     private void initData(Intent intent){
         Bundle bundle = intent.getExtras();
-        host = bundle.getString(ChatRoomConfig.HOST);
-        mReceiverName = bundle.getString(ChatRoomConfig.NAME);
-        mReceiverAvatarPath = bundle.getString(ChatRoomConfig.AVATAR);
-        mReceiverIdentifier = bundle.getString(ChatRoomConfig.IDENTIFIER);
+//        host = bundle.getString(ChatRoomConfig.HOST);
+        mEntity = bundle.getString(ChatRoomConfig.NAME);
         isGroup = bundle.getBoolean(ChatRoomConfig.GROUP);
+        if (isGroup) {
+            mGroup = new Gson().fromJson(mEntity,GroupEntity.class);
+            mReceiver = mGroup.getId();
+            mNotifyId = mGroup.getNotifyId();
+        } else {
+            mContact = new Gson().fromJson(mEntity,ContactEntity.class);
+            mReceiver = mContact.getId();
+            mNotifyId = mContact.getNotifyId();
+        }
 
-        //获得历史聊天记录
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                ChatRecordDao chatRecordDao = MyDataBase.getInstance().getChatRecordDao();
-                int number = chatRecordDao.getNumber(mReceiverIdentifier);
-                int pageNum = 20;
-                List<ChatRecordEntity> all = chatRecordDao.getAll(mReceiverIdentifier,number-pageNum,pageNum);
-                if (all != null && all.size() != 0){
-                    EventBus.getDefault().post(all);
-                }
-            }
-        }).start();
 
-        //加载历史聊天记录
-        IntranetChatApplication.
-                setsChatRoomMessageAdapter(
-                        new ChatRoomMessageAdapter(
-                                this,
-                                IntranetChatApplication.getsMineAvatarPath(),
-                                mReceiverIdentifier,isGroup)
-                );
-        mAdapter = IntranetChatApplication.getsChatRoomMessageAdapter();
-        mAdapter.setHasStableIds(true);
+        mAdapter = RecordManager.init(this,mReceiver,isGroup);
         mAdapter.setHasStableIds(true);
         mAdapter.setOnScrollToPosition(onScrollToPosition);
         mAdapter.setOnClickReplayOrNotify(mOnClickReplayOrNotify);       //注册回复和@
         mRecyclerView.setAdapter(mAdapter);
 
-        GroupMembersBean bean = new GroupMembersBean();
-        bean.setmMemberName(mReceiverName);
-        bean.setmMemberAvatarPath(mReceiverAvatarPath);
-        mRoomName.setText(mReceiverName);
+//        GroupMembersBean bean = new GroupMembersBean();
+//        bean.setmMemberName(mEntity);
+//        bean.setmMemberAvatarPath(mReceiverAvatarPath);
+        mRoomName.setText(mEntity);
 
-        myHost = IntranetChatServer.getHostIP();
+//        myHost = IntranetChatServer.getHostIP();
 
         //单聊聊天室不允许建群
         if (!isGroup){
@@ -404,42 +360,9 @@ public class ChatRoomActivity extends BaseActivity implements View.OnClickListen
         //监听软键盘弹出
         getWindow().getDecorView().getViewTreeObserver().addOnGlobalLayoutListener(mLayoutChangeListener);
 
-        //刷新未读消息数
-        LatestChatHistoryEntity item = IntranetChatApplication.sLatestChatHistoryMap.get(mReceiverIdentifier);
-        if (null != item){
-            int number = IntranetChatApplication.getmTotalUnReadNumber() - item.getUnReadNumber();
-            item.setUnReadNumber(0);
-            if (number == 0){
-                //B: [PT-80][Intranet Chat] [APP][UI] TextBadgeItem 一直为红色,Allen Luo,2019/11/12
-                IntranetChatApplication.getmTextBadgeItem().hide();
-            }else {
-                IntranetChatApplication.getmTextBadgeItem().show().setText(String.valueOf(number));
-                //E: [PT-80][Intranet Chat] [APP][UI] TextBadgeItem 一直为红色,Allen Luo,2019/11/12
-            }
-            IntranetChatApplication.setmTotalUnReadNumber(number);
-            if (IntranetChatApplication.getsMessageListAdapter() != null){
-                IntranetChatApplication.getsMessageListAdapter().notifyDataSetChanged();
-            }
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    MyDataBase.getInstance().getLatestChatHistoryDao().update(item);
-                }
-            }).start();
-        }
-
         //删除存在的通知
-        ContactEntity next = null;
-        if (isGroup){
-            next = IntranetChatApplication.sGroupContactMap.get(mReceiverIdentifier);
-        }else {
-            next = IntranetChatApplication.sContactMap.get(mReceiverIdentifier);
-        }
-        if (null != next){
-            mNotifyId = next.getNotifyId();
-            if (IntranetChatApplication.getsNotificationManager() != null){
-                IntranetChatApplication.getsNotificationManager().cancel(mNotifyId);
-            }
+        if (IntranetChatApplication.getsNotificationManager() != null){
+            IntranetChatApplication.getsNotificationManager().cancel(mNotifyId);
         }
 
         myAudioManager = new MyAudioManager();
@@ -478,7 +401,7 @@ public class ChatRoomActivity extends BaseActivity implements View.OnClickListen
         RoomUtils.setMaxFlingVelocity(mRecyclerView, 6000);
 
         ViewGroup.LayoutParams layoutParams = mMoreFunctionBox.getLayoutParams();
-        layoutParams.height = IntranetChatApplication.getsEquipmentInfoEntity().getSoftInputHeight();
+        layoutParams.height = DeviceInfoBean.getInstance().getKeyBroadHeight();
         mMoreFunctionBox.setLayoutParams(layoutParams);
         mBlankFunctionBox.setLayoutParams(layoutParams);
 
@@ -531,29 +454,7 @@ public class ChatRoomActivity extends BaseActivity implements View.OnClickListen
                     }
                     if (mAdapter.getTopPosition() == 0 && isUp){
                         isRefresh = false;
-                        new Thread(new Runnable() {
-                            @Override
-                            public void run() {
-                                ChatRecordDao chatRecordDao = MyDataBase.getInstance().getChatRecordDao();
-                                int number = chatRecordDao.getNumber(mReceiverIdentifier);
-                                if (number == mAdapter.getItemCount()){
-                                    List<ChatRecordEntity> all = new ArrayList<>();
-                                    EventBus.getDefault().post(all);
-                                    return;
-                                }else {
-                                    int more = 15;
-                                    int start = number - mAdapter.getItemCount() - 15;
-                                    if (start < 0){
-                                        start = 0;
-                                        more = number - mAdapter.getItemCount();
-                                    }
-                                    List<ChatRecordEntity> all = chatRecordDao.getAll(mReceiverIdentifier, start, more);
-                                    if (all != null && all.size() != 0){
-                                        EventBus.getDefault().post(all);
-                                    }
-                                }
-                            }
-                        }).start();
+                        RecordManager.getInstance().loadMoreRecord(mReceiver,isGroup ? 1 : 0);
                     }
                 }
             }
@@ -575,56 +476,19 @@ public class ChatRoomActivity extends BaseActivity implements View.OnClickListen
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
-    public void loadChatHistory(List<ChatRecordEntity> chatHistory) {
-        if (chatHistory.size() == 0){
-            ToastUtil.toast(ChatRoomActivity.this, getString(R.string.ChatRoomActivity_loadChatHistory_toast_text));
-            return;
-        }
-        mAdapter.addAll(chatHistory);
-    }
-
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void handleReceiveAndSaveFile(LoadResourceBean loadResourceBean) {
-        TLog.d(TAG, "onReceiveAndSaveFile: run: receiver = " + loadResourceBean.getRecordEntity());
-        mAdapter.add(loadResourceBean.getRecordEntity(),true);
-    }
-
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onReceiveEventMessage(EventMessage eventMessage){
-        TLog.d(TAG, "onReceiveEventMessage: eventMessage.getType() = " + eventMessage.getType());
-        if (eventMessage.getType() == CALL_FROM_OTHER && isAudioRecording){
-            myAudioManager.stopAndNotSend();
-            stopAnimation();
-            isAudioRecording = false;
-            sIsAudioRecording = false;
-            return;
-        }
-        if (!(eventMessage.getType() == 1 || eventMessage.getType() == 2 || eventMessage.getType() == 3)){
-            return;
-        }
-        if (!sendVoice && eventMessage.getType() == 3){
-            return;
-        }
-        ChatRecordEntity recordEntity = SendMessage.sendCommonMessage(eventMessage, new SendMessageBean("", mReceiverIdentifier, host,
-                mReceiverAvatarPath, mReceiverName, isGroup),true);
-        if (null != recordEntity){
-            mAdapter.add(recordEntity);
-        }
-    }
-
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onReceiveMessageRecord(ChatRecordEntity recordEntity) {
-        TLog.d(TAG,"------> " + recordEntity.toString());
-        mAdapter.add(recordEntity);
+    public void receiveContactSignal(ChatSignal signal) {
         mAdapter.notifyDataSetChanged();
-        myHost = recordEntity.getHost();
+    }
+
+    public void receiveAvatarSignal(AvatarSignal signal) {
+        mAdapter.notifyDataSetChanged();
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         EventBus.getDefault().unregister(this);
-        IntranetChatApplication.setsChatRoomMessageAdapter(null);
+        RecordManager.destroy();
     }
 
     @Override
@@ -658,7 +522,11 @@ public class ChatRoomActivity extends BaseActivity implements View.OnClickListen
                         break;
                     }
                     IntranetChatApplication.setInCall(true);
-                    LaunchVoiceCallActivity.go(ChatRoomActivity.this, host, mReceiverName, mReceiverAvatarPath, mReceiverIdentifier);
+                    LaunchVoiceCallActivity.go(ChatRoomActivity.this,
+                            mContact.getHost(),
+                            mContact.getName(),
+                            mContact.getAvatar(),
+                            mContact.getIdentifier());
                 }
                 break;
             case R.id.chat_room_more_function_video_call_box:
@@ -670,7 +538,11 @@ public class ChatRoomActivity extends BaseActivity implements View.OnClickListen
                     IntranetChatApplication.setInCall(true);
                     IntranetChatApplication.getmDatasQueue().clear();
                     Sender.mInputDatasQueue.clear();
-                    LaunchVideoCallActivity.go(ChatRoomActivity.this, host, mReceiverName, mReceiverAvatarPath, mReceiverIdentifier);
+                    LaunchVideoCallActivity.go(ChatRoomActivity.this,
+                            mContact.getHost(),
+                            mContact.getName(),
+                            mContact.getAvatar(),
+                            mContact.getIdentifier());
                 }
                 break;
             case R.id.chat_room_more_function_camera_box:
@@ -696,7 +568,7 @@ public class ChatRoomActivity extends BaseActivity implements View.OnClickListen
             case R.id.chat_room_establish_group:
                 if (QuickClickListener.isFastClick(300)) {
                     TLog.d(TAG, "onClick: 查看群成员！！！");
-                    EstablishGroupActivity.go(ChatRoomActivity.this, mReceiverIdentifier, isGroup);
+                    EstablishGroupActivity.go(ChatRoomActivity.this, mGroup.getId());
                 }
                 break;
             case R.id.chat_room_input_message:
@@ -915,11 +787,11 @@ public class ChatRoomActivity extends BaseActivity implements View.OnClickListen
             case 0:     //普通消息
                 sendCommonMessage(message);
                 break;
-            case 1:     //@消息
-                sendAtMessage(message);
-                break;
-            case 2:     //回复消息
-                break;
+//            case 1:     //@消息
+//                sendAtMessage(message);
+//                break;
+//            case 2:     //回复消息
+//                break;
         }
         mInputMessage.setText("");
     }
@@ -932,23 +804,31 @@ public class ChatRoomActivity extends BaseActivity implements View.OnClickListen
         String[] atIdentifiers = new String[spans.length];
         for (int i = 0; i<spans.length; i++){
             atIdentifiers[i] = mNotifyReceivers.get(spans[i]);
-            String name = IntranetChatApplication.sContactMap.get(atIdentifiers[i]).getName();
+            String name = ContactManager.getInstance().getContact(atIdentifiers[i]).getName();
             int idx = message.indexOf('@' + name);
             atIdentifiers[i] = atIdentifiers[i] + '|' + idx + '|' + name.length();
         }
 
-        ChatRecordEntity recordEntity = SendMessage.broadcastAtMessage(new SendAtMessageBean(message, mReceiverIdentifier, host,
-                mReceiverAvatarPath, mReceiverName, isGroup, atIdentifiers));
-        mAdapter.add(recordEntity);
+//        RecordEntity recordEntity = SendMessage.broadcastAtMessage(
+//                new SendAtMessageBean(message, mReceiverIdentifier, host,
+//                mReceiverAvatarPath, mEntity, isGroup, atIdentifiers));
+//        mAdapter.add(recordEntity);
     }
 
     /**
      * 发送普通消息到指定用户
      * @param message 发送的消息*/
     private void sendCommonMessage(String message){
-        ChatRecordEntity recordEntity = SendMessage.sendCommonMessage(new SendMessageBean(message, mReceiverIdentifier, host,
-                mReceiverAvatarPath, mReceiverName, isGroup));
-        mAdapter.add(recordEntity);
+        //发送消息
+        if (isGroup) {
+            Message.getInstance().send(mGroup,message);
+        } else {
+            Message.getInstance().send(mContact,message);
+        }
+
+        //刷新聊天列表和消息列表
+        RecordManager.getInstance().recordText(message,-1);
+        LatestManager.getInstance().send(mReceiver,message,isGroup);
     }
 
     public void hidden(){
@@ -983,8 +863,8 @@ public class ChatRoomActivity extends BaseActivity implements View.OnClickListen
             }else {
                 eventMessage.setType(4);
             }
-            SendMessage.sendCommonMessage(eventMessage, new SendMessageBean("", mReceiverIdentifier, host,
-                    mReceiverAvatarPath, mReceiverName, isGroup),false);
+//            SendMessage.sendCommonMessage(eventMessage, new SendMessageBean("", mReceiverIdentifier, host,
+//                    mReceiverAvatarPath, mEntity, isGroup),false);
         }
         super.onActivityResult(requestCode, resultCode, data);
     }

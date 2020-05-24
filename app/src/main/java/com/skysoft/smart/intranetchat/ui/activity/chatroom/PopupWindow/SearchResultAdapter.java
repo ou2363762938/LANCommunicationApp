@@ -2,18 +2,21 @@ package com.skysoft.smart.intranetchat.ui.activity.chatroom.PopupWindow;
 
 import android.content.Context;
 import android.text.TextUtils;
+
+import com.skysoft.smart.intranetchat.model.avatar.AvatarManager;
+import com.skysoft.smart.intranetchat.model.contact.ContactManager;
+import com.skysoft.smart.intranetchat.model.group.GroupManager;
 import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.skysoft.smart.intranetchat.R;
 import com.skysoft.smart.intranetchat.app.IntranetChatApplication;
-import com.skysoft.smart.intranetchat.bean.TransmitBean;
+import com.skysoft.smart.intranetchat.bean.chat.TransmitBean;
 import com.skysoft.smart.intranetchat.database.table.ContactEntity;
 
 import java.lang.ref.SoftReference;
@@ -31,12 +34,10 @@ public class SearchResultAdapter extends BaseAdapter {
     private LayoutInflater mInflater;
     private List<TransmitBean> mSearchResults = new ArrayList<>();
     private OnSelectSearchResultListener mOnSelectListener;
-    private String mCurrentRoomIdentifier;
 
-    public SearchResultAdapter(Context context, OnSelectSearchResultListener mOnSelectListener,String mCurrentRoomIdentifier) {
+    public SearchResultAdapter(Context context, OnSelectSearchResultListener mOnSelectListener) {
         this.mSoftContext = new SoftReference<Context>(context);
         this.mOnSelectListener = mOnSelectListener;
-        this.mCurrentRoomIdentifier = mCurrentRoomIdentifier;
         mInflater = LayoutInflater.from(mSoftContext.get());
     }
 
@@ -48,48 +49,8 @@ public class SearchResultAdapter extends BaseAdapter {
             return;
         }
 
-        List<TransmitBean> list = new ArrayList<>();
-        Iterator<String> contactIterator = IntranetChatApplication.getsContactList().iterator();
-        Iterator<String> groupIterator = IntranetChatApplication.getsGroupContactList().iterator();
-
-        while (contactIterator.hasNext()){
-            ContactEntity contactEntity = IntranetChatApplication.sContactMap.get(contactIterator.next());
-            if (null == contactEntity){
-                throw new NullPointerException();
-            }
-
-            if (contactEntity.getIdentifier().equals(mCurrentRoomIdentifier)){      //搜索结果不包含自己
-                continue;
-            }
-
-            TransmitBean bean = matchingContactEntity(key, contactEntity);
-            if (null != bean){
-                list.add(bean);
-            }
-        }
-
-        while (groupIterator.hasNext()){
-            ContactEntity contactEntity = IntranetChatApplication.sGroupContactMap.get(groupIterator.next());
-            if (null == contactEntity){
-                throw new NullPointerException();
-            }
-
-            if (contactEntity.getIdentifier().equals(mCurrentRoomIdentifier)){      //搜索结果不包含自己
-                continue;
-            }
-
-            TransmitBean bean = matchingContactEntity(key, contactEntity);
-            if (null != bean){
-                bean.setGroup(true);
-                list.add(bean);
-            }
-        }
-
-        TLog.d(TAG, "onInputSearchKeyChange: size = " + list.size());
-        if (mSearchResults.size() != 0){
-            mSearchResults.clear();
-        }
-        mSearchResults.addAll(list);
+        mSearchResults.addAll(ContactManager.getInstance().findContact(key));
+        mSearchResults.addAll(GroupManager.getInstance().findGroup(key));
         notifyDataSetChanged();
     }
 
@@ -142,11 +103,8 @@ public class SearchResultAdapter extends BaseAdapter {
      * @return null：key和contactEntity不匹配*/
     private TransmitBean baseMatchingContactEntity(String key, ContactEntity contactEntity){
         if (!TextUtils.isEmpty(key) && contactEntity.getName().contains(key)){
-            return new TransmitBean(contactEntity.getAvatarPath()
-                    ,contactEntity.getName()
-                    ,contactEntity.getIdentifier()
-                    ,false
-                    ,contactEntity.getHost());
+            return new TransmitBean(contactEntity.getId()
+                    ,false);
         }
         return null;
     }
@@ -184,12 +142,8 @@ public class SearchResultAdapter extends BaseAdapter {
             holder = (SearchResultViewHolder) convertView.getTag();
         }
 
-        if (!TextUtils.isEmpty(bean.getmAvatarPath())){
-            Glide.with(mSoftContext.get()).load(bean.getmAvatarPath()).into(holder.mAvatar);
-        }else {
-            Glide.with(mSoftContext.get()).load(R.drawable.default_head).into(holder.mAvatar);
-        }
-        holder.mName.setText(bean.getmUseName());
+        AvatarManager.getInstance().loadContactAvatar(mSoftContext.get(),holder.mAvatar,bean.getAvatar());
+        holder.mName.setText(bean.getName());
 
         holder.mBox.setOnClickListener(new View.OnClickListener() {
             @Override

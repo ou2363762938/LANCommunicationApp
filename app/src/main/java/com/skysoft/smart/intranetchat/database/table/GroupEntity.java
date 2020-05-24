@@ -8,49 +8,130 @@ package com.skysoft.smart.intranetchat.database.table;
 import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
+import androidx.room.Ignore;
 import androidx.room.Index;
 import androidx.room.PrimaryKey;
 
-@Entity(tableName = "group_entity",primaryKeys = "group_identifier",indices = @Index(value = "group_identifier",unique = true))
+@Entity(tableName = "_group",
+        indices = @Index(value = "identifier",unique = true))
 public class GroupEntity {
-    @ColumnInfo(name = "group_identifier")
+    @PrimaryKey(autoGenerate = true)
+    private int id;
+    @ColumnInfo
+    private int avatar = -1;
+    @ColumnInfo
+    private String name;
+    @ColumnInfo(name = "identifier")
     @NonNull
-    private String groupIdentifier;
-    @ColumnInfo(name = "group_avatar_holder")
-    private String groupHolder;
-    @ColumnInfo(name = "member_number")
-    private int memberNumber;
+    private String identifier;
+    @ColumnInfo
+    private String holder;
 
-    public String getGroupIdentifier() {
-        return groupIdentifier;
+    @Ignore
+    private int status = 3;
+    @Ignore
+    private String host = "255.255.255.255";
+    @Ignore
+    private boolean check = false;
+    @Ignore
+    private int notifyId;
+    @Ignore
+    private boolean showCheck = true;
+
+    public int getId() {
+        return id;
     }
 
-    public void setGroupIdentifier(String groupIdentifier) {
-        this.groupIdentifier = groupIdentifier;
+    public void setId(int id) {
+        this.id = id;
     }
 
-    public String getGroupHolder() {
-        return groupHolder;
+    public int getAvatar() {
+        return avatar;
     }
 
-    public void setGroupHolder(String groupHolder) {
-        this.groupHolder = groupHolder;
+    public void setAvatar(int avatar) {
+        this.avatar = avatar;
     }
 
-    public int getMemberNumber() {
-        return memberNumber;
+    public String getName() {
+        return name;
     }
 
-    public void setMemberNumber(int memberNumber) {
-        this.memberNumber = memberNumber;
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    @NonNull
+    public String getIdentifier() {
+        return identifier;
+    }
+
+    public void setIdentifier(@NonNull String identifier) {
+        this.identifier = identifier;
+    }
+
+    public String getHolder() {
+        return holder;
+    }
+
+    public void setHolder(String holder) {
+        this.holder = holder;
+    }
+
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
+    }
+
+    public String getHost() {
+        return host;
+    }
+
+    public void setHost(String host) {
+        this.host = host;
+    }
+
+    public boolean isCheck() {
+        return check;
+    }
+
+    public void setCheck(boolean check) {
+        this.check = check;
+    }
+
+    public int getNotifyId() {
+        return notifyId;
+    }
+
+    public void setNotifyId(int notifyId) {
+        this.notifyId = notifyId;
+    }
+
+    public boolean isShowCheck() {
+        return showCheck;
+    }
+
+    public void setShowCheck(boolean showCheck) {
+        this.showCheck = showCheck;
     }
 
     @Override
     public String toString() {
         return "GroupEntity{" +
-                ", groupIdentifier='" + groupIdentifier + '\'' +
-                ", groupHolder='" + groupHolder + '\'' +
-                ", memberNumber=" + memberNumber +
+                "id=" + id +
+                ", avatar=" + avatar +
+                ", name='" + name + '\'' +
+                ", identifier='" + identifier + '\'' +
+                ", holder='" + holder + '\'' +
+                ", status=" + status +
+                ", host='" + host + '\'' +
+                ", check=" + check +
+                ", notifyId=" + notifyId +
+                ", showCheck=" + showCheck +
                 '}';
     }
 }

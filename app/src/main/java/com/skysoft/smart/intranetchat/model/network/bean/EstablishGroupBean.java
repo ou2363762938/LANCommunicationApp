@@ -12,7 +12,7 @@ public class EstablishGroupBean {
     private String mHolderIdentifier;
     private String mGroupAvatarIdentifier;
     private String mGroupIdentifier;
-    private List<UserInfoBean> mUsers;
+    private List<String> mUsers;
     private boolean remark;
 
     public boolean isRemark() {
@@ -55,11 +55,11 @@ public class EstablishGroupBean {
         this.mGroupIdentifier = mGroupIdentifier;
     }
 
-    public List<UserInfoBean> getmUsers() {
+    public List<String> getmUsers() {
         return mUsers;
     }
 
-    public void setmUsers(List<UserInfoBean> mUsers) {
+    public void setmUsers(List<String> mUsers) {
         this.mUsers = mUsers;
     }
 

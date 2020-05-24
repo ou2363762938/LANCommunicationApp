@@ -13,14 +13,14 @@ import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.RemoteException;
-import android.provider.Settings;
 import android.text.TextUtils;
-import android.util.Log;
 
-import com.skysoft.smart.intranetchat.tools.Identifier;
+import com.skysoft.smart.intranetchat.bean.signal.AvatarSignal;
+import com.skysoft.smart.intranetchat.model.avatar.AvatarManager;
+import com.skysoft.smart.intranetchat.model.contact.ContactManager;
+import com.skysoft.smart.intranetchat.model.mine.MineInfoManager;
 import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -32,7 +32,7 @@ import com.ashokvarma.bottomnavigation.BottomNavigationBar;
 import com.ashokvarma.bottomnavigation.BottomNavigationItem;
 import com.ashokvarma.bottomnavigation.TextBadgeItem;
 import com.skysoft.smart.intranetchat.app.IntranetChatApplication;
-import com.skysoft.smart.intranetchat.model.net_model.Login;
+import com.skysoft.smart.intranetchat.model.login.Login;
 import com.skysoft.smart.intranetchat.model.net_model.VoiceCall;
 import com.skysoft.smart.intranetchat.app.impl.HandleInfo;
 import com.skysoft.smart.intranetchat.model.camera.entity.EventMessage;
@@ -44,14 +44,11 @@ import com.skysoft.smart.intranetchat.tools.toastutil.ToastUtil;
 import com.skysoft.smart.intranetchat.ui.activity.videocall.AnswerVideoCallActivity;
 import com.skysoft.smart.intranetchat.ui.activity.voicecall.AnswerVoiceCallActivity;
 import com.skysoft.smart.intranetchat.ui.fragment.main.contact.ContactFragment;
-import com.skysoft.smart.intranetchat.ui.fragment.main.message.MessageFragment;
+import com.skysoft.smart.intranetchat.ui.fragment.main.message.LatestFragment;
 import com.skysoft.smart.intranetchat.ui.fragment.main.mine.MineFragment;
 import com.skysoft.smart.intranetchat.ui.fragment.main.tool.ToolsFragment;
 
 import org.greenrobot.eventbus.EventBus;
-
-import java.lang.reflect.Method;
-import java.security.Security;
 
 
 public class MainActivity extends AppCompatActivity{
@@ -61,7 +58,7 @@ public class MainActivity extends AppCompatActivity{
     private BottomNavigationBar mBottomNavigationBar;
     private TextBadgeItem textBadgeItem;
     private static FragmentManager sFragmentManager;
-    private MessageFragment sMessageFragment;
+    private LatestFragment sLatestFragment;
     private ContactFragment sContactFragment;
     private ToolsFragment sToolsFragment;
     private MineFragment sMineFragment;
@@ -84,13 +81,6 @@ public class MainActivity extends AppCompatActivity{
         //B: 监听网络状况 ,Oliver Ou,2019/11/15
         initReceiver();
         //E: 监听网络状况 ,Oliver Ou,2019/11/15
-        String serialNumber = null;
-//        serialNumber = Security.getProperty(Settings.Secure.ANDROID_ID);
-        serialNumber = new Identifier().getSerialNumber(this);
-        Log.d(TAG, "------->Serial Number : " + serialNumber);
-        //826c898ec440d6c6;826c898ec440d6c6
-        //64ee242befc61c2e
-        Log.d(TAG, IntranetChatApplication.sMineUserInfo.toString());
     }
 
     private long time;
@@ -116,7 +106,7 @@ public class MainActivity extends AppCompatActivity{
             }
             int pid = android.os.Process.myPid();
             android.os.Process.killProcess(pid);
-            Login.broadcastUserOutLine(IntranetChatApplication.getsMineUserInfo().getIdentifier());
+            Login.broadcastUserOutLine(MineInfoManager.getInstance().getIdentifier());
         }else{
             time = System.currentTimeMillis();
             ToastUtil.timingToast(MainActivity.this,getString(R.string.quitApp_toast_text),1000);
@@ -161,11 +151,11 @@ public class MainActivity extends AppCompatActivity{
 
                 switch (position) {
                     case 0:
-                        if (sMessageFragment == null) {
-                            sMessageFragment = new MessageFragment();
-                            sFragmentTransaction.add(R.id.frameContent, sMessageFragment);
+                        if (sLatestFragment == null) {
+                            sLatestFragment = new LatestFragment();
+                            sFragmentTransaction.add(R.id.frameContent, sLatestFragment);
                         } else {
-                            sFragmentTransaction.show(sMessageFragment);
+                            sFragmentTransaction.show(sLatestFragment);
                         }
                         break;
                     case 1:
@@ -213,14 +203,14 @@ public class MainActivity extends AppCompatActivity{
     public void setEnterFragment(){
         sFragmentManager = getSupportFragmentManager();
         FragmentTransaction sFragmentTransaction = getSupportFragmentManager().beginTransaction();
-        sMessageFragment = new MessageFragment();
-        sFragmentTransaction.add(R.id.frameContent,sMessageFragment);
+        sLatestFragment = new LatestFragment();
+        sFragmentTransaction.add(R.id.frameContent, sLatestFragment);
         sFragmentTransaction.commit();
     }
 
     private void hideFragment(FragmentTransaction transaction){
-        if (sMessageFragment != null){
-            transaction.hide(sMessageFragment);
+        if (sLatestFragment != null){
+            transaction.hide(sLatestFragment);
         }
         if (sContactFragment != null){
             transaction.hide(sContactFragment);
@@ -250,11 +240,14 @@ public class MainActivity extends AppCompatActivity{
             }
             EventBus.getDefault().post(new EventMessage(null,CALL_FROM_OTHER));
             IntranetChatApplication.setInCall(true);
-            ContactEntity next = IntranetChatApplication.sContactMap.get(userInfoBean.getIdentifier());
+            ContactEntity next = ContactManager.getInstance().getContact(userInfoBean.getIdentifier());
             if(null != next){
                 String name = next.getName();
-                String avatarPath = next.getAvatarPath();
-                AnswerVoiceCallActivity.go(MainActivity.this,host,name,avatarPath,userInfoBean.getIdentifier());
+                AnswerVoiceCallActivity.go(MainActivity.this,
+                        host,
+                        name,
+                        next.getAvatar(),
+                        userInfoBean.getIdentifier());
                 return;
             }
         }
@@ -268,11 +261,15 @@ public class MainActivity extends AppCompatActivity{
             }
             EventBus.getDefault().post(new EventMessage(null,CALL_FROM_OTHER));
             IntranetChatApplication.setInCall(true);
-            ContactEntity next = IntranetChatApplication.sContactMap.get(userInfoBean.getIdentifier());
+            ContactEntity next = ContactManager.getInstance().getContact(userInfoBean.getIdentifier());
             if(null != next){
                 String name = next.getName();
-                String avatarPath = next.getAvatarPath();
-                AnswerVideoCallActivity.go(MainActivity.this,host,name,avatarPath,userInfoBean.getIdentifier());
+                String avatarPath = AvatarManager.getInstance().getAvatarPath(next.getAvatar());
+                AnswerVideoCallActivity.go(MainActivity.this,
+                        host,
+                        name,
+                        avatarPath,
+                        userInfoBean.getIdentifier());
                 return;
             }
         }
@@ -320,7 +317,7 @@ public class MainActivity extends AppCompatActivity{
                                     IntranetChatApplication.setHostIp(host);
                                     Login.hostChanged(host);
                                 }
-                                Login.login(IntranetChatApplication.getsMineUserInfo());
+                                Login.login(MineInfoManager.getInstance().getUserInfo());
                             }
                             ToastUtil.toast(MainActivity.this, getString(R.string.MainActivity_BroadcastReceiver_wifi_toast_text));
                             break;

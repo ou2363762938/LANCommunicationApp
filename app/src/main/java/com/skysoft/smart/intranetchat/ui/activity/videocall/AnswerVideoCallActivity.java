@@ -10,6 +10,12 @@ import android.content.Intent;
 import android.graphics.SurfaceTexture;
 import android.os.Bundle;
 import android.text.TextUtils;
+
+import com.skysoft.smart.intranetchat.app.BaseCallActivity;
+import com.skysoft.smart.intranetchat.bean.signal.AvatarSignal;
+import com.skysoft.smart.intranetchat.model.avatar.AvatarManager;
+import com.skysoft.smart.intranetchat.model.chat.record.RecordManager;
+import com.skysoft.smart.intranetchat.model.network.Config;
 import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 import android.view.TextureView;
 import android.view.View;
@@ -24,7 +30,6 @@ import com.skysoft.smart.intranetchat.app.IntranetChatApplication;
 import com.skysoft.smart.intranetchat.model.net_model.VoiceCall;
 import com.skysoft.smart.intranetchat.app.impl.OnReceiveCallHungUp;
 import com.skysoft.smart.intranetchat.app.impl.OnReceiveRequestConsent;
-import com.skysoft.smart.intranetchat.bean.RecordCallBean;
 import com.skysoft.smart.intranetchat.model.camera.manager.MyShowCaptureManager;
 import com.skysoft.smart.intranetchat.model.camera.videocall.Sender;
 import com.skysoft.smart.intranetchat.model.network.bean.UserInfoBean;
@@ -32,11 +37,13 @@ import com.skysoft.smart.intranetchat.tools.customstatusbar.CustomStatusBarBackg
 import com.skysoft.smart.intranetchat.ui.activity.chatroom.ChatRoom.ChatRoomConfig;
 
 import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class AnswerVideoCallActivity extends AppCompatActivity {
+public class AnswerVideoCallActivity extends BaseCallActivity {
 
     private String TAG = AnswerVideoCallActivity.class.getSimpleName();
     private ImageView refuseCall;
@@ -45,13 +52,16 @@ public class AnswerVideoCallActivity extends AppCompatActivity {
     private TextView mName;
     private TextureView mTexture;
     private MyShowCaptureManager mShowCaptureManager;
-    private String host;
+
     private Timer consentOutTimer;
     private long intervalTime = 550;
     private long lastRequestConsentTime;
     private Timer affirmRequestConsentTimer;
+
+    private String host;
     private String mIdentifier;
     private String mImagePath;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -61,6 +71,8 @@ public class AnswerVideoCallActivity extends AppCompatActivity {
         IntranetChatApplication.getsCallback().setHungUpInAnswer(hungUp);
         IntranetChatApplication.getsCallback().setOnReceiveRequestConsent(onReceiveRequestConsent);
 
+        mConfig = ChatRoomConfig.RECEIVE_VIDEO_CALL;
+        EventBus.getDefault().register(this);
         Intent intent = getIntent();
         Bundle bundle = intent.getExtras();
         mIdentifier = bundle.getString("identifier");
@@ -88,7 +100,7 @@ public class AnswerVideoCallActivity extends AppCompatActivity {
             public void onClick(View v) {
                 VoiceCall.refuseVoiceCall(host);
                 IntranetChatApplication.setInCall(false);
-                EventBus.getDefault().post(new RecordCallBean(mIdentifier,ChatRoomConfig.CALL_REFUSE_ANSWER_MINE,host,false));
+                endCall(getString(R.string.call_refuse_answer_mine));
                 finish();
             }
         });
@@ -106,7 +118,7 @@ public class AnswerVideoCallActivity extends AppCompatActivity {
         lastRequestConsentTime = System.currentTimeMillis();
         consentOutTime();
         Sender.mInputDatasQueue.clear();
-        TLog.d(TAG, "onClick: send queen "+ Sender.mInputDatasQueue.size()+" receiver : "+IntranetChatApplication.getmDatasQueue().size());
+        TLog.d(TAG, "onClick: notify queen "+ Sender.mInputDatasQueue.size()+" receiver : "+IntranetChatApplication.getmDatasQueue().size());
 
     }
 
@@ -118,7 +130,7 @@ public class AnswerVideoCallActivity extends AppCompatActivity {
                 TLog.d(TAG, "run: responseConsentOutTime");
                 VoiceCall.responseConsentOutTime(host);
                 IntranetChatApplication.setInCall(false);
-                EventBus.getDefault().post(new RecordCallBean(mIdentifier,ChatRoomConfig.CALL_OUT_TIME_ANSWER,host,false));
+                endCall(getString(R.string.call_refuse_answer));
                 finish();
             }
         };
@@ -131,7 +143,7 @@ public class AnswerVideoCallActivity extends AppCompatActivity {
                 if (System.currentTimeMillis() - lastRequestConsentTime > intervalTime){
                     VoiceCall.hungUpVoiceCall(host);
                     IntranetChatApplication.setInCall(false);
-                    EventBus.getDefault().post(new RecordCallBean(mIdentifier,ChatRoomConfig.CALL_DIE_ANSWER,host,false));
+                    endCall(getString(R.string.call_die));
                     finish();
                 }
             }
@@ -146,7 +158,7 @@ public class AnswerVideoCallActivity extends AppCompatActivity {
                 return;
             }
             IntranetChatApplication.setInCall(false);
-            EventBus.getDefault().post(new RecordCallBean(mIdentifier,ChatRoomConfig.CALL_REFUSE_ANSWER,host,false));
+            endCall(getString(R.string.call_refuse_answer));
             finish();
         }
     };
@@ -164,13 +176,14 @@ public class AnswerVideoCallActivity extends AppCompatActivity {
         super.onBackPressed();
         VoiceCall.hungUpVoiceCall(host);
         IntranetChatApplication.setInCall(false);
-        EventBus.getDefault().post(new RecordCallBean(mIdentifier,ChatRoomConfig.CALL_REFUSE_ANSWER_MINE,host,false));
+        endCall(getString(R.string.call_refuse_answer_mine));
         finish();
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        EventBus.getDefault().unregister(this);
 //        mShowCaptureManager.closeCamera();
 //        mShowCaptureManager.stopBackgroundThread();
         if (consentOutTimer != null){
@@ -223,4 +236,15 @@ public class AnswerVideoCallActivity extends AppCompatActivity {
 
     };
 
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void receiveAvatarSignal(AvatarSignal signal) {
+        if (mIdentifier.equals(signal.receiver)) {
+            AvatarManager.
+                    getInstance().
+                    loadContactAvatar(
+                            AnswerVideoCallActivity.this,
+                            mHeadImg,
+                            signal.receiver);
+        }
+    }
 }

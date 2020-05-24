@@ -12,37 +12,46 @@ import androidx.room.Ignore;
 import androidx.room.Index;
 import androidx.room.PrimaryKey;
 
-@Entity(tableName = "contact_info",primaryKeys = "user_identifier",indices = {@Index(value = "user_identifier",unique = true)})
+@Entity(tableName = "contact",
+        indices = {@Index(value = "identifier",unique = true)})
 public class ContactEntity {
-    //B:[Intranet Chat] [APP][UI] Chat Room Oliver Ou 2019/10/31
-    @ColumnInfo(name = "user_name")
+    @PrimaryKey(autoGenerate = true)
+    private int id;
+    @ColumnInfo
+    private int avatar = -1;
+    @ColumnInfo
     private String name;
-    @ColumnInfo(name = "user_identifier")
+    @ColumnInfo(name = "identifier")
     @NonNull
     private String identifier;
-    @ColumnInfo(name = "user_head_path")
-    private String avatarPath;
-    @ColumnInfo(name = "user_head_identifier")
-    private String avatarIdentifier;
-    @ColumnInfo
-    private int group;
+
     @Ignore
     private int status = 3;
+    @Ignore
+    private int notifyId;
+    @Ignore
+    private long heartbeat = -1;
     @Ignore
     private String host;
     @Ignore
     private boolean check = false;
     @Ignore
-    private int notifyId;
-    @Ignore
     private boolean showCheck = true;
 
-    public boolean isShowCheck() {
-        return showCheck;
+    public int getId() {
+        return id;
     }
 
-    public void setShowCheck(boolean showCheck) {
-        this.showCheck = showCheck;
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public int getAvatar() {
+        return avatar;
+    }
+
+    public void setAvatar(int avatar) {
+        this.avatar = avatar;
     }
 
     public String getName() {
@@ -53,27 +62,12 @@ public class ContactEntity {
         this.name = name;
     }
 
-    public String getAvatarPath() {
-        return avatarPath;
-    }
-
-    public void setAvatarPath(String avatarPath) {
-        this.avatarPath = avatarPath;
-    }
-
-    public String getAvatarIdentifier() {
-        return avatarIdentifier;
-    }
-
-    public void setAvatarIdentifier(String avatarIdentifier) {
-        this.avatarIdentifier = avatarIdentifier;
-    }
-
+    @NonNull
     public String getIdentifier() {
         return identifier;
     }
 
-    public void setIdentifier(String identifier) {
+    public void setIdentifier(@NonNull String identifier) {
         this.identifier = identifier;
     }
 
@@ -85,6 +79,14 @@ public class ContactEntity {
         this.status = status;
     }
 
+    public long getHeartbeat() {
+        return heartbeat;
+    }
+
+    public void setHeartbeat(long heartbeat) {
+        this.heartbeat = heartbeat;
+    }
+
     public String getHost() {
         return host;
     }
@@ -93,23 +95,12 @@ public class ContactEntity {
         this.host = host;
     }
 
-    //EB:[Intranet Chat] [APP][UI] Group chat, Oliver Ou 2019/11/7
     public boolean isCheck() {
         return check;
     }
 
     public void setCheck(boolean check) {
         this.check = check;
-    }
-    //E:[Intranet Chat] [APP][UI] Group chat, Oliver Ou 2019/11/7
-//E:[Intranet Chat] [APP][UI] Chat Room Oliver Ou 2019/10/31
-
-    public int getGroup() {
-        return group;
-    }
-
-    public void setGroup(int group) {
-        this.group = group;
     }
 
     public int getNotifyId() {
@@ -120,18 +111,26 @@ public class ContactEntity {
         this.notifyId = notifyId;
     }
 
+    public boolean isShowCheck() {
+        return showCheck;
+    }
+
+    public void setShowCheck(boolean showCheck) {
+        this.showCheck = showCheck;
+    }
+
     @Override
     public String toString() {
         return "ContactEntity{" +
+                "id=" + id +
+                ", avatar=" + avatar +
                 ", name='" + name + '\'' +
                 ", identifier='" + identifier + '\'' +
-                ", avatarPath='" + avatarPath + '\'' +
-                ", avatarIdentifier='" + avatarIdentifier + '\'' +
-                ", group=" + group +
                 ", status=" + status +
                 ", host='" + host + '\'' +
                 ", check=" + check +
                 ", notifyId=" + notifyId +
+                ", showCheck=" + showCheck +
                 '}';
     }
 }

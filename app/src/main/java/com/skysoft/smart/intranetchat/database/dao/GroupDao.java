@@ -26,9 +26,12 @@ public interface GroupDao {
     @Delete
     void delete(GroupEntity... groupEntities);
 
-    @Query("select * from group_entity")
+    @Query("select * from _group")
     List<GroupEntity> getAllGroup();
 
-    @Query("select * from group_entity where group_identifier =:identifier")
+    @Query("select * from _group where identifier =:identifier")
     GroupEntity getGroupEntity(String identifier);
+
+    @Query("select * from _group order by id desc limit 1")
+    int getNewInsertId();
 }

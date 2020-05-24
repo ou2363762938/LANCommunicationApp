@@ -11,8 +11,24 @@ import android.text.TextUtils;
 import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 
 import java.security.MessageDigest;
+import java.util.List;
 
 public class Identifier {
+    private static Identifier sInstance;
+    private Identifier() {
+
+    }
+
+    public static Identifier getInstance() {
+        if (sInstance == null) {
+            synchronized (Identifier.class) {
+                if (sInstance == null) {
+                    sInstance = new Identifier();
+                }
+            }
+        }
+        return sInstance;
+    }
 
     public String getSerialNumber(Context context) {
         String serialNumber = null;
@@ -62,6 +78,24 @@ public class Identifier {
         for (int i = 0; i < newIdentifier.length; i++){
             for(int j = 0; j < identifiers.length; j++){
                 newIdentifier[i] += identifiers[j].charAt(i);
+            }
+        }
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < newIdentifier.length; i++){
+            sb.append(newIdentifier[i]);
+        }
+        String temp = sb.toString();
+        return getIdentifier(temp);
+    }
+
+    public String getGroupIdentifier(List<String> identifiers) {
+        if (identifiers == null){
+            return null;
+        }
+        int[] newIdentifier = new int[identifiers.get(0).length()];
+        for (int i = 0; i < newIdentifier.length; i++){
+            for(int j = 0; j < identifiers.size(); j++){
+                newIdentifier[i] += identifiers.get(j).charAt(i);
             }
         }
         StringBuilder sb = new StringBuilder();

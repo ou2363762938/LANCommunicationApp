@@ -8,7 +8,12 @@ package com.skysoft.smart.intranetchat.ui.activity.voicecall;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.text.TextUtils;
+
+import com.skysoft.smart.intranetchat.app.BaseCallActivity;
+import com.skysoft.smart.intranetchat.model.avatar.AvatarManager;
+import com.skysoft.smart.intranetchat.model.chat.record.RecordManager;
+import com.skysoft.smart.intranetchat.model.mine.MineInfoManager;
+import com.skysoft.smart.intranetchat.model.network.Config;
 import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 import android.view.View;
 import android.widget.ImageView;
@@ -16,14 +21,12 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.bumptech.glide.Glide;
 import com.skysoft.smart.intranetchat.R;
 import com.skysoft.smart.intranetchat.app.IntranetChatApplication;
 import com.skysoft.smart.intranetchat.model.net_model.VoiceCall;
 import com.skysoft.smart.intranetchat.app.impl.HandleVoiceCallResponse;
 import com.skysoft.smart.intranetchat.app.impl.OnReceiveCallHungUp;
-import com.skysoft.smart.intranetchat.bean.InCallBean;
-import com.skysoft.smart.intranetchat.bean.RecordCallBean;
+import com.skysoft.smart.intranetchat.bean.network.InCallBean;
 import com.skysoft.smart.intranetchat.tools.customstatusbar.CustomStatusBarBackground;
 import com.skysoft.smart.intranetchat.ui.activity.chatroom.ChatRoom.ChatRoomConfig;
 
@@ -34,7 +37,7 @@ import org.greenrobot.eventbus.ThreadMode;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class LaunchVoiceCallActivity extends AppCompatActivity {
+public class LaunchVoiceCallActivity extends BaseCallActivity {
 
     private String TAG = LaunchVoiceCallActivity.class.getSimpleName();
     private ImageView hungVoiceCall;
@@ -42,7 +45,7 @@ public class LaunchVoiceCallActivity extends AppCompatActivity {
     private TextView mName;
     private String host;
     private String name;
-    private String imgPath;
+    private int mAvatar;
     private long lastWaitingConsentCall;
     private long intervalTime = 550;
     private Timer affirmWaitingTimer;
@@ -59,22 +62,23 @@ public class LaunchVoiceCallActivity extends AppCompatActivity {
         IntranetChatApplication.getsCallback().setHungUpInAnswer(onReceiveCallHungUp);
         hungVoiceCall = findViewById(R.id.activity_start_voice_call);
 
+        mConfig = ChatRoomConfig.SEND_VOICE_CALL;
         Intent intent = getIntent();
         Bundle bundle = intent.getExtras();
         host = bundle.getString("host");
         name = bundle.getString("name");
-        imgPath = bundle.getString("imgPath");
+        mAvatar = bundle.getInt("avatar");
         mIdentifier = bundle.getString("identifier");
         EventBus.getDefault().register(this);
         init();
-        VoiceCall.startVoiceCall(IntranetChatApplication.getsMineUserInfo(), host);
+        VoiceCall.startVoiceCall(MineInfoManager.getInstance().getUserInfo(), host);
 
         hungVoiceCall.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 VoiceCall.hungUpVoiceCall(host);
                 IntranetChatApplication.setInCall(false);
-                EventBus.getDefault().post(new RecordCallBean(mIdentifier,ChatRoomConfig.CALL_REFUSE_LAUNCH_MINE,host,true));
+                endCall(getString(R.string.call_refuse_launch_mine));
                 LaunchVoiceCallActivity.this.finish();
             }
         });
@@ -91,7 +95,7 @@ public class LaunchVoiceCallActivity extends AppCompatActivity {
                 if (System.currentTimeMillis() - lastWaitingConsentCall > intervalTime){
                     VoiceCall.hungUpVoiceCall(host);
                     IntranetChatApplication.setInCall(false);
-                    EventBus.getDefault().post(new RecordCallBean(mIdentifier,ChatRoomConfig.CALL_DIE_LAUNCH,host,true));
+                    endCall(getString(R.string.call_die));
                     LaunchVoiceCallActivity.this.finish();
                 }
             }
@@ -112,11 +116,7 @@ public class LaunchVoiceCallActivity extends AppCompatActivity {
         mImgHead = findViewById(R.id.activity_start_voice_img);
         mName = findViewById(R.id.activity_start_voice_name);
         mName.setText(name);
-        if (!TextUtils.isEmpty(imgPath)){
-            Glide.with(this).load(imgPath).into(mImgHead);
-        }else {
-            Glide.with(this).load(R.drawable.default_head).into(mImgHead);
-        }
+        AvatarManager.getInstance().loadContactAvatar(this,mImgHead,mAvatar);
     }
 
     public static void go(Activity activity, String host) {
@@ -127,11 +127,11 @@ public class LaunchVoiceCallActivity extends AppCompatActivity {
         activity.startActivity(intent);
     }
 
-    public static void go(Activity activity,String host, String name, String imgPath, String identifier) {
+    public static void go(Activity activity,String host, String name, int avatar, String identifier) {
         Intent intent = new Intent(activity, LaunchVoiceCallActivity.class);
         Bundle bundle = new Bundle();
         bundle.putString("name", name);
-        bundle.putString("imgPath", imgPath);
+        bundle.putInt("avatar", avatar);
         bundle.putString("host", host);
         bundle.putString("identifier",identifier);
         intent.putExtras(bundle);
@@ -142,7 +142,7 @@ public class LaunchVoiceCallActivity extends AppCompatActivity {
         @Override
         public void onReceiveConsentVoiceCall(String host) {
             TLog.d(TAG, "onReceiveConsentVoiceCall: " + host);
-            VoiceCallActivity.go(LaunchVoiceCallActivity.this, host,name,imgPath,mIdentifier,false);
+            VoiceCallActivity.go(LaunchVoiceCallActivity.this, host,name,mAvatar,mIdentifier,false);
             finish();
         }
 
@@ -153,7 +153,7 @@ public class LaunchVoiceCallActivity extends AppCompatActivity {
                 return;
             }
             IntranetChatApplication.setInCall(false);
-            EventBus.getDefault().post(new RecordCallBean(mIdentifier,ChatRoomConfig.CALL_REFUSE_LAUNCH,host,true));
+            endCall(getString(R.string.call_refuse_launch));
             LaunchVoiceCallActivity.this.finish();
         }
 
@@ -167,7 +167,7 @@ public class LaunchVoiceCallActivity extends AppCompatActivity {
         public void onReceiveConsentOutTime() {
             TLog.d(TAG, "onReceiveConsentOutTime: ");
             IntranetChatApplication.setInCall(false);
-            EventBus.getDefault().post(new RecordCallBean(mIdentifier,ChatRoomConfig.CALL_OUT_TIME_ANSWER,host,true));
+            endCall(getString(R.string.call_refuse_answer));
             LaunchVoiceCallActivity.this.finish();
         }
 
@@ -178,7 +178,9 @@ public class LaunchVoiceCallActivity extends AppCompatActivity {
                 return;
             }
 //            Toast.makeText(LaunchVoiceCallActivity.this,"对方正在通话中",Toast.LENGTH_SHORT).show();
-            EventBus.getDefault().post(new RecordCallBean(mIdentifier,ChatRoomConfig.CALL_IN_CALL,host,true));
+            endCall(getString(R.string.call_in_call));
+//            EventBus.getDefault().post(new RecordCallBean(
+//                    mIdentifier,ChatRoomConfig.CALL_IN_CALL,host,true));
         }
     };
 
@@ -209,7 +211,7 @@ public class LaunchVoiceCallActivity extends AppCompatActivity {
         super.onBackPressed();
         VoiceCall.hungUpVoiceCall(host);
         IntranetChatApplication.setInCall(false);
-        EventBus.getDefault().post(new RecordCallBean(mIdentifier,ChatRoomConfig.CALL_REFUSE_LAUNCH_MINE,host,true));
+        endCall(getString(R.string.call_refuse_launch_mine));
         finish();
     }
 
@@ -233,7 +235,7 @@ public class LaunchVoiceCallActivity extends AppCompatActivity {
                 return;
             }
             IntranetChatApplication.setInCall(false);
-            EventBus.getDefault().post(new RecordCallBean(mIdentifier,ChatRoomConfig.CALL_REFUSE_LAUNCH,host,true));
+            endCall(getString(R.string.call_refuse_launch));
             finish();
         }
     };

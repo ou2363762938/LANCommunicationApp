@@ -71,7 +71,7 @@ public class VCEncoder {
                     addTag(outData, outBitsSize);
                     outputBuffer.get(outData, 7, outBitsSize);
                     Sender.mInputDatasQueue.offer(outData);
-                    TLog.d(TAG, "VCEncoder: send data" + outData.length);
+                    TLog.d(TAG, "VCEncoder: notify data" + outData.length);
                 }
                 mMediaCodec.releaseOutputBuffer(id, true);
             } catch (IllegalStateException e) {

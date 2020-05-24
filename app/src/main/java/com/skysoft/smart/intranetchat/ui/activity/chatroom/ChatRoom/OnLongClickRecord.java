@@ -4,7 +4,6 @@ import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.PopupWindow;
@@ -14,22 +13,23 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.skysoft.smart.intranetchat.R;
-import com.skysoft.smart.intranetchat.database.table.ChatRecordEntity;
+import com.skysoft.smart.intranetchat.database.table.RecordEntity;
+import com.skysoft.smart.intranetchat.model.chat.record.RecordAdapter;
 import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 import com.skysoft.smart.intranetchat.ui.activity.chatroom.PopupWindow.PopupWindowAdapter;
 
 public class OnLongClickRecord implements View.OnLongClickListener {
     private static final String TAG = "OnLongClickRecord";
-    private ChatRecordEntity mRecordEntity;     //被长按的记录
+    private RecordEntity mRecordEntity;     //被长按的记录
     private ChatRoomMessageViewHolder holder;   //被长按的holder
-    private ChatRoomMessageAdapter mAdapter;
+    private RecordAdapter mAdapter;
     private View mView;
     private Context mContext;
 
     public OnLongClickRecord(Context context,
-                             ChatRecordEntity mRecordEntity,
+                             RecordEntity mRecordEntity,
                              ChatRoomMessageViewHolder holder,
-                             ChatRoomMessageAdapter adapter) {
+                             RecordAdapter adapter) {
         this.mContext = context;
         this.mRecordEntity = mRecordEntity;
         this.holder = holder;
@@ -51,14 +51,14 @@ public class OnLongClickRecord implements View.OnLongClickListener {
     /**
      * 弹出popupWindow
      * @param view 被长按的控件，popupWindow围绕view显示
-     * @param chatRecordEntity 被长按的控件对应的聊天记录
+     * @param recordEntity 被长按的控件对应的聊天记录
      * @param relativeY 控件相对于聊天室顶部的相对距离
      * @param nameHeight 对方名字的高度*/
     public void showPopupMenu(View view,
-                              ChatRecordEntity chatRecordEntity,
+                              RecordEntity recordEntity,
                               int relativeY, int nameHeight,
                               int position,
-                              ChatRoomMessageAdapter chatRoomAdapter){
+                              RecordAdapter chatRoomAdapter){
 //        if (null == mView){
 //            mView = LayoutInflater.from(mContext).inflate(R.layout.chat_message_popup_window, null);
 //        }
@@ -79,7 +79,7 @@ public class OnLongClickRecord implements View.OnLongClickListener {
         //popupWindow弹出的内容
         PopupWindowAdapter adapter = new PopupWindowAdapter(
                 mContext,
-                chatRecordEntity,
+                recordEntity,
                 popupWindow,
                 mAdapter,
                 position);
@@ -100,15 +100,7 @@ public class OnLongClickRecord implements View.OnLongClickListener {
         int offsetY = -(contentView.getMeasuredHeight() + view.getHeight());
 
         //如果是接收的消息，popupWindow相对于view靠左，反之靠右
-        if (chatRecordEntity.getIsReceive() == ChatRoomConfig.SEND_FILE
-                || chatRecordEntity.getIsReceive() == ChatRoomConfig.SEND_IMAGE
-                || chatRecordEntity.getIsReceive() == ChatRoomConfig.SEND_MESSAGE
-                || chatRecordEntity.getIsReceive() == ChatRoomConfig.SEND_VIDEO
-                || chatRecordEntity.getIsReceive() == ChatRoomConfig.SEND_VIDEO_CALL
-                || chatRecordEntity.getIsReceive() == ChatRoomConfig.SEND_VOICE
-                || chatRecordEntity.getIsReceive() == ChatRoomConfig.SEND_VOICE_CALL
-                || chatRecordEntity.getIsReceive() == ChatRoomConfig.SEND_AT_MESSAGE
-                || chatRecordEntity.getIsReceive() == ChatRoomConfig.SEND_REPLAY_MESSAGE){
+        if (recordEntity.getSender() != -1){
             TLog.d(TAG, "showPopupMenu: right");
             offsetX = -(contentView.getMeasuredWidth() - view.getWidth());
         }

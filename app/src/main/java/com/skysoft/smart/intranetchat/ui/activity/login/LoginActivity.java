@@ -10,9 +10,10 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.text.TextUtils;
+
+import com.skysoft.smart.intranetchat.bean.base.DeviceInfoBean;
 import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewTreeObserver;
@@ -26,17 +27,12 @@ import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.skysoft.smart.intranetchat.MainActivity;
 import com.skysoft.smart.intranetchat.R;
 import com.skysoft.smart.intranetchat.app.IntranetChatApplication;
-import com.skysoft.smart.intranetchat.model.net_model.Login;
+import com.skysoft.smart.intranetchat.model.login.Login;
 import com.skysoft.smart.intranetchat.tools.customstatusbar.CustomStatusBarBackground;
 import com.skysoft.smart.intranetchat.tools.toastutil.ToastUtil;
 import com.skysoft.smart.intranetchat.ui.activity.camera.CameraActivity;
 import com.skysoft.smart.intranetchat.ui.activity.camera.ClipImageActivity;
 import com.skysoft.smart.intranetchat.model.camera.entity.EventMessage;
-import com.skysoft.smart.intranetchat.database.MyDataBase;
-import com.skysoft.smart.intranetchat.database.table.MineInfoEntity;
-import com.skysoft.smart.intranetchat.model.network.Config;
-import com.skysoft.smart.intranetchat.model.network.bean.UserInfoBean;
-import com.skysoft.smart.intranetchat.tools.Identifier;
 import com.skysoft.smart.intranetchat.tools.Mac;
 import com.skysoft.smart.intranetchat.tools.permissionmanage.PermissionManage;
 
@@ -60,8 +56,7 @@ public class LoginActivity extends AppCompatActivity {
         @Override
         public void onSoftKeyboardStateChangedListener(boolean isKeyBoardShow, int keyboardHeight, int screenSize) {
             if (isKeyBoardShow){
-                IntranetChatApplication.getsEquipmentInfoEntity().setSoftInputHeight(keyboardHeight);
-                IntranetChatApplication.getsEquipmentInfoEntity().setScreenSize(screenSize);
+                DeviceInfoBean.getInstance().set(keyboardHeight,screenSize);
             }
         }
     };
@@ -92,7 +87,6 @@ public class LoginActivity extends AppCompatActivity {
     EditText mineName;
     @BindView(R.id.activity_login_button)
     Button buttonLogin;
-    private MineInfoEntity mineInfoEntity;
 
     private boolean isRegister = true;
 
@@ -101,13 +95,11 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
         CustomStatusBarBackground.customStatusBarTransparent(this);
-        mineInfoEntity = new MineInfoEntity();
         EventBus.getDefault().register(this);
 
         PermissionManage.allPermissionManage(this);
         ButterKnife.bind(this);
         String mac = Mac.getMac(this);
-        IntranetChatApplication.getsEquipmentInfoEntity().setMac(mac);
         getWindow().getDecorView().getViewTreeObserver().addOnGlobalLayoutListener(mLayoutChangeListener);
     }
 
@@ -142,57 +134,17 @@ public class LoginActivity extends AppCompatActivity {
                 dialogView();
                 break;
             case R.id.activity_login_button:
-                //B:[Intranet Chat] [APP][UI] Chat Room Oliver Ou 2019/10/31
                 String userName = mineName.getText().toString();
                 if (TextUtils.isEmpty(userName)){
                     return;
                 }
-                //B:[Intranet Chat] [APP][UI] Chat Room Oliver Ou 2019/11/4
                 if (userName.length() > 12 || userName.length() < 2){
                     ToastUtil.toast(LoginActivity.this, getString(R.string.limit_name_length));
                     return;
                 }
-                //E:[Intranet Chat] [APP][UI] Chat Room Oliver Ou 2019/11/4
-                if (isRegister){
-                    String headIdentifier;
-                    String userIdentifier;
-                    Identifier identifier = new Identifier();
-                    //B:[Intranet Chat] [APP][UI] Chat Room Oliver Ou 2019/11/4
-                    userIdentifier = identifier.getUserIdentifier(identifier.getSerialNumber(this));
-                    //E:[Intranet Chat] [APP][UI] Chat Room Oliver Ou 2019/11/4
-                    if (TextUtils.isEmpty(avatarPath)){
-                        headIdentifier = identifier.getDefaultAvatarIdentifier();
-                    }else {
-                        headIdentifier = identifier.getFileIdentifier(avatarPath);
-                        //记录头像地址
-                        mineInfoEntity.setMineHeadPath(avatarPath);
-                    }
-                    mineInfoEntity.setMineIdentifier(userIdentifier);
-                    mineInfoEntity.setMineHeadIdentifier(headIdentifier);
-                    mineInfoEntity.setMineName(userName);
-                }
-                UserInfoBean mineUserInfo = new UserInfoBean();
-                mineUserInfo.setName(mineName.getText().toString());
-                mineUserInfo.setIdentifier(mineInfoEntity.getMineIdentifier());
-                mineUserInfo.setAvatarIdentifier(mineInfoEntity.getMineHeadIdentifier());
-                mineUserInfo.setStatus(Config.STATUS_ONLINE);
-                //B:[Intranet Chat] [APP][UI] Chat Room Oliver Ou 2019/11/4
-                IntranetChatApplication.setMineUserInfo(mineInfoEntity,mineName.getText().toString());
-                //E:[Intranet Chat] [APP][UI] Chat Room Oliver Ou 2019/11/4
-                //B:[Intranet Chat] [APP][UI] Chat Room Oliver Ou 2019/11/1
-                IntranetChatApplication.setsMineAvatarPath(mineInfoEntity.getMineHeadPath());
-                //E:[Intranet Chat] [APP][UI] Chat Room Oliver Ou 2019/11/1
-                //E:[Intranet Chat] [APP][UI] Chat Room Oliver Ou 2019/10/31
-                Login.login(mineUserInfo);
-                if (isRegister){
-                    new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                            MyDataBase.getInstance().getMineInfoDao().insert(mineInfoEntity);
-                            MyDataBase.getInstance().getEquipmentInfoDaoDao().insert(IntranetChatApplication.getsEquipmentInfoEntity());
-                        }
-                    }).start();
-                }
+
+                Login.register(LoginActivity.this,userName,avatarPath);
+
                 Intent main = new Intent(LoginActivity.this, MainActivity.class);
                 startActivity(main);
                 finish();

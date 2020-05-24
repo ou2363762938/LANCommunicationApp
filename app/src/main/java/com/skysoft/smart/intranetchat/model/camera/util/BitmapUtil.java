@@ -42,7 +42,6 @@ public class BitmapUtil {
         final BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = true;
         options.inPreferredConfig = Bitmap.Config.RGB_565;
-        Bitmap bitmap = BitmapFactory.decodeFile(filePath, options);
         int inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
         options.inSampleSize = inSampleSize;
         options.inJustDecodeBounds = false;

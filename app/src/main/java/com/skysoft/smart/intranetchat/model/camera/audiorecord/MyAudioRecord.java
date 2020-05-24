@@ -86,7 +86,7 @@ public class MyAudioRecord {
                 int read = mAudioRecord.read(data, 0, mBufferSize);
                 if (AudioRecord.ERROR_INVALID_OPERATION != read) {
                     VoiceCall.sendVoiceCallData(data);
-                    TLog.d(TAG, "vioceCall send data");
+                    TLog.d(TAG, "vioceCall notify data");
                 }
             }
         }).start();

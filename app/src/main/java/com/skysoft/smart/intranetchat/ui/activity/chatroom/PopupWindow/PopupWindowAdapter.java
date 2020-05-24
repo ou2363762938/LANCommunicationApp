@@ -3,6 +3,12 @@ package com.skysoft.smart.intranetchat.ui.activity.chatroom.PopupWindow;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
+
+import com.skysoft.smart.intranetchat.database.table.FileEntity;
+import com.skysoft.smart.intranetchat.database.table.RecordEntity;
+import com.skysoft.smart.intranetchat.model.chat.record.RecordManager;
+import com.skysoft.smart.intranetchat.model.network.Config;
+import com.skysoft.smart.intranetchat.tools.GsonTools;
 import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 
 import android.util.Log;
@@ -14,9 +20,8 @@ import android.widget.TextView;
 
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.skysoft.smart.intranetchat.R;
-import com.skysoft.smart.intranetchat.database.table.ChatRecordEntity;
 import com.skysoft.smart.intranetchat.ui.activity.chatroom.ChatRoom.ChatRoomConfig;
-import com.skysoft.smart.intranetchat.ui.activity.chatroom.ChatRoom.ChatRoomMessageAdapter;
+import com.skysoft.smart.intranetchat.model.chat.record.RecordAdapter;
 
 import java.util.Arrays;
 import java.util.List;
@@ -30,53 +35,54 @@ public class PopupWindowAdapter extends RecyclerView.Adapter<PopupWindowAdapter.
     private int mPosition;
     private List<String> mItemList;
     private PopupWindow mPopupWindow;   //关闭popupWindow
-    private ChatRecordEntity mChatRecordEntity;     //长按的消息记录
-    private ChatRoomMessageAdapter mChatAdapter;
+    private RecordEntity mRecord;     //长按的消息记录
+    private RecordAdapter mChatAdapter;
 
-    public PopupWindowAdapter(Context mContext,
-                              ChatRecordEntity mChatRecordEntity,
-                              PopupWindow mPopupWindow,
-                              ChatRoomMessageAdapter mChatAdapter,
+    public PopupWindowAdapter(Context context,
+                              RecordEntity record,
+                              PopupWindow popupWindow,
+                              RecordAdapter chatAdapter,
                               int position) {
-        this.mContext = mContext;
-        this.mChatRecordEntity = mChatRecordEntity;
+        this.mContext = context;
+        this.mRecord = record;
         this.mPosition = position;
-        Log.d(TAG, "---------->>receive : " + mChatRecordEntity.getIsReceive());
-        Log.d(TAG, "---------->>record : " + mChatRecordEntity.getType());
         //判断长按的消息记录
-        switch (mChatRecordEntity.getType()){
+        switch (record.getType()){
             case ChatRoomConfig.RECORD_TEXT:
-            case ChatRoomConfig.RECORD_NOTIFY_MESSAGE:
-            case ChatRoomConfig.RECORD_REPLAY_MESSAGE:
-                if ((mChatRecordEntity.getIsReceive() == ChatRoomConfig.RECEIVE_MESSAGE ||
-                        mChatRecordEntity.getIsReceive() == ChatRoomConfig.RECEIVE_AT_MESSAGE ||
-                        mChatRecordEntity.getIsReceive() == ChatRoomConfig.RECEIVE_REPLAY_MESSAGE) && mChatAdapter.isGroup()){
-                    mItemList = Arrays.asList(mContext.getResources().getStringArray(R.array.popup_window_item_text));
+//            case ChatRoomConfig.RECORD_NOTIFY_MESSAGE:
+//            case ChatRoomConfig.RECORD_REPLAY_MESSAGE:
+                if (record.getSender() != -1 && chatAdapter.isGroup()){
+                    mItemList = Arrays.asList(context.getResources().getStringArray(R.array.popup_window_item_text));
                 }else {
-                    mItemList = Arrays.asList(mContext.getResources().getStringArray(R.array.popup_window_item_text_send));
+                    mItemList = Arrays.asList(context.getResources().getStringArray(R.array.popup_window_item_text_send));
                 }
                 break;
-            case ChatRoomConfig.RECORD_VOICE:
             case ChatRoomConfig.RECORD_CALL:
-                Log.d(TAG, "-------Voice : Call---------");
-                mItemList = Arrays.asList(mContext.getResources().getStringArray(R.array.popup_window_item_voice));
+                mItemList = Arrays.asList(context.getResources().getStringArray(R.array.popup_window_item_voice));
                 break;
-            case ChatRoomConfig.RECORD_IMAGE:
-            case ChatRoomConfig.RECORD_VIDEO:
             case ChatRoomConfig.RECORD_FILE:
-                if (mChatRecordEntity.getIsReceive() == ChatRoomConfig.SEND_FILE
-                        || mChatRecordEntity.getIsReceive() == ChatRoomConfig.SEND_VIDEO
-                        || mChatRecordEntity.getIsReceive() == ChatRoomConfig.SEND_IMAGE
-                        || !mChatAdapter.isGroup()){
-                    mItemList = Arrays.asList(mContext.getResources().getStringArray(R.array.popup_window_item_other_send));
-                }else {
-                    mItemList = Arrays.asList(mContext.getResources().getStringArray(R.array.popup_window_item_other));
+                if (record.getFileEntity() == null) {
+                    record.setFileEntity((FileEntity) GsonTools.formJson(record.getFile(), FileEntity.class));
+                }
+                switch (record.getFileEntity().getType()) {
+                    case Config.FILE_VOICE:
+                        mItemList = Arrays.asList(context.getResources().getStringArray(R.array.popup_window_item_voice));
+                        break;
+                    case Config.FILE_PICTURE:
+                    case Config.FILE_VIDEO:
+                    case Config.FILE_COMMON:
+                        if (record.getSender() == -1) {
+                            mItemList = Arrays.asList(context.getResources().getStringArray(R.array.popup_window_item_other_send));
+                        } else {
+                            mItemList = Arrays.asList(context.getResources().getStringArray(R.array.popup_window_item_other));
+                        }
+                        break;
                 }
                 break;
         }
         Log.d(TAG, "---------Size : " + mItemList.size());
-        this.mPopupWindow = mPopupWindow;
-        this.mChatAdapter = mChatAdapter;
+        this.mPopupWindow = popupWindow;
+        this.mChatAdapter = chatAdapter;
     }
 
     @NonNull
@@ -113,19 +119,26 @@ public class PopupWindowAdapter extends RecyclerView.Adapter<PopupWindowAdapter.
     }
 
     private void copy() {
-        if (mChatRecordEntity.getType() == ChatRoomConfig.RECORD_TEXT){
+        if (mRecord.getType() == ChatRoomConfig.RECORD_TEXT){
             //复制文字到系统粘贴板
             ClipboardManager clipboardManager = (ClipboardManager) mContext.getSystemService(Context.CLIPBOARD_SERVICE);
-            ClipData label = ClipData.newPlainText("label", mChatRecordEntity.getContent());
+            ClipData label = ClipData.newPlainText("label", mRecord.getContent());
             clipboardManager.setPrimaryClip(label);
         }
     }
 
     private void transmitByType(){
-        if (mChatRecordEntity.getType() == ChatRoomConfig.RECORD_TEXT){
-            TransmitActivity.startActivity(mContext,mChatRecordEntity.getContent(),mChatRecordEntity.getType(),mChatRecordEntity.getReceiver());
-        }else if (mChatRecordEntity.getType() == ChatRoomConfig.RECORD_IMAGE){
-            TransmitActivity.startActivity(mContext,mChatRecordEntity.getPath(),mChatRecordEntity.getType(),mChatRecordEntity.getReceiver());
+        if (mRecord.getType() == ChatRoomConfig.RECORD_TEXT){
+            TransmitActivity.startActivity(mContext,
+                    mRecord.getContent(),
+                    mRecord.getType(),
+                    mRecord.getReceiver());
+        }else if (mRecord.getType() == ChatRoomConfig.RECORD_FILE
+                 && mRecord.getFileEntity().getType() == Config.FILE_PICTURE){
+            TransmitActivity.startActivity(mContext,
+                    mRecord.getFile(),
+                    mRecord.getType(),
+                    mRecord.getReceiver());
         }
     }
 
@@ -139,7 +152,7 @@ public class PopupWindowAdapter extends RecyclerView.Adapter<PopupWindowAdapter.
         view.findViewById(R.id.delete_record).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mChatAdapter.deleteChatRecord(mPosition);
+                RecordManager.getInstance().deleteRecord(mPosition);
                 dialog.dismiss();
             }
         });

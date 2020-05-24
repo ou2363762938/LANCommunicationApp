@@ -41,7 +41,7 @@ public class Config {
     public static final int CODE_ESTABLISH_GROUP = 18;
     public static final int CODE_USER_OUT_LINE = 19;
 
-    //request
+    //requestFile
     public static final int REQUEST_USERINFO = 20;
     public static final int REQUEST_CONSENT_CALL = 21;
     public static final int REQUEST_MONITOR = 22;
@@ -96,15 +96,20 @@ public class Config {
     public static final int NOTIFY_CLEAR_QUEUE = 76;
 
     //down file step
-    public static final int STEP_RECEIVE_NOTIFY = 80;
-    public static final int STEP_ASK_FILE = 83;
-    public static final int STEP_DOWN_LOAD_FAILURE = 84;
-    public static final int STEP_SUCCESS = 85;
+
+
+
+    public static final int STEP_NOTIFY = 0;
+    public static final int STEP_REQUEST = 1;
+    public static final int STEP_SEND = 2;
+    public static final int STEP_FAILURE = 3;
+    public static final int STEP_SUCCESS = 4;
+    public static final int STEP_RECEIVE = 5;
 
     //path
     public static final String PATH_IMAGE = "/Android/data/com.skysoft.smart.intranetchat/files/images/";
     public static final String PATH_AVATAR = "/Android/data/com.skysoft.smart.intranetchat/files/avatar/";
     public static final String PATH_VOICE = "/Android/data/com.skysoft.smart.intranetchat/files/voice/";
     public static final String PATH_VIDEO = "/Android/data/com.skysoft.smart.intranetchat/files/video/";
-    public static final String PATH_RECEIVE_FILE = "/Android/data/com.skysoft.smart.intranetchat/files/receive";
+    public static final String PATH_RECEIVE_FILE = "/Android/data/com.skysoft.smart.intranetchat/files/requestFile";
 }
