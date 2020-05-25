@@ -256,12 +256,12 @@ public class BindRecord {
                           RecordEntity bean) {
         TextView message = null;
         if (bean.getSender() == -1){
-            holder.getSenderMessage().setText(bean.getContent());
-            holder.getSenderMessage().setVisibility(View.VISIBLE);
-            message = holder.getSenderMessage();
-        }else {
             holder.getMineMessage().setText(bean.getContent());
             holder.getMineMessage().setVisibility(View.VISIBLE);
+            message = holder.getSenderMessage();
+        }else {
+            holder.getSenderMessage().setText(bean.getContent());
+            holder.getSenderMessage().setVisibility(View.VISIBLE);
             message = holder.getMineMessage();
         }
 

@@ -214,6 +214,9 @@ public class IntranetChatApplication extends Application {
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void receiveLatestSignal(LatestSignal signal) {
         if (signal.isClickLatest) {
+            if (sTotalUnReadNumber == 0) {
+                return;
+            }
             sTotalUnReadNumber -= signal.unRead;
             if (sTotalUnReadNumber == 0) {
                 mTextBadgeItem.hide();

@@ -13,6 +13,7 @@ import com.skysoft.smart.intranetchat.database.table.ContactEntity;
 import com.skysoft.smart.intranetchat.database.table.FileEntity;
 import com.skysoft.smart.intranetchat.database.table.GroupEntity;
 import com.skysoft.smart.intranetchat.database.table.LatestEntity;
+import com.skysoft.smart.intranetchat.model.chat.record.RecordManager;
 import com.skysoft.smart.intranetchat.model.contact.ContactManager;
 import com.skysoft.smart.intranetchat.model.group.GroupManager;
 import com.skysoft.smart.intranetchat.model.network.Config;
@@ -93,6 +94,8 @@ public class LatestManager {
                 int u = user + base;
                 LatestEntity latest = mLatestMap.get(u);
                 LatestDao latestDao = MyDataBase.getInstance().getLatestDao();
+                boolean inRoom = RecordManager.getInstance().isInRoom();
+
                 if (latest == null) {
                     latest.setUser(u);
 
@@ -103,10 +106,10 @@ public class LatestManager {
                     mLatestIndex.put(u,id);
                     mLatestMap.put(id,latest);
                     mLatestSortList.add(id);
-                    if (!group) {
+                    if (!group && !inRoom) {
                         latest.addUnReadNumber();
                     }
-                } else {
+                } else if (!inRoom) {
                     latest.addUnReadNumber();
                 }
 
