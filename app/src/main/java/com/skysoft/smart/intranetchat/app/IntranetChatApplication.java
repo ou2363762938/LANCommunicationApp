@@ -234,6 +234,10 @@ public class IntranetChatApplication extends Application {
 
     private void initTotalUnReadNumber(int unRead) {
         TLog.d(TAG,"--------> Init UnRead " + unRead);
+        if (mTextBadgeItem == null) {
+            return;
+        }
+
         sTotalUnReadNumber = unRead;
         if (sTotalUnReadNumber == 0) {
             mTextBadgeItem.hide();

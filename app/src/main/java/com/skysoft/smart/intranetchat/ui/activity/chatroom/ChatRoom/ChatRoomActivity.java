@@ -618,7 +618,7 @@ public class ChatRoomActivity extends BaseActivity implements View.OnClickListen
             KeyBoardUtils.hintKeyBoard(this);
         } else if (isOpeningKeyboard) {
 //            mBlankFunctionBox.setVisibility(View.VISIBLE);
-            mMoreFunctionBox.setVisibility(View.INVISIBLE);
+//            mMoreFunctionBox.setVisibility(View.INVISIBLE);
             KeyBoardUtils.showInput(this,mInputMessage);
         }
     }
@@ -656,7 +656,7 @@ public class ChatRoomActivity extends BaseActivity implements View.OnClickListen
         int moreFunctionBoxVisibility = mMoreFunctionBox.getVisibility();
         int blankFunctionBoxVisibility = mBlankFunctionBox.getVisibility();
         if (inputMessageVisibility == 0) {      //输入文字
-            if (moreFunctionBoxVisibility != 0) {       //多功能框不可见
+            if (moreFunctionBoxVisibility != 0 || isKeyboardOpened) {       //多功能框不可见
                 openMoreFunction();
             } else {
                 closeMoreFunction(false,true);

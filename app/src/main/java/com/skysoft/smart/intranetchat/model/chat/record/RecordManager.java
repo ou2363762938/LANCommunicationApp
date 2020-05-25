@@ -100,9 +100,6 @@ public class RecordManager {
                 pageNum);
         if (all != null && all.size() != 0){
             mRecordList.addAll(all);
-            for (RecordEntity record : all) {
-                TLog.d(TAG,"---------------> " + record.toString());
-            }
         }
     }
 
@@ -154,7 +151,7 @@ public class RecordManager {
 
     private boolean isRecordTime(long time) {
         if (mRecordList.size() == 0) {
-            return true;
+            return false;
         }
 
         RecordEntity latestRecord = mRecordList.get(mRecordList.size() - 1);
@@ -170,7 +167,7 @@ public class RecordManager {
      * @param t2 上一条记录的时间*/
     private boolean isRecordTime(long t1, long t2) {
         TLog.d(TAG,"--------t1, t2------"+t1 + ", " + t2);
-        if (t1 - t2 > 2*60*1000) {
+        if (t2 >0 && t1 - t2 > 2*60*1000) {
             return true;
         }
         return false;

@@ -3,7 +3,10 @@ package com.skysoft.smart.intranetchat.bean.base;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
+
 public class DeviceInfoBean {
+    private static final String TAG = "DeviceInfoBean";
     private Context mContext;
     private SharedPreferences mShared;
     private SharedPreferences.Editor mEditor;
@@ -20,6 +23,7 @@ public class DeviceInfoBean {
 
     public static void init(Context context) {
         sInstance = new DeviceInfoBean(context);
+        sInstance.init();
     }
 
     public static DeviceInfoBean getInstance() {
@@ -50,6 +54,7 @@ public class DeviceInfoBean {
     }
 
     public void set(int keyBroadHeight, int screenSize) {
+        TLog.d(TAG,"----->keyBroadHeight : " + keyBroadHeight);
         mEditor.putInt(KEY_BROAD_HEIGHT,keyBroadHeight);
         mEditor.putInt(SCREEN_SIZE,screenSize);
         mEditor.commit();
@@ -58,5 +63,6 @@ public class DeviceInfoBean {
     public void init() {
         keyBroadHeight = mShared.getInt(KEY_BROAD_HEIGHT, 0);
         screenSize = mShared.getInt(SCREEN_SIZE, 0);
+        TLog.d(TAG,"-------->Init KeyBroadHeight : " + keyBroadHeight);
     }
 }
