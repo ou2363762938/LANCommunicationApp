@@ -5,6 +5,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.RemoteException;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.skysoft.smart.intranetchat.app.IntranetChatApplication;
 import com.skysoft.smart.intranetchat.bean.chat.TransmitBean;
@@ -34,6 +35,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class ContactManager {
+    private static final String TAG = "ContactManager";
     private static ContactManager sInstance;
     private final int BASE_NOTIFY = 0;
     private ContactManager() {
@@ -162,6 +164,7 @@ public class ContactManager {
     }
 
     public void receiveUserInfo(UserInfoBean userInfoBean, String host) {
+        Log.d(TAG, "---------> Receive UserInfo " + userInfoBean.toString());
         if (MineInfoManager
                 .getInstance()
                 .getIdentifier()
@@ -209,7 +212,7 @@ public class ContactManager {
     }
 
     private void saveContact(ContactEntity contact, String avatar, int userMonitored, int userMonitor) {
-        new Thread(new Runnable() {
+        Runnable save = new Runnable() {
             @Override
             public void run() {
                 ContactDao contactDao = MyDataBase.getInstance().getContactDao();
@@ -220,8 +223,11 @@ public class ContactManager {
                                     insert(avatar)
                     );
 
+                    contact.setId(0);
+                    Log.d(TAG, "----------> " + contact.toString());
                     contactDao.insert(contact);
                     int id = contactDao.getNewInsertId();
+                    Log.d(TAG, "---------Get ID : " + id);
                     contact.setId(id);
 
                     mContactMap.put(id,contact);
@@ -236,7 +242,8 @@ public class ContactManager {
                 sortContact();
                 EventBus.getDefault().post(mSignal);
             }
-        }).start();
+        };
+        mHandler.post(save);
     }
 
     /**
@@ -356,6 +363,9 @@ public class ContactManager {
 
         for (int i = mWatchList.size()-1; i >= 0; i--) {
             ContactEntity contact = mContactMap.get(mWatchList.get(i));
+            if (contact == null) {
+                continue;
+            }
             difference = millis - contact.getHeartbeat();
             if (difference > 6000) {
                 Login.broadcastUserOutLine(contact.getIdentifier());
@@ -379,6 +389,9 @@ public class ContactManager {
         String identifier = MineInfoManager.getInstance().getIdentifier();
         for (String id:mWatchList) {
             ContactEntity contact = mContactMap.get(Integer.parseInt(id));
+            if (contact == null) {
+                continue;
+            }
             SendRequest.sendHeartbeat(identifier, contact.getHost());
         }
     }

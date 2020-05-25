@@ -341,12 +341,7 @@ public class ChatRoomActivity extends BaseActivity implements View.OnClickListen
         mAdapter.setOnClickReplayOrNotify(mOnClickReplayOrNotify);       //注册回复和@
         mRecyclerView.setAdapter(mAdapter);
 
-//        GroupMembersBean bean = new GroupMembersBean();
-//        bean.setmMemberName(mEntity);
-//        bean.setmMemberAvatarPath(mReceiverAvatarPath);
-        mRoomName.setText(mEntity);
-
-//        myHost = IntranetChatServer.getHostIP();
+        mRoomName.setText(isGroup ? mGroup.getName() : mContact.getName());
 
         //单聊聊天室不允许建群
         if (!isGroup){
@@ -480,6 +475,7 @@ public class ChatRoomActivity extends BaseActivity implements View.OnClickListen
         mAdapter.notifyDataSetChanged();
     }
 
+    @Subscribe(threadMode = ThreadMode.MAIN)
     public void receiveAvatarSignal(AvatarSignal signal) {
         mAdapter.notifyDataSetChanged();
     }

@@ -13,6 +13,7 @@ import android.widget.TextView;
 
 import com.skysoft.smart.intranetchat.R;
 import com.skysoft.smart.intranetchat.bean.signal.AvatarSignal;
+import com.skysoft.smart.intranetchat.bean.signal.LatestSignal;
 import com.skysoft.smart.intranetchat.database.table.LatestEntity;
 import com.skysoft.smart.intranetchat.listener.AdapterOnClickListener;
 import com.skysoft.smart.intranetchat.model.latest.LatestListAdapter;
@@ -84,6 +85,11 @@ public class LatestFragment extends BaseFragment implements View.OnClickListener
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void receiveAvatarSignal(AvatarSignal signal) {
+        mAdapter.notifyDataSetChanged();
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void receiveLatestSignal(LatestSignal signal) {
         mAdapter.notifyDataSetChanged();
     }
 

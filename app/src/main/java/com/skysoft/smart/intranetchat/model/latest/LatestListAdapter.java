@@ -13,6 +13,8 @@ import com.skysoft.smart.intranetchat.listener.AdapterOnClickListener;
 import com.skysoft.smart.intranetchat.model.avatar.AvatarManager;
 import com.skysoft.smart.intranetchat.model.contact.ContactManager;
 import com.skysoft.smart.intranetchat.tools.ChatRoom.RoomUtils;
+
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -206,6 +208,7 @@ public class LatestListAdapter extends BaseAdapter {
     }
 
     public void setView(ViewHolder holder, LatestEntity latest){
+        Log.d(TAG, "---------> " + latest.toString());
         ContactEntity contact = ContactManager
                 .getInstance()
                 .getContact(latest.getId());

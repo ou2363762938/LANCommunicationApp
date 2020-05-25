@@ -3,10 +3,8 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-    <View
-        android:id="@+id/custom_status_bar_background"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+    <include
+        layout="@layout/base_title"/>
     <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/user_info_head"
         android:layout_width="@dimen/dp_140"

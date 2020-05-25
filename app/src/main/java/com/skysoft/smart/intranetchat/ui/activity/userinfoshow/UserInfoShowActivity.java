@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 
+import com.skysoft.smart.intranetchat.app.BaseActivity;
 import com.skysoft.smart.intranetchat.bean.signal.AvatarSignal;
 import com.skysoft.smart.intranetchat.bean.signal.ContactSignal;
 import com.skysoft.smart.intranetchat.model.avatar.AvatarManager;
@@ -31,7 +32,7 @@ import org.greenrobot.eventbus.ThreadMode;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
-public class UserInfoShowActivity extends AppCompatActivity {
+public class UserInfoShowActivity extends BaseActivity {
     private static String TAG = UserInfoShowActivity.class.getSimpleName();
     private ViewHolder mHolder;
     private ContactEntity mContact;
@@ -40,10 +41,9 @@ public class UserInfoShowActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.layout_user_info_show);
-        CustomStatusBarBackground.customStatusBarTransparent(this);
-        CustomStatusBarBackground.drawableViewStatusBar(this,R.drawable.custom_gradient_main_title,findViewById(R.id.custom_status_bar_background));
         EventBus.getDefault().register(this);
 
+        mHolder = new ViewHolder();
         mHolder.avatar = findViewById(R.id.user_info_head);
         mHolder.name = findViewById(R.id.user_info_name);
         mHolder.state = findViewById(R.id.user_info_state);

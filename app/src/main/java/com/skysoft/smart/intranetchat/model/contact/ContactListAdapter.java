@@ -17,7 +17,6 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.bumptech.glide.Glide;
 import com.skysoft.smart.intranetchat.R;
-import com.skysoft.smart.intranetchat.app.IntranetChatApplication;
 import com.skysoft.smart.intranetchat.database.table.ContactEntity;
 import com.skysoft.smart.intranetchat.listener.AdapterOnClickListener;
 import com.skysoft.smart.intranetchat.model.avatar.AvatarManager;

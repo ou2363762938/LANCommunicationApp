@@ -56,6 +56,7 @@ public class ToolsFragment extends BaseFragment implements View.OnClickListener 
             case R.id.tools_linear_clock:
                 Intent clock = new Intent(AlarmClock.ACTION_SET_ALARM);
                 startActivity(clock);
+                getActivity().overridePendingTransition(R.anim.default_in,R.anim.default_out);
                 break;
             case R.id.tools_linear_calendar:
                 Intent intent = new Intent(getActivity(), MyCalendarView.class);

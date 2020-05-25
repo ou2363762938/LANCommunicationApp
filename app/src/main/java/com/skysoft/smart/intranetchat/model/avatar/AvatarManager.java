@@ -112,6 +112,13 @@ public class AvatarManager {
     }
 
     public int insert(String identifier) {
+        if (!sDefaultAvatarId.equals(identifier)) {
+            AvatarEntity avatar = mAvatarMap.get(identifier);
+            if (avatar != null) {
+                return avatar.getId();
+            }
+        }
+
         AvatarEntity avatarEntity = new AvatarEntity();
 
         avatarEntity.setIdentifier(identifier);

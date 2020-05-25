@@ -14,9 +14,13 @@ import com.skysoft.smart.intranetchat.app.BaseFragment;
 import com.skysoft.smart.intranetchat.app.IntranetChatApplication;
 import com.skysoft.smart.intranetchat.bean.signal.AvatarSignal;
 import com.skysoft.smart.intranetchat.bean.signal.ContactSignal;
+import com.skysoft.smart.intranetchat.database.table.ContactEntity;
 import com.skysoft.smart.intranetchat.listener.AdapterOnClickListener;
 import com.skysoft.smart.intranetchat.model.contact.ContactListAdapter;
 import com.skysoft.smart.intranetchat.model.contact.ContactManager;
+import com.skysoft.smart.intranetchat.tools.GsonTools;
+import com.skysoft.smart.intranetchat.ui.activity.chatroom.ChatRoom.ChatRoomActivity;
+import com.skysoft.smart.intranetchat.ui.activity.userinfoshow.UserInfoShowActivity;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -33,6 +37,16 @@ public class ContactFragment extends BaseFragment {
         public void onItemClickListener(View view, Object obj, int position) {
             //TODO 点击事件
             super.onItemClickListener(view, obj, position);
+            ContactEntity contact = (ContactEntity) obj;
+            switch (view.getId()) {
+                case R.id.contact_head:
+                    UserInfoShowActivity.go(getContext(),contact.getId());
+                    break;
+                case R.id.contact_list_item:
+                    ChatRoomActivity.go(getContext(), GsonTools.toJson(contact),false);
+                    break;
+
+            }
         }
     };
 
@@ -70,6 +84,7 @@ public class ContactFragment extends BaseFragment {
         mContactAdapter.notifyDataSetChanged();
     }
 
+    @Subscribe(threadMode = ThreadMode.MAIN)
     public void receiveAvatarSignal(AvatarSignal signal) {
         mContactAdapter.notifyDataSetChanged();
     }

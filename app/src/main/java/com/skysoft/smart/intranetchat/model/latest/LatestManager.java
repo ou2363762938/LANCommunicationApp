@@ -174,6 +174,7 @@ public class LatestManager {
                 if (latest.getId() != -1) {
                     latestDao.update(latest);
                 } else {
+                    latest.setId(0);
                     latestDao.insert(latest);
                     int id = latestDao.getNewInsertId();
                     latest.setId(id);

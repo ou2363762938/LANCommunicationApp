@@ -127,9 +127,10 @@ public class ContactEntity {
                 ", name='" + name + '\'' +
                 ", identifier='" + identifier + '\'' +
                 ", status=" + status +
+                ", notifyId=" + notifyId +
+                ", heartbeat=" + heartbeat +
                 ", host='" + host + '\'' +
                 ", check=" + check +
-                ", notifyId=" + notifyId +
                 ", showCheck=" + showCheck +
                 '}';
     }
