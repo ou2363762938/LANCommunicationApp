@@ -18,6 +18,7 @@ import com.skysoft.smart.intranetchat.database.table.ContactEntity;
 import com.skysoft.smart.intranetchat.listener.AdapterOnClickListener;
 import com.skysoft.smart.intranetchat.model.contact.ContactListAdapter;
 import com.skysoft.smart.intranetchat.model.contact.ContactManager;
+import com.skysoft.smart.intranetchat.model.latest.LatestManager;
 import com.skysoft.smart.intranetchat.tools.GsonTools;
 import com.skysoft.smart.intranetchat.ui.activity.chatroom.ChatRoom.ChatRoomActivity;
 import com.skysoft.smart.intranetchat.ui.activity.userinfoshow.UserInfoShowActivity;
@@ -43,7 +44,7 @@ public class ContactFragment extends BaseFragment {
                     UserInfoShowActivity.go(getContext(),contact.getId());
                     break;
                 case R.id.contact_list_item:
-
+                    LatestManager.getInstance().refreshUnRead(contact.getId());
                     ChatRoomActivity.go(getContext(), GsonTools.toJson(contact),false);
                     break;
 

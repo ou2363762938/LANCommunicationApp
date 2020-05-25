@@ -205,8 +205,6 @@ public class LatestManager {
                 if (latest != null) {
                     latest.setContent(content);
                     MyDataBase.getInstance().getLatestDao().update(latest);
-
-                    EventBus.getDefault().post(mSignal);
                 }
             }
         };
@@ -244,10 +242,13 @@ public class LatestManager {
         if (latest == null) {
             return;
         }
+        mSignal.unRead = latest.getUnReadNumber();
+        mSignal.isClickLatest = true;
         latest.setUnReadNumber(0);
-        IntranetChatApplication.setTotalUnReadNumber(
-                LatestManager.getInstance().totalUnReadNumber());
+//        IntranetChatApplication.setTotalUnReadNumber(
+//                LatestManager.getInstance().totalUnReadNumber());
         update(latest);
+        EventBus.getDefault().post(mSignal);
         mAdapter.notifyDataSetChanged();
     }
 

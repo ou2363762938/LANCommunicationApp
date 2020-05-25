@@ -30,4 +30,13 @@ public class MessageSignal {
     public void setBean(MessageBean mBean) {
         this.mBean = mBean;
     }
+
+    @Override
+    public String toString() {
+        return "MessageSignal{" +
+                "isIn=" + isIn +
+                ", isNew=" + isNew +
+                ", mBean=" + mBean +
+                '}';
+    }
 }

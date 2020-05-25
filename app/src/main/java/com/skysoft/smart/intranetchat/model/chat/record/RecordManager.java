@@ -55,6 +55,7 @@ public class RecordManager {
     public RecordAdapter initAdapter(Context context,
                                      int receiver,
                                      boolean group) {
+        isInRoom = true;
         mRecordList = new ArrayList<>();
         mReceiver = receiver;
         mGroup = group ? 1 : 0;
@@ -71,6 +72,7 @@ public class RecordManager {
     }
 
     public void destroy() {
+        isInRoom = false;
         mRecordAdapter = null;
         mRecordList = null;
     }
@@ -86,6 +88,11 @@ public class RecordManager {
     private final int LOAD_MORE_NUMBER = 20;
     private int mReceiver;
     private int mGroup;
+    private boolean isInRoom = false;
+
+    public boolean isInRoom() {
+        return isInRoom;
+    }
 
     private void loadRecord(int receiver, int group) {
         RecordDao recordDao = MyDataBase.getInstance().getRecordDao();

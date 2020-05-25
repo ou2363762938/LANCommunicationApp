@@ -80,6 +80,8 @@ public class Message {
                 messageBean.setHost(host);
                 MessageSignal signal = new MessageSignal();
                 signal.setBean(messageBean);
+                signal.setIn(RecordManager.getInstance().isInRoom());
+                EventBus.getDefault().post(signal);
 
                 RecordManager.getInstance().recordText(messageBean);
                 LatestManager.getInstance().receive(messageBean.getReceiver(),messageBean.getMsg());

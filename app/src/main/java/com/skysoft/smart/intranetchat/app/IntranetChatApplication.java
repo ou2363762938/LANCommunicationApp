@@ -30,13 +30,11 @@ import android.os.RemoteException;
 import android.text.TextUtils;
 
 import com.skysoft.smart.intranetchat.bean.base.DeviceInfoBean;
+import com.skysoft.smart.intranetchat.bean.signal.LatestSignal;
 import com.skysoft.smart.intranetchat.bean.signal.MessageSignal;
 import com.skysoft.smart.intranetchat.customize.StatusBarLayout;
 import com.skysoft.smart.intranetchat.customize.TitleLinearLayout;
-import com.skysoft.smart.intranetchat.database.dao.RecordDao;
 import com.skysoft.smart.intranetchat.database.table.GroupEntity;
-import com.skysoft.smart.intranetchat.database.table.LatestEntity;
-import com.skysoft.smart.intranetchat.database.table.RecordEntity;
 import com.skysoft.smart.intranetchat.model.avatar.AvatarManager;
 import com.skysoft.smart.intranetchat.model.chat.Message;
 import com.skysoft.smart.intranetchat.model.chat.record.RecordManager;
@@ -44,14 +42,12 @@ import com.skysoft.smart.intranetchat.model.contact.ContactManager;
 import com.skysoft.smart.intranetchat.model.filemanager.FileManager;
 import com.skysoft.smart.intranetchat.model.filemanager.FilePath;
 import com.skysoft.smart.intranetchat.model.group.GroupManager;
-import com.skysoft.smart.intranetchat.model.latest.LatestManager;
 import com.skysoft.smart.intranetchat.model.mine.MineInfoManager;
 import com.skysoft.smart.intranetchat.tools.ChatRoom.RoomUtils;
 import com.skysoft.smart.intranetchat.tools.customstatusbar.CustomStatusBarBackground;
 import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 
 import android.widget.RemoteViews;
-import android.widget.TextView;
 
 import androidx.annotation.RequiresApi;
 
@@ -61,15 +57,12 @@ import com.skysoft.smart.intranetchat.R;
 import com.skysoft.smart.intranetchat.app.impl.OnReceiveCallBean;
 import com.skysoft.smart.intranetchat.database.MyDataBase;
 import com.skysoft.smart.intranetchat.database.table.ContactEntity;
-import com.skysoft.smart.intranetchat.database.table.FileEntity;
 import com.skysoft.smart.intranetchat.model.network.Config;
 import com.skysoft.smart.intranetchat.model.network.bean.MessageBean;
 import com.skysoft.smart.intranetchat.server.IntranetChatServer;
 import com.skysoft.smart.intranetchat.tools.GsonTools;
 import com.skysoft.smart.intranetchat.ui.activity.chatroom.ChatRoom.ChatRoomActivity;
 import com.skysoft.smart.intranetchat.ui.activity.chatroom.ChatRoom.ChatRoomConfig;
-import com.skysoft.smart.intranetchat.model.chat.record.RecordAdapter;
-import com.skysoft.smart.intranetchat.model.group.EstablishGroupAdapter;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -79,11 +72,8 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 
-import de.hdodenhof.circleimageview.CircleImageView;
 
 import static androidx.core.app.NotificationCompat.VISIBILITY_SECRET;
 
@@ -215,22 +205,30 @@ public class IntranetChatApplication extends Application {
     public void receiveMessageSignal(MessageSignal signal) {
 
         if (signal.getBean() != null) {
-            setUnReadNumber(signal.isIn(),true,signal.getBean());
-        } else {
-            LatestManager.getInstance().notifyDataChanged();
+            TLog.d(TAG,"------> " + signal.toString());
+            setUnReadNumber(signal.isIn(),
+                    signal.getBean());
+        }
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void receiveLatestSignal(LatestSignal signal) {
+        if (signal.isClickLatest) {
+            sTotalUnReadNumber -= signal.unRead;
+            if (sTotalUnReadNumber == 0) {
+                mTextBadgeItem.hide();
+            } else {
+                mTextBadgeItem.show();
+                mTextBadgeItem.setText(String.valueOf(sTotalUnReadNumber));
+            }
         }
     }
 
     private void setUnReadNumber(boolean isIn,
-                                 boolean isDataSetChanged,
                                  MessageBean messageBean) {
         if (!isIn) {
             addTotalUnReadNumber();
             notification(messageBean,messageBean.getHost());
-        }
-
-        if (isDataSetChanged) {
-            LatestManager.getInstance().notifyDataChanged();
         }
     }
 
@@ -266,7 +264,6 @@ public class IntranetChatApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        EventBus.getDefault().register(this);
 //        MyDataBase.initAdapter(this);
         sBaseTimeLine = initBaseTimeLine();
         boolean isCurrentProcess = getApplicationContext().getPackageName().equals
@@ -282,6 +279,7 @@ public class IntranetChatApplication extends Application {
     }
 
     public void init() {
+        EventBus.getDefault().register(this);
         MyDataBase.init(this);
         DeviceInfoBean.init(this);
         MineInfoManager.init(this);
