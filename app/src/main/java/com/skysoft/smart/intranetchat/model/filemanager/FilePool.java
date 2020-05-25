@@ -31,13 +31,14 @@ public class FilePool {
         mFileDrops.put(drops.getFileBean().getRid(),drops);
     }
 
-    public void put (FileBean bean, String path, int step) {
+    public FileDrops put (FileBean bean, String path, int step) {
         FileDrops drops = new FileDrops();
         drops.setFileBean(bean);
         drops.setPath(TextUtils.isEmpty(path) ? "" : path);
         drops.setTime(System.currentTimeMillis());
         drops.setStep(step);
         mFileDrops.put(bean.getRid(),drops);
+        return drops;
     }
 
     public FileDrops get(String rid) {

@@ -24,13 +24,17 @@ import com.skysoft.smart.intranetchat.app.BaseActivity;
 import com.skysoft.smart.intranetchat.bean.base.DeviceInfoBean;
 import com.skysoft.smart.intranetchat.bean.signal.AvatarSignal;
 import com.skysoft.smart.intranetchat.bean.signal.RecordSignal;
+import com.skysoft.smart.intranetchat.database.table.FileEntity;
 import com.skysoft.smart.intranetchat.database.table.GroupEntity;
 import com.skysoft.smart.intranetchat.database.table.RecordEntity;
 import com.skysoft.smart.intranetchat.model.chat.Message;
+import com.skysoft.smart.intranetchat.model.chat.record.Code;
 import com.skysoft.smart.intranetchat.model.chat.record.RecordAdapter;
 import com.skysoft.smart.intranetchat.model.chat.record.RecordManager;
 import com.skysoft.smart.intranetchat.model.contact.ContactManager;
+import com.skysoft.smart.intranetchat.model.filemanager.FileManager;
 import com.skysoft.smart.intranetchat.model.latest.LatestManager;
+import com.skysoft.smart.intranetchat.model.network.Config;
 import com.skysoft.smart.intranetchat.tools.ChatRoom.KeyBoardUtils;
 import com.skysoft.smart.intranetchat.tools.ChatRoom.RoomUtils;
 import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
@@ -293,7 +297,7 @@ public class ChatRoomActivity extends BaseActivity implements View.OnClickListen
     public OnScrollToPosition onScrollToPosition = new OnScrollToPosition() {
         @Override
         public void onLoadViewOver(int size) {
-            mRecyclerView.scrollToPosition(size - 1);
+            scroll();
         }
     };
 
@@ -339,6 +343,9 @@ public class ChatRoomActivity extends BaseActivity implements View.OnClickListen
         mAdapter.setOnScrollToPosition(onScrollToPosition);
         mAdapter.setOnClickReplayOrNotify(mOnClickReplayOrNotify);       //注册回复和@
         mRecyclerView.setAdapter(mAdapter);
+        if (mAdapter.getItemCount() > 0) {
+            mRecyclerView.smoothScrollToPosition(mAdapter.getItemCount()-1);
+        }
 
         mRoomName.setText(isGroup ? mGroup.getName() : mContact.getName());
 
@@ -432,7 +439,7 @@ public class ChatRoomActivity extends BaseActivity implements View.OnClickListen
                 if (hasFocus && mMoreFunctionBox.getVisibility() == View.GONE){
                     isClickMoreFunction = false;
                     mBlankFunctionBox.setVisibility(View.VISIBLE);
-                    mRecyclerView.scrollToPosition(mAdapter.getItemCount() - 1);
+                    scroll();
                 }
             }
         });
@@ -472,12 +479,50 @@ public class ChatRoomActivity extends BaseActivity implements View.OnClickListen
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void receiveRecordSignal(RecordSignal signal) {
         mAdapter.notifyDataSetChanged();
-        mRecyclerView.scrollToPosition(mAdapter.getItemCount());
+        switch (signal.code) {
+//            case Code.LOAD:
+//                scroll();
+//                break;
+            case Code.LOAD_MORE:
+                break;
+            case Code.LOAD:
+            case Code.RS:
+                smoothScroll();
+                break;
+
+        }
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void receiveAvatarSignal(AvatarSignal signal) {
         mAdapter.notifyDataSetChanged();
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void receiveEventMessage(EventMessage event) {
+        TLog.d(TAG,"-------- " + event.getMessage() + ", " + event.getType());
+        if (event.getType() <= 4) {
+            int type = 0;
+            switch (event.getType()) {
+                case 1:
+                    type = Config.FILE_PICTURE;
+                    break;
+                case 2:
+                    type = Config.FILE_VIDEO;
+                    break;
+                case 3:
+                    type = Config.FILE_VOICE;
+                    break;
+            }
+            FileEntity f = null;
+            if (isGroup) {
+                f = FileManager.getInstance().notify(mGroup,event.getMessage(),type, (int) event.getLength());
+            } else {
+                f = FileManager.getInstance().notify(mContact,event.getMessage(),type, (int) event.getLength());
+            }
+            RecordManager.getInstance().recordFile(f,-1);
+            LatestManager.getInstance().send(mReceiver,f,isGroup);
+        }
     }
 
     @Override
@@ -600,6 +645,7 @@ public class ChatRoomActivity extends BaseActivity implements View.OnClickListen
         mMoreFunctionBox.setVisibility(View.VISIBLE);
         mBlankFunctionBox.setVisibility(View.GONE);
         KeyBoardUtils.hintKeyBoard(this);
+        scroll();
 //        if (isKeyboardOpened) {
 //            mBlankFunctionBox.setVisibility(View.GONE);
 //            KeyBoardUtils.hintKeyBoard(this);
@@ -620,6 +666,7 @@ public class ChatRoomActivity extends BaseActivity implements View.OnClickListen
 //            mBlankFunctionBox.setVisibility(View.VISIBLE);
 //            mMoreFunctionBox.setVisibility(View.INVISIBLE);
             KeyBoardUtils.showInput(this,mInputMessage);
+            scroll();
         }
     }
 
@@ -674,6 +721,14 @@ public class ChatRoomActivity extends BaseActivity implements View.OnClickListen
         } else {
             switchMessage(true);
         }
+    }
+
+    private void scroll() {
+        mRecyclerView.scrollToPosition(mAdapter.getItemCount()-1);
+    }
+
+    private void smoothScroll() {
+        mRecyclerView.smoothScrollToPosition(mAdapter.getItemCount()-1);
     }
 
     private void goChoseFile() {
@@ -859,6 +914,8 @@ public class ChatRoomActivity extends BaseActivity implements View.OnClickListen
             }else {
                 eventMessage.setType(4);
             }
+
+//            FileManager.getInstance().notify();
 //            SendMessage.sendCommonMessage(eventMessage, new SendMessageBean("", mReceiverIdentifier, host,
 //                    mReceiverAvatarPath, mEntity, isGroup),false);
         }

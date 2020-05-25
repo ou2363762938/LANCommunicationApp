@@ -7,6 +7,8 @@ package com.skysoft.smart.intranetchat.server;
 
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
+
+import com.skysoft.smart.intranetchat.model.network.file.SendFileContentThread;
 import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 
 import com.skysoft.smart.intranetchat.IIntranetChatAidlInterface;
@@ -102,15 +104,18 @@ public class IntranetChatAidl extends IIntranetChatAidlInterface.Stub {
 
     @Override
     public void sendFile(String fileJson,String path, String host) throws RemoteException {
-        TLog.d(TAG, "sendFile: path = " + path);
+        TLog.d(TAG, "-------------> sendFile: path = " + path);
         send(fileJson,Config.CODE_FILE,host);
-        resourceSendRecord(fileJson,path,false,false);
+//        resourceSendRecord(fileJson,path,false,false);
     }
 
     @Override
     public void sendFileContent(String rid,
                                 String path,
                                 String host) throws RemoteException {
+        TLog.d(TAG,"-------Send File Content--------");
+        SendFileContentThread s = new SendFileContentThread(rid,path,host);
+        s.start();
     }
 
     @Override
@@ -242,7 +247,7 @@ public class IntranetChatAidl extends IIntranetChatAidlInterface.Stub {
 
     /*发送*/
     private void send(String data,int code,String host){
-        TLog.d(TAG, "notify: host = " + host);
+        TLog.d(TAG, "notify: code : " + code + " host = " + host);
         Sender.sender(data,code,host);
     }
 

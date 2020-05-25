@@ -83,7 +83,7 @@ public class MonitorUdpReceivePortThread extends Thread {
                             broadcastItem.onReceiveRequest(data,host);
                             break;
                         case Config.CODE_FILE:
-                            broadcastItem.onReceiveFile(data,host);
+                            broadcastItem.onReceiveFileBean(data,host);
                             break;
                         case Config.CODE_ASK_RESOURCE:
                             broadcastItem.onReceiveAskResource(data,host);

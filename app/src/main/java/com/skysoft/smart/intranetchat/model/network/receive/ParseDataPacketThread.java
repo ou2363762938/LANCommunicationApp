@@ -146,11 +146,13 @@ public class ParseDataPacketThread extends Thread {
 
     /*当从数据包获取到FileBean时的处理方法*/
     private void onReceiveFileBean(DataPacketBean dataPacketBean, String host) {
-        TLog.d(TAG, "onReceiveFileBean: " + host);
-        FileBean fileBean = (FileBean) GsonTools.formJson(dataPacketBean.getData(), FileBean.class);
-        if (fileBean == null || fileBean.getSender().equals(IntranetChatAidl.getUserInfoBean().getIdentifier())){
-            return;
-        }
+        TLog.d(TAG, "onReceiveFileBean: " +
+                dataPacketBean.getData() +
+                ", " + host);
+//        FileBean fileBean = (FileBean) GsonTools.formJson(dataPacketBean.getData(), FileBean.class);
+//        if (fileBean == null || fileBean.getSender().equals(IntranetChatAidl.getUserInfoBean().getIdentifier())){
+//            return;
+//        }
 
         MonitorUdpReceivePortThread.broadcastReceive(Config.CODE_FILE,dataPacketBean.getData(),host);
 

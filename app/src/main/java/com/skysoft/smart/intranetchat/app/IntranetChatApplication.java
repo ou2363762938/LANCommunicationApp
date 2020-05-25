@@ -41,6 +41,7 @@ import com.skysoft.smart.intranetchat.model.chat.record.RecordManager;
 import com.skysoft.smart.intranetchat.model.contact.ContactManager;
 import com.skysoft.smart.intranetchat.model.filemanager.FileManager;
 import com.skysoft.smart.intranetchat.model.filemanager.FilePath;
+import com.skysoft.smart.intranetchat.model.filemanager.FilePool;
 import com.skysoft.smart.intranetchat.model.group.GroupManager;
 import com.skysoft.smart.intranetchat.model.latest.Code;
 import com.skysoft.smart.intranetchat.model.mine.MineInfoManager;
@@ -314,6 +315,7 @@ public class IntranetChatApplication extends Application {
         MineInfoManager.init(this);
         RecordManager.init();
         Message.init(this);
+        FilePool.init();
         FileManager.init(this);
         FilePath.init(this);
         setContext(this);

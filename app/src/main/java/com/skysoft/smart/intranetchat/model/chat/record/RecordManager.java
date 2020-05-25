@@ -12,6 +12,7 @@ import com.skysoft.smart.intranetchat.database.MyDataBase;
 import com.skysoft.smart.intranetchat.database.dao.RecordDao;
 import com.skysoft.smart.intranetchat.database.table.FileEntity;
 import com.skysoft.smart.intranetchat.database.table.RecordEntity;
+import com.skysoft.smart.intranetchat.model.camera.entity.EventMessage;
 import com.skysoft.smart.intranetchat.model.contact.ContactManager;
 import com.skysoft.smart.intranetchat.model.group.GroupManager;
 import com.skysoft.smart.intranetchat.model.latest.LatestManager;
@@ -61,6 +62,7 @@ public class RecordManager {
             @Override
             public void run() {
                 loadRecord(receiver,group ? 1 : 0);
+                mSignal.code = Code.LOAD;
                 EventBus.getDefault().post(mSignal);
             }
         });
@@ -121,6 +123,7 @@ public class RecordManager {
                     }
                     List<RecordEntity> all = recordDao.getRecord(receiver,group, start, more);
                     mRecordList.addAll(all);
+                    mSignal.code = Code.LOAD_MORE;
                     EventBus.getDefault().post(mSignal);
                 }
             }
@@ -130,6 +133,7 @@ public class RecordManager {
     }
 
     private void notifyChanged() {
+        mSignal.code = Code.RS;
         EventBus.getDefault().post(mSignal);
     }
 
@@ -222,13 +226,44 @@ public class RecordManager {
         record(record);
     }
 
-    public void recordFile(FileEntity file, int sender) {
+    public void recordFile(FileEntity file,
+                           int sender,
+                           int receiver,
+                           int group) {
         RecordEntity record = generatorRecord(ChatRoomConfig.RECORD_FILE, sender);
+        record.setReceiver(receiver);
+        record.setSender(sender);
+        record.setGroup(group);
         record.setFileEntity(file);
-        record.setFile(GsonTools.toJson(file));
-        if (file.getType() == Config.FILE_VIDEO && file.getStep() == Config.STEP_SUCCESS) {
+
+        if (file.getType() == Config.FILE_VIDEO) {
             file.setThumbnail(thumbnailFile(file.getPath()));
         }
+        record.setFile(GsonTools.toJson(file));
+        record(record);
+    }
+
+    public void recordFile(FileEntity file, String sender, String receiver) {
+        int s = ContactManager.getInstance().getContactId(sender);
+        if (sender.equals(receiver)) {
+            recordFile(file,s,s,0);
+        } else {
+            recordFile(file,
+                    s,
+                    GroupManager.getInstance().getGroupId(receiver),
+                    1);
+        }
+    }
+
+    public void recordFile(FileEntity file, int sender) {
+        TLog.d(TAG,"------------> " + file.toString());
+        RecordEntity record = generatorRecord(ChatRoomConfig.RECORD_FILE, sender);
+        record.setFileEntity(file);
+        if (file.getType() == Config.FILE_VIDEO ) {
+            file.setThumbnail(thumbnailFile(file.getPath()));
+            TLog.d(TAG,"----------> Thumbnail : " + file.getThumbnail());
+        }
+        record.setFile(GsonTools.toJson(file));
         record(record);
     }
 

@@ -11,9 +11,13 @@ import com.skysoft.smart.intranetchat.app.IntranetChatApplication;
 import com.skysoft.smart.intranetchat.model.network.Config;
 import com.skysoft.smart.intranetchat.model.network.bean.AskResourceBean;
 import com.skysoft.smart.intranetchat.tools.GsonTools;
+import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 
 public class AskFile {
+    private static final String TAG = "AskFile";
+
     public static void askFile(String identifier,String host){
+        TLog.d(TAG,"---------Ask File-------" + identifier);
         AskResourceBean askResourceBean = new AskResourceBean();
         askResourceBean.setResourceUniqueIdentifier(identifier);
         askResourceBean.setResourceType(Config.RESOURCE_FILE);

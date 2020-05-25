@@ -11,6 +11,7 @@ import com.skysoft.smart.intranetchat.database.table.ContactEntity;
 import com.skysoft.smart.intranetchat.database.table.FileEntity;
 import com.skysoft.smart.intranetchat.database.table.GroupEntity;
 import com.skysoft.smart.intranetchat.model.avatar.AvatarManager;
+import com.skysoft.smart.intranetchat.model.camera.entity.EventMessage;
 import com.skysoft.smart.intranetchat.model.chat.record.RecordManager;
 import com.skysoft.smart.intranetchat.model.contact.ContactManager;
 import com.skysoft.smart.intranetchat.model.group.GroupManager;
@@ -24,6 +25,7 @@ import com.skysoft.smart.intranetchat.model.network.bean.ReceiveFileContentBean;
 import com.skysoft.smart.intranetchat.model.network.bean.ResponseBean;
 import com.skysoft.smart.intranetchat.tools.GsonTools;
 import com.skysoft.smart.intranetchat.tools.Identifier;
+import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -49,27 +51,34 @@ public class FileManager {
         return sInstance;
     }
 
-    public void notify(ContactEntity contact, String path, int type, int contentLength) {
+    public FileEntity notify(ContactEntity contact, String path, int type, int contentLength) {
         FileBean bean = generatorFileBean(path,type,contentLength);
         bean.setReceiver(contact.getIdentifier());
         bean.setSender(sMineId);
-        FilePool.getInstance().put(bean,path,Config.STEP_NOTIFY);
+        FileDrops drops = FilePool.
+                getInstance().
+                put(bean,path,Config.STEP_NOTIFY);
         notify(bean,path,contact.getHost());
+        return drops.getFileEntity();
     }
 
-    public void notify(GroupEntity group, String path, int type, int contentLength) {
+    public FileEntity notify(GroupEntity group, String path, int type, int contentLength) {
         FileBean bean = generatorFileBean(path,type,contentLength);
         bean.setReceiver(group.getIdentifier());
-        bean.setSender(sMineId);
-        FilePool.getInstance().put(bean,path,Config.STEP_NOTIFY);
+        bean.setSender(MineInfoManager.getInstance().getIdentifier());
+        FileDrops drops = FilePool.getInstance().put(bean,path,Config.STEP_NOTIFY);
         notify(bean,path,"255.255.255.255");
+        return drops.getFileEntity();
     }
 
     private void notify(FileBean bean, String path, String host) {
+        TLog.d(TAG,"=========> notify " + bean.toString());
         try {
+            TLog.d(TAG,"----------> notify " + host);
             IntranetChatApplication.sAidlInterface.sendFile(GsonTools.toJson(bean),path,host);
         } catch (RemoteException e) {
             e.printStackTrace();
+            TLog.d(TAG,"========== Exception =========");
         }
     }
 
@@ -90,11 +99,13 @@ public class FileManager {
     }
 
     public void requestFile(FileBean bean, String host) {
+        TLog.d(TAG,"requestFile----------> " + bean.toString());
         FilePool.getInstance().put(bean,"",Config.STEP_REQUEST);
         AskFile.askFile(bean.getRid(), host);
     }
 
     public void receiveRequest(String rid, String host) {
+        TLog.d(TAG,"receiveRequest--------> " + rid);
         FileDrops drops = FilePool.getInstance().get(rid);
         drops.setStep(Config.STEP_SEND);
         try {
@@ -129,7 +140,8 @@ public class FileManager {
                 RecordManager.
                         getInstance().
                         recordFile(entity,
-                                drops.getFileBean().getSender());
+                                drops.getFileBean().getSender(),
+                                drops.getFileBean().getReceiver());
                 LatestManager.
                         getInstance().
                         receive(drops.getFileBean().getReceiver(),

@@ -201,6 +201,7 @@ public class IntranetChatCallback extends IIntranetChatAidlInterfaceCallback.Stu
                 }
                 break;
             case Config.RESOURCE_FILE:
+                TLog.d(TAG,"---------> " + askResourceJson);
                 FileManager.getInstance().receiveRequest(bean.getResourceUniqueIdentifier(), host);
                 break;
         }
@@ -210,12 +211,13 @@ public class IntranetChatCallback extends IIntranetChatAidlInterfaceCallback.Stu
     public void onReceiveAndSaveFile(String sender,
                                      String receiver,
                                      String identifier,
-                                     String path,
+                                     String path ,
                                      String host) throws RemoteException {
     }
 
     @Override
     public void onReceiveFile(String receive,String host) throws RemoteException {
+        TLog.d(TAG,"onReceiveFile-----------> " + receive);
         ReceiveFileContentBean bean = (ReceiveFileContentBean) GsonTools.formJson(receive,ReceiveFileContentBean.class);
         FileManager.getInstance().receiveFile(bean,host);
     }

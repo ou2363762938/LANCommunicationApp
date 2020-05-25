@@ -18,6 +18,7 @@ import com.skysoft.smart.intranetchat.model.contact.ContactManager;
 import com.skysoft.smart.intranetchat.model.group.GroupManager;
 import com.skysoft.smart.intranetchat.model.network.Config;
 import com.skysoft.smart.intranetchat.tools.GsonTools;
+import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 import com.skysoft.smart.intranetchat.ui.activity.chatroom.ChatRoom.ChatRoomActivity;
 
 import org.greenrobot.eventbus.EventBus;
@@ -31,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 
 public class LatestManager {
+    private static final String TAG = "LatestManager";
     private static LatestManager sInstance;
     private LatestManager() {
         mLatestSortList = new ArrayList<>();
@@ -97,7 +99,7 @@ public class LatestManager {
             public void run() {
                 int base = group ? 1000 : 0;
                 int u = user + base;
-                LatestEntity latest = mLatestMap.get(u);
+                LatestEntity latest = mLatestMap.get(mLatestIndex.get(u));
                 LatestDao latestDao = MyDataBase.getInstance().getLatestDao();
                 boolean inRoom = RecordManager.getInstance().isInRoom();
 
@@ -124,6 +126,7 @@ public class LatestManager {
                 latest.setGroup(base);
 
                 latestDao.update(latest);
+                sortLatest();
                 EventBus.getDefault().post(mSignal);
             }
         };
@@ -169,8 +172,10 @@ public class LatestManager {
             public void run() {
                 int base = group ? 1000 : 0;
                 int u = user + base;
-                LatestEntity latest = mLatestMap.get(u);
+                TLog.d(TAG,"==========<> User : " + u + ", id : " + mLatestIndex.get(u));
+                LatestEntity latest = mLatestMap.get(mLatestIndex.get(u));
                 if (latest == null) {
+                    TLog.d(TAG,"=====Null-----");
                     latest = new LatestEntity();
                     latest.setId(-1);
                     latest.setUser(u);
@@ -193,6 +198,7 @@ public class LatestManager {
                     mLatestIndex.put(u,id);
                 }
 
+                sortLatest();
                 EventBus.getDefault().post(mSignal);
             }
         };
@@ -325,13 +331,13 @@ public class LatestManager {
     public String fileContent(FileEntity file) {
         switch (file.getType()) {
             case Config.FILE_VOICE:
-                return "语音";
+                return "[语音]";
             case Config.FILE_VIDEO:
-                return "视频";
+                return "[视频]";
             case Config.FILE_PICTURE:
-                return "图片";
+                return "[图片]";
             case Config.FILE_COMMON:
-                return "文件";
+                return "[文件]";
             default:
                 return null;
         }

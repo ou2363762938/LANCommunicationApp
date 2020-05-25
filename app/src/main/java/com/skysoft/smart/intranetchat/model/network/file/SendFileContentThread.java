@@ -55,6 +55,7 @@ public class SendFileContentThread extends Thread {
         if (mSocket == null){
             return;
         }
+        TLog.d(TAG,"------------------");
         File f = new File(mPath);
         FileInputStream fis = null;
         OutputStream os = null;

@@ -30,6 +30,7 @@ import com.skysoft.smart.intranetchat.model.network.Config;
 import com.skysoft.smart.intranetchat.tools.CreateNotifyBitmap;
 import com.skysoft.smart.intranetchat.tools.GsonTools;
 import com.skysoft.smart.intranetchat.tools.QuickClickListener;
+import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 import com.skysoft.smart.intranetchat.ui.activity.camera.PictureShowActivity;
 import com.skysoft.smart.intranetchat.ui.activity.camera.VideoPlayActivity;
 import com.skysoft.smart.intranetchat.ui.activity.chatroom.ChatRoom.ChatRoomConfig;

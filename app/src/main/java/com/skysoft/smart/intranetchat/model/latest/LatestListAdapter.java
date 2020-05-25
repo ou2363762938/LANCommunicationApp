@@ -211,7 +211,7 @@ public class LatestListAdapter extends BaseAdapter {
         Log.d(TAG, "---------> " + latest.toString());
         ContactEntity contact = ContactManager
                 .getInstance()
-                .getContact(latest.getId());
+                .getContact(latest.getUser());
         holder.name.setText(contact.getName());
         holder.message.setText(latest.getContent());
         holder.messageTime.setText(RoomUtils.millToFullTime(latest.getTime()));
