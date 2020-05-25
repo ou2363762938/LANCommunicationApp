@@ -48,6 +48,7 @@ public class Login {
             @Override
             public void run() {
                 MineInfoManager infoManager = MineInfoManager.getInstance().init();
+                TLog.d(TAG, "---------> " + infoManager.toString());
                 //已经注册，进入主页面
                 if (!TextUtils.isEmpty(infoManager.getIdentifier())){
                     Login.login(MineInfoManager.getInstance().getUserInfo());

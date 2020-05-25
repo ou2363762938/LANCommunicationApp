@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.RemoteException;
+import android.util.Log;
 
 import com.skysoft.smart.intranetchat.app.IntranetChatApplication;
 import com.skysoft.smart.intranetchat.bean.signal.MessageSignal;
@@ -71,7 +72,8 @@ public class Message {
                 }
 
                 MessageBean messageBean = (MessageBean) GsonTools.formJson(messageJson,MessageBean.class);
-                if (messageBean.getSender().equals(sMineId)){
+                if (messageBean.getSender().equals(
+                        MineInfoManager.getInstance().getIdentifier())){
                     return;
                 }
 
@@ -79,7 +81,7 @@ public class Message {
                 MessageSignal signal = new MessageSignal();
                 signal.setBean(messageBean);
 
-                RecordManager.getInstance().recordText(messageBean.getMsg(),messageBean.getSender());
+                RecordManager.getInstance().recordText(messageBean);
                 LatestManager.getInstance().receive(messageBean.getReceiver(),messageBean.getMsg());
             }
         };
@@ -110,6 +112,7 @@ public class Message {
     }
 
     private void send(MessageBean bean) {
+        TLog.d(TAG, "------> " + bean.toString());
         try {
             IntranetChatApplication.
                     sAidlInterface.
@@ -124,8 +127,8 @@ public class Message {
         MessageBean bean = new MessageBean();
         bean.setMsg(message);
         bean.setTimeStamp(System.currentTimeMillis());
-        bean.setSender(sMineId);
-        bean.setReceiver(sMineId);
+        bean.setSender(MineInfoManager.getInstance().getIdentifier());
+        bean.setReceiver(MineInfoManager.getInstance().getIdentifier());
         bean.setHost(contact.getHost());
 
         return bean;

@@ -22,7 +22,6 @@ import android.text.style.ImageSpan;
 import com.google.gson.Gson;
 import com.skysoft.smart.intranetchat.app.BaseActivity;
 import com.skysoft.smart.intranetchat.bean.base.DeviceInfoBean;
-import com.skysoft.smart.intranetchat.bean.network.SendAtMessageBean;
 import com.skysoft.smart.intranetchat.bean.signal.AvatarSignal;
 import com.skysoft.smart.intranetchat.bean.signal.ChatSignal;
 import com.skysoft.smart.intranetchat.database.table.GroupEntity;
@@ -32,7 +31,6 @@ import com.skysoft.smart.intranetchat.model.chat.record.RecordAdapter;
 import com.skysoft.smart.intranetchat.model.chat.record.RecordManager;
 import com.skysoft.smart.intranetchat.model.contact.ContactManager;
 import com.skysoft.smart.intranetchat.model.latest.LatestManager;
-import com.skysoft.smart.intranetchat.model.network.bean.MessageBean;
 import com.skysoft.smart.intranetchat.tools.ChatRoom.KeyBoardUtils;
 import com.skysoft.smart.intranetchat.tools.ChatRoom.RoomUtils;
 import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
@@ -57,8 +55,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.skysoft.smart.intranetchat.MainActivity;
 import com.skysoft.smart.intranetchat.R;
 import com.skysoft.smart.intranetchat.app.IntranetChatApplication;
-import com.skysoft.smart.intranetchat.bean.network.SendMessageBean;
-import com.skysoft.smart.intranetchat.model.net_model.SendMessage;
 import com.skysoft.smart.intranetchat.model.camera.manager.MyMediaPlayerManager;
 import com.skysoft.smart.intranetchat.model.camera.videocall.Sender;
 import com.skysoft.smart.intranetchat.tools.CreateNotifyBitmap;
@@ -335,7 +331,7 @@ public class ChatRoomActivity extends BaseActivity implements View.OnClickListen
         }
 
 
-        mAdapter = RecordManager.init(this,mReceiver,isGroup);
+        mAdapter = RecordManager.getInstance().initAdapter(this,mReceiver,isGroup);
         mAdapter.setHasStableIds(true);
         mAdapter.setOnScrollToPosition(onScrollToPosition);
         mAdapter.setOnClickReplayOrNotify(mOnClickReplayOrNotify);       //注册回复和@
@@ -484,7 +480,7 @@ public class ChatRoomActivity extends BaseActivity implements View.OnClickListen
     protected void onDestroy() {
         super.onDestroy();
         EventBus.getDefault().unregister(this);
-        RecordManager.destroy();
+        RecordManager.getInstance().destroy();
     }
 
     @Override

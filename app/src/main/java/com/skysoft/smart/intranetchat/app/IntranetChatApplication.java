@@ -39,6 +39,7 @@ import com.skysoft.smart.intranetchat.database.table.LatestEntity;
 import com.skysoft.smart.intranetchat.database.table.RecordEntity;
 import com.skysoft.smart.intranetchat.model.avatar.AvatarManager;
 import com.skysoft.smart.intranetchat.model.chat.Message;
+import com.skysoft.smart.intranetchat.model.chat.record.RecordManager;
 import com.skysoft.smart.intranetchat.model.contact.ContactManager;
 import com.skysoft.smart.intranetchat.model.filemanager.FileManager;
 import com.skysoft.smart.intranetchat.model.filemanager.FilePath;
@@ -266,7 +267,7 @@ public class IntranetChatApplication extends Application {
     public void onCreate() {
         super.onCreate();
         EventBus.getDefault().register(this);
-//        MyDataBase.init(this);
+//        MyDataBase.initAdapter(this);
         sBaseTimeLine = initBaseTimeLine();
         boolean isCurrentProcess = getApplicationContext().getPackageName().equals
                 (getCurrentProcessName());
@@ -284,6 +285,7 @@ public class IntranetChatApplication extends Application {
         MyDataBase.init(this);
         DeviceInfoBean.init(this);
         MineInfoManager.init(this);
+        RecordManager.init();
         Message.init(this);
         FileManager.init(this);
         FilePath.init(this);

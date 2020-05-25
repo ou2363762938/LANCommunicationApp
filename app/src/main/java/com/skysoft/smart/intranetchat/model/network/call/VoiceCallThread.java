@@ -34,9 +34,9 @@ public class VoiceCallThread {
     }
 
     public static void init(Socket socket) {
-        TLog.d(TAG, "init: 1");
+        TLog.d(TAG, "initAdapter: 1");
         if (sInstance.isClose()) {
-            TLog.d(TAG, "init: 2");
+            TLog.d(TAG, "initAdapter: 2");
             sInstance.mDatasQueue.clear();
             sInstance.socket = socket;
             sInstance.close = false;

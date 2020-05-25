@@ -39,7 +39,7 @@ public abstract class MyDataBase extends RoomDatabase {
     public MyDataBase(){}
     public static MyDataBase sInstance;
     public static void init(Context context){
-        TLog.d("MyDatabase", "init: ");
+        TLog.d("MyDatabase", "initAdapter: ");
         sInstance = Room.databaseBuilder(context, MyDataBase.class,DB_NAME).build();
     }
 

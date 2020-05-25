@@ -31,7 +31,7 @@ public class VioceCallPlay extends Thread {
         mBufSize = AudioTrack.getMinBufferSize(mFrequency, mChannel, mSampBit) * 5;
         mAudioTrack = new AudioTrack(AudioManager.STREAM_MUSIC, mFrequency, mChannel, mSampBit, mBufSize, AudioTrack.MODE_STREAM);
         mAudioTrack.play();
-        TLog.d(TAG, "init:  play");
+        TLog.d(TAG, "initAdapter:  play");
     }
 
     @Override

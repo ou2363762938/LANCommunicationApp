@@ -43,7 +43,7 @@ public class MyAudioTrack {
         mBufSize = getMinBufferSize();
         mAudioTrack = new AudioTrack(AudioManager.STREAM_MUSIC, mFrequency, mChannel, mSampBit, mBufSize, AudioTrack.MODE_STREAM);
         mAudioTrack.play();
-        TLog.d(TAG, "init: track play");
+        TLog.d(TAG, "initAdapter: track play");
     }
 
     public void release() {

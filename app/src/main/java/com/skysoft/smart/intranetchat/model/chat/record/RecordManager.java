@@ -17,10 +17,13 @@ import com.skysoft.smart.intranetchat.database.table.FileEntity;
 import com.skysoft.smart.intranetchat.database.table.GroupMemberEntity;
 import com.skysoft.smart.intranetchat.database.table.RecordEntity;
 import com.skysoft.smart.intranetchat.model.contact.ContactManager;
+import com.skysoft.smart.intranetchat.model.group.GroupManager;
 import com.skysoft.smart.intranetchat.model.latest.LatestManager;
 import com.skysoft.smart.intranetchat.model.net_model.SendFile;
 import com.skysoft.smart.intranetchat.model.network.Config;
+import com.skysoft.smart.intranetchat.model.network.bean.MessageBean;
 import com.skysoft.smart.intranetchat.tools.GsonTools;
+import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 import com.skysoft.smart.intranetchat.ui.activity.chatroom.ChatRoom.ChatRoomConfig;
 
 import org.greenrobot.eventbus.EventBus;
@@ -32,16 +35,30 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class RecordManager {
+    private static final String TAG = "RecordManager";
     private static RecordManager sInstance;
-    private RecordManager(Context context, int receiver, boolean group) {
+    private RecordManager() {
+        mHandlerThread = new HandlerThread(HANDLER_THREAD_NAME);
+        mHandlerThread.start();
+        mHandler = new Handler(mHandlerThread.getLooper());
+    }
+
+    public static RecordManager getInstance() {
+        return sInstance;
+    }
+
+    public static RecordManager init() {
+        sInstance = new RecordManager();
+        return sInstance;
+    }
+
+    public RecordAdapter initAdapter(Context context,
+                                     int receiver,
+                                     boolean group) {
         mRecordList = new ArrayList<>();
         mReceiver = receiver;
         mGroup = group ? 1 : 0;
         mRecordAdapter = new RecordAdapter(context,receiver,group,mRecordList);
-
-        mHandlerThread = new HandlerThread(HANDLER_THREAD_NAME);
-        mHandlerThread.start();
-        mHandler = new Handler(mHandlerThread.getLooper());
 
         mHandler.post(new Runnable() {
             @Override
@@ -50,27 +67,12 @@ public class RecordManager {
                 EventBus.getDefault().post(mSignal);
             }
         });
-    }
-    public static RecordManager getInstance() {
-        return sInstance;
+        return mRecordAdapter;
     }
 
-    public static RecordAdapter init(Context context,
-                                           int receiver,
-                                           boolean group) {
-        if (sInstance != null) {
-            sInstance = null;
-        }
-        sInstance = new RecordManager(context,receiver,group);
-        return sInstance.mRecordAdapter;
-    }
-
-    public static void destroy() {
-        if (sInstance != null) {
-            sInstance.mRecordAdapter = null;
-            sInstance.mRecordList = null;
-            sInstance = null;
-        }
+    public void destroy() {
+        mRecordAdapter = null;
+        mRecordList = null;
     }
 
     private RecordAdapter mRecordAdapter;
@@ -136,6 +138,14 @@ public class RecordManager {
         }
     }
 
+    private void recordTime(RecordDao recordDao, long time, long t2) {
+        if (isRecordTime(time,t2)) {
+            RecordEntity recordTime = generatorRecord(ChatRoomConfig.RECORD_TIME, -1,time);
+            recordDao.insert(recordTime);
+//            mRecordList.add(recordTime);
+        }
+    }
+
     private boolean isRecordTime(long time) {
         if (mRecordList.size() == 0) {
             return true;
@@ -146,10 +156,17 @@ public class RecordManager {
             return false;
         }
 
-        if (time - latestRecord.getTime() > 2*60*1000) {
+        return isRecordTime(time,latestRecord.getTime());
+    }
+
+    /**
+     * @param t1 待加入的记录的时间
+     * @param t2 上一条记录的时间*/
+    private boolean isRecordTime(long t1, long t2) {
+        TLog.d(TAG,"--------t1, t2------"+t1 + ", " + t2);
+        if (t1 - t2 > 2*60*1000) {
             return true;
         }
-
         return false;
     }
 
@@ -159,9 +176,14 @@ public class RecordManager {
             public void run() {
                 RecordDao recordDao = MyDataBase.getInstance().getRecordDao();
 
-                recordTime(recordDao,record.getTime());
+                if (mRecordList == null) {
+                    long time = recordDao.getLatestRecordTime(record.getReceiver(), record.getGroup());
+                    recordTime(recordDao,record.getTime(),time);
+                } else {
+                    recordTime(recordDao,record.getTime());
+                    mRecordList.add(record);
+                }
 
-                mRecordList.add(record);
                 recordDao.insert(record);
 
                 notifyChanged();
@@ -177,9 +199,24 @@ public class RecordManager {
         record(record);
     }
 
-    public void recordText(String content, String sender) {
-        int id = ContactManager.getInstance().getContact(sender).getId();
-        recordText(content,id);
+    public void recordText(MessageBean bean) {
+        int sender = ContactManager.
+                getInstance().
+                getContact(bean.getSender()).getId();
+        RecordEntity record = generatorRecord(ChatRoomConfig.RECORD_TEXT, sender);
+        record.setContent(bean.getMsg());
+
+        if (bean.getSender().equals(bean.getSender())) {
+            record.setGroup(0);
+            record.setReceiver(sender);
+        } else {
+            record.setGroup(1);
+            record.setReceiver(
+                            GroupManager.getInstance().getGroupId(
+                                    bean.getReceiver()));
+        }
+
+        record(record);
     }
 
     public void recordFile(FileEntity file, int sender) {

@@ -214,6 +214,16 @@ public class LatestManager {
         mHandler.post(update);
     }
 
+    public void update(LatestEntity latest) {
+        Runnable update = new Runnable() {
+            @Override
+            public void run() {
+                MyDataBase.getInstance().getLatestDao().update(latest);
+            }
+        };
+        mHandler.post(update);
+    }
+
     public void clickLatest(Context context, LatestEntity latest, int position) {
         refreshUnRead(latest);
         String entity = null;
@@ -231,9 +241,13 @@ public class LatestManager {
     }
 
     private void refreshUnRead(LatestEntity latest) {
+        if (latest == null) {
+            return;
+        }
         latest.setUnReadNumber(0);
         IntranetChatApplication.setTotalUnReadNumber(
                 LatestManager.getInstance().totalUnReadNumber());
+        update(latest);
         mAdapter.notifyDataSetChanged();
     }
 

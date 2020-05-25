@@ -99,7 +99,7 @@ public class VideoEncoder {
         if (mMediaCodec != null) {
             mMediaCodec.start();
         } else {
-            throw new IllegalArgumentException("startEncoder failed,is the MediaCodec has been init correct?");
+            throw new IllegalArgumentException("startEncoder failed,is the MediaCodec has been initAdapter correct?");
         }
     }
 

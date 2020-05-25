@@ -139,7 +139,6 @@ public class MineInfoManager {
     @Override
     public String toString() {
         return "MineInfoManager{" +
-                "mContext=" + mContext +
                 ", name='" + name + '\'' +
                 ", identifier='" + identifier + '\'' +
                 ", host='" + host + '\'' +

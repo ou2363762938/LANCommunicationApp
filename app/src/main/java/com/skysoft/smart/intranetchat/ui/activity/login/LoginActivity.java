@@ -26,7 +26,6 @@ import com.bumptech.glide.Glide;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.skysoft.smart.intranetchat.MainActivity;
 import com.skysoft.smart.intranetchat.R;
-import com.skysoft.smart.intranetchat.app.IntranetChatApplication;
 import com.skysoft.smart.intranetchat.model.login.Login;
 import com.skysoft.smart.intranetchat.tools.customstatusbar.CustomStatusBarBackground;
 import com.skysoft.smart.intranetchat.tools.toastutil.ToastUtil;
@@ -50,12 +49,13 @@ public class LoginActivity extends AppCompatActivity {
 
     public static final String TAG = "LoginActivity";
     private static BottomSheetDialog bottomSheetDialog;
-    private int mMaxBottomHight = 0;
+    private int mMaxBottomHeight = 0;
     private OnSoftKeyboardStateChangedListener mOSSCL = new OnSoftKeyboardStateChangedListener() {
 
         @Override
         public void onSoftKeyboardStateChangedListener(boolean isKeyBoardShow, int keyboardHeight, int screenSize) {
             if (isKeyBoardShow){
+                TLog.d(TAG,"Height --------> " + keyboardHeight);
                 DeviceInfoBean.getInstance().set(keyboardHeight,screenSize);
             }
         }
@@ -69,8 +69,8 @@ public class LoginActivity extends AppCompatActivity {
             Rect rect = new Rect();
             getWindow().getDecorView().getWindowVisibleDisplayFrame(rect);
             int heightDifference = 0;
-            mMaxBottomHight = mMaxBottomHight < rect.bottom ? rect.bottom : mMaxBottomHight;
-            if (screenSize.y == mMaxBottomHight){
+            mMaxBottomHeight = mMaxBottomHeight < rect.bottom ? rect.bottom : mMaxBottomHeight;
+            if (screenSize.y == mMaxBottomHeight){
                 heightDifference = screenSize.y - rect.bottom;
             }else {
                 heightDifference = screenSize.y - rect.bottom + rect.top;

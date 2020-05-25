@@ -68,6 +68,8 @@ public class MessageBean{
                 "sender='" + sender + '\'' +
                 ", receiver='" + receiver + '\'' +
                 ", msg='" + msg + '\'' +
+                ", type=" + type +
+                ", host='" + host + '\'' +
                 ", timeStamp=" + timeStamp +
                 '}';
     }
