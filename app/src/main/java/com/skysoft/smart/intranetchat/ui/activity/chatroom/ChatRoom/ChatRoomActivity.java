@@ -23,7 +23,7 @@ import com.google.gson.Gson;
 import com.skysoft.smart.intranetchat.app.BaseActivity;
 import com.skysoft.smart.intranetchat.bean.base.DeviceInfoBean;
 import com.skysoft.smart.intranetchat.bean.signal.AvatarSignal;
-import com.skysoft.smart.intranetchat.bean.signal.ChatSignal;
+import com.skysoft.smart.intranetchat.bean.signal.RecordSignal;
 import com.skysoft.smart.intranetchat.database.table.GroupEntity;
 import com.skysoft.smart.intranetchat.database.table.RecordEntity;
 import com.skysoft.smart.intranetchat.model.chat.Message;
@@ -164,6 +164,9 @@ public class ChatRoomActivity extends BaseActivity implements View.OnClickListen
 
         @Override
         public void onSoftKeyboardStateChangedListener(boolean isKeyBoardShow, int keyboardHeight, int screenSize) {
+            TLog.d(TAG,"---> isKeyBoardShow : " + isKeyBoardShow +
+                    ", keyboardHeight : " + keyboardHeight +
+                    ", screenSize : " + screenSize);
             isKeyboardOpened = isKeyBoardShow;
 
             //开启软键盘
@@ -467,8 +470,9 @@ public class ChatRoomActivity extends BaseActivity implements View.OnClickListen
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
-    public void receiveContactSignal(ChatSignal signal) {
+    public void receiveRecordSignal(RecordSignal signal) {
         mAdapter.notifyDataSetChanged();
+        mRecyclerView.scrollToPosition(mAdapter.getItemCount());
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)

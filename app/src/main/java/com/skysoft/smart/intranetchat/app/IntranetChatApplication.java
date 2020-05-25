@@ -42,6 +42,7 @@ import com.skysoft.smart.intranetchat.model.contact.ContactManager;
 import com.skysoft.smart.intranetchat.model.filemanager.FileManager;
 import com.skysoft.smart.intranetchat.model.filemanager.FilePath;
 import com.skysoft.smart.intranetchat.model.group.GroupManager;
+import com.skysoft.smart.intranetchat.model.latest.Code;
 import com.skysoft.smart.intranetchat.model.mine.MineInfoManager;
 import com.skysoft.smart.intranetchat.tools.ChatRoom.RoomUtils;
 import com.skysoft.smart.intranetchat.tools.customstatusbar.CustomStatusBarBackground;
@@ -213,17 +214,13 @@ public class IntranetChatApplication extends Application {
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void receiveLatestSignal(LatestSignal signal) {
-        if (signal.isClickLatest) {
-            if (sTotalUnReadNumber == 0) {
-                return;
-            }
-            sTotalUnReadNumber -= signal.unRead;
-            if (sTotalUnReadNumber == 0) {
-                mTextBadgeItem.hide();
-            } else {
-                mTextBadgeItem.show();
-                mTextBadgeItem.setText(String.valueOf(sTotalUnReadNumber));
-            }
+        switch (signal.code) {
+            case Code.INIT_UNREAD:
+                initTotalUnReadNumber(signal.unRead);
+                break;
+            case Code.CLICK_ITEM:
+                reduceTotalUnReadNumber(signal.unRead);
+                break;
         }
     }
 
@@ -232,6 +229,31 @@ public class IntranetChatApplication extends Application {
         if (!isIn) {
             addTotalUnReadNumber();
             notification(messageBean,messageBean.getHost());
+        }
+    }
+
+    private void initTotalUnReadNumber(int unRead) {
+        TLog.d(TAG,"--------> Init UnRead " + unRead);
+        sTotalUnReadNumber = unRead;
+        if (sTotalUnReadNumber == 0) {
+            mTextBadgeItem.hide();
+        } else {
+            mTextBadgeItem.show();
+            mTextBadgeItem.setText(String.valueOf(sTotalUnReadNumber));
+        }
+    }
+
+    private void reduceTotalUnReadNumber(int unRead) {
+        if (sTotalUnReadNumber == 0) {
+            return;
+        }
+        sTotalUnReadNumber -= unRead;
+        if (sTotalUnReadNumber <= 0) {
+            sTotalUnReadNumber = 0;
+            mTextBadgeItem.hide();
+        } else {
+            mTextBadgeItem.show();
+            mTextBadgeItem.setText(String.valueOf(sTotalUnReadNumber));
         }
     }
 
@@ -398,14 +420,17 @@ public class IntranetChatApplication extends Application {
         String name = null;
         String avatar = null;
         int notifyId = 0;
+        String entity = null;
         TLog.d(TAG, "notification: notifyId " + message.getReceiver());
         if (group) {
             GroupEntity groupEntity = GroupManager.getInstance().getGroup(message.getReceiver());
+            entity = GsonTools.toJson(groupEntity);
             name = groupEntity.getName();
             avatar = AvatarManager.getInstance().getAvatarPath(groupEntity.getAvatar());
             notifyId = groupEntity.getNotifyId();
         } else {
             ContactEntity contact = ContactManager.getInstance().getContact(message.getSender());
+            entity = GsonTools.toJson(contact);
             name = contact.getName();
             avatar = AvatarManager.getInstance().getAvatarPath(contact.getAvatar());
             notifyId = contact.getNotifyId();
@@ -414,7 +439,7 @@ public class IntranetChatApplication extends Application {
         Intent mainIntent = new Intent(IntranetChatApplication.this, ChatRoomActivity.class);
         Bundle bundle = new Bundle();
         bundle.putString(ChatRoomConfig.AVATAR, avatar);
-        bundle.putString(ChatRoomConfig.NAME, name);
+        bundle.putString(ChatRoomConfig.NAME, entity);
         bundle.putString(ChatRoomConfig.HOST, host);
         bundle.putInt(ChatRoomConfig.UID, 0);
         bundle.putString(ChatRoomConfig.IDENTIFIER, message.getReceiver());

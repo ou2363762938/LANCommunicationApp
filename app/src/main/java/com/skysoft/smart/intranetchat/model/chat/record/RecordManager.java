@@ -6,15 +6,11 @@ import android.media.MediaMetadataRetriever;
 import android.os.Handler;
 import android.os.HandlerThread;
 
-import com.skysoft.smart.intranetchat.R;
 import com.skysoft.smart.intranetchat.bean.chat.RecordCallBean;
-import com.skysoft.smart.intranetchat.bean.signal.ChatSignal;
-import com.skysoft.smart.intranetchat.bean.signal.ContactSignal;
+import com.skysoft.smart.intranetchat.bean.signal.RecordSignal;
 import com.skysoft.smart.intranetchat.database.MyDataBase;
-import com.skysoft.smart.intranetchat.database.dao.GroupMemberDao;
 import com.skysoft.smart.intranetchat.database.dao.RecordDao;
 import com.skysoft.smart.intranetchat.database.table.FileEntity;
-import com.skysoft.smart.intranetchat.database.table.GroupMemberEntity;
 import com.skysoft.smart.intranetchat.database.table.RecordEntity;
 import com.skysoft.smart.intranetchat.model.contact.ContactManager;
 import com.skysoft.smart.intranetchat.model.group.GroupManager;
@@ -79,7 +75,7 @@ public class RecordManager {
 
     private RecordAdapter mRecordAdapter;
     private List<RecordEntity> mRecordList;
-    private ChatSignal mSignal = new ChatSignal();
+    private RecordSignal mSignal = new RecordSignal();
     private final String HANDLER_THREAD_NAME = "RecordThread";
     private HandlerThread mHandlerThread;
     private Handler mHandler;
@@ -104,6 +100,9 @@ public class RecordManager {
                 pageNum);
         if (all != null && all.size() != 0){
             mRecordList.addAll(all);
+            for (RecordEntity record : all) {
+                TLog.d(TAG,"---------------> " + record.toString());
+            }
         }
     }
 
@@ -178,7 +177,7 @@ public class RecordManager {
     }
 
     private void record(RecordEntity record) {
-        Runnable recordText = new Runnable(){
+        Runnable r = new Runnable(){
             @Override
             public void run() {
                 RecordDao recordDao = MyDataBase.getInstance().getRecordDao();
@@ -197,7 +196,7 @@ public class RecordManager {
             }
         };
 
-        mHandler.post(recordText);
+        mHandler.post(r);
     }
 
     public void recordText(String content, int sender) {

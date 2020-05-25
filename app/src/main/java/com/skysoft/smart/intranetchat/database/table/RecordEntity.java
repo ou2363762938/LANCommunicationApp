@@ -14,8 +14,7 @@ import androidx.room.PrimaryKey;
 
 import static androidx.room.ForeignKey.CASCADE;
 
-@Entity(tableName = "record",
-        indices = {@Index(value = {"receiver", "sender"})})
+@Entity(tableName = "record")
 public class RecordEntity {
     @PrimaryKey(autoGenerate = true)
     private int id;

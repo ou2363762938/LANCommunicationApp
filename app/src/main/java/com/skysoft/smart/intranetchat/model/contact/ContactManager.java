@@ -110,6 +110,11 @@ public class ContactManager {
         return mContactMap.get(mContactIndex.get(identifier));
     }
 
+    public String getContactJson(String identifier) {
+        ContactEntity contact = mContactMap.get(mContactIndex.get(identifier));
+        return GsonTools.toJson(contact);
+    }
+
     /**
      * 由联系人唯一码寻找联系人，并刷新联系人的心跳
      * @param identifier 联系人唯一码

@@ -61,11 +61,16 @@ public class LatestManager {
     private HandlerThread mHandlerThread;
 
     public void initLatestMap(List<LatestEntity> entities) {
+        int unRead = 0;
         for (LatestEntity latest:entities) {
             mLatestSortList.add(latest.getId());
             mLatestMap.put(latest.getId(),latest);
             mLatestIndex.put(latest.getUser(),latest.getId());
+            unRead += latest.getUnReadNumber();
         }
+        mSignal.code = Code.INIT_UNREAD;
+        mSignal.unRead = unRead;
+        EventBus.getDefault().post(mSignal);
     }
 
     public LatestEntity getLatest(int sender) {
@@ -97,6 +102,7 @@ public class LatestManager {
                 boolean inRoom = RecordManager.getInstance().isInRoom();
 
                 if (latest == null) {
+                    latest = new LatestEntity();
                     latest.setUser(u);
 
                     latestDao.insert(latest);
@@ -246,7 +252,7 @@ public class LatestManager {
             return;
         }
         mSignal.unRead = latest.getUnReadNumber();
-        mSignal.isClickLatest = true;
+        mSignal.code = Code.CLICK_ITEM;
         latest.setUnReadNumber(0);
 //        IntranetChatApplication.setTotalUnReadNumber(
 //                LatestManager.getInstance().totalUnReadNumber());

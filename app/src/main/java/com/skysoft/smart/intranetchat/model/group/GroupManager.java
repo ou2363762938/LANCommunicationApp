@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
 
+import com.google.gson.Gson;
 import com.skysoft.smart.intranetchat.R;
 import com.skysoft.smart.intranetchat.app.IntranetChatApplication;
 import com.skysoft.smart.intranetchat.bean.chat.TransmitBean;
@@ -92,6 +93,11 @@ public class GroupManager {
 
     public GroupEntity getGroup(String group) {
         return mGroupMap.get(mGroupIndex.get(group));
+    }
+
+    public String getGroupJson(String group) {
+        GroupEntity g = mGroupMap.get(mGroupIndex.get(group));
+        return GsonTools.toJson(g);
     }
 
     public List<TransmitBean> findGroup(String key) {
