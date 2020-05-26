@@ -165,7 +165,8 @@ public class IntranetChatCallback extends IIntranetChatAidlInterfaceCallback.Stu
         }
         switch (bean.getResourceType()){
             case Config.RESOURCE_AVATAR:        //某个用户向我请求头像数据
-                Login.notifyChangeAvatar(bean.host);
+//                Login.notifyChangeAvatar(bean.host);
+                FileManager.getInstance().notifyAvatar(host,bean.getResourceUniqueIdentifier());
                 break;
             case Config.REQUEST_MONITOR:        //某个用户请求做我的监视者
                 if (ContactManager.getInstance().watchMeNumber() < 4){

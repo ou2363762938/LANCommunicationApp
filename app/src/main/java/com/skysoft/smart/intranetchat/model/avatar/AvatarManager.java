@@ -1,6 +1,8 @@
 package com.skysoft.smart.intranetchat.model.avatar;
 
 import android.content.Context;
+import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.RemoteException;
 import android.text.TextUtils;
 import android.view.View;
@@ -22,6 +24,7 @@ import com.skysoft.smart.intranetchat.model.network.bean.AskResourceBean;
 import com.skysoft.smart.intranetchat.model.network.bean.UserInfoBean;
 import com.skysoft.smart.intranetchat.tools.GsonTools;
 import com.skysoft.smart.intranetchat.tools.Identifier;
+import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -30,10 +33,14 @@ import java.util.List;
 import java.util.Map;
 
 public class AvatarManager {
+    private static final String TAG = "AvatarManager";
     private static AvatarManager sInstance;
     private AvatarManager() {
         mAvatarMap = new HashMap<>();
         mAvatarIndex = new HashMap<>();
+        mHandlerThread = new HandlerThread(TAG);
+        mHandlerThread.start();
+        mHandler = new Handler(mHandlerThread.getLooper());
     }
 
     public static AvatarManager getInstance() {
@@ -54,6 +61,8 @@ public class AvatarManager {
             .getInstance()
             .getDefaultAvatarIdentifier();
     private AvatarSignal mSignal = new AvatarSignal();
+    private HandlerThread mHandlerThread;
+    private Handler mHandler;
 
     public void initAvatarMap(List<AvatarEntity> avatarEntities) {
         for (AvatarEntity avatar:avatarEntities) {
@@ -91,23 +100,26 @@ public class AvatarManager {
 
     public void insertAvatar(ContactEntity contact, String identifier) {
         if (contact.getAvatar() == -1) {
-            new Thread(new Runnable() {
+            Runnable insert = new Runnable() {
                 @Override
                 public void run() {
                     contact.setAvatar(insert(identifier));
                 }
-            }).start();
+            };
+
+            mHandler.post(insert);
         }
     }
 
     public void insertAvatar(GroupEntity group, String identifier) {
         if (group.getAvatar() == -1) {
-            new Thread(new Runnable() {
+            Runnable insert = new Runnable() {
                 @Override
                 public void run() {
                     group.setAvatar(insert(identifier));
                 }
-            }).start();
+            };
+            mHandler.post(insert);
         }
     }
 
@@ -135,6 +147,18 @@ public class AvatarManager {
         return id;
     }
 
+    public void update(AvatarEntity avatar) {
+        Runnable update = new Runnable() {
+            @Override
+            public void run() {
+                AvatarDao avatarDao = MyDataBase.getInstance().getAvatarDao();
+                avatarDao.update(avatar);
+            }
+        };
+
+        mHandler.post(update);
+    }
+
     public void loadContactAvatar(Context context, ImageView view, int avatar) {
         String path = null;
         if (avatar == -1) {
@@ -158,13 +182,19 @@ public class AvatarManager {
 
     public boolean checkAvatar(int id, String identifier) {
         AvatarEntity avatar = mAvatarMap.get(id);
-        if (!avatar.equals(identifier)) {
-            avatar.setIdentifier(identifier);
-            if (!identifier.equals(sDefaultAvatarId)) {
-                return true;
+        TLog.d(TAG,"<<<<<<< " + avatar.toString() + ", ID : " + identifier);
+
+        if (!avatar.getIdentifier().equals(identifier)) {
+//            avatar.setIdentifier(identifier);
+            if (identifier.equals(sDefaultAvatarId)) {
+                avatar.setIdentifier(sDefaultAvatarId);
+                update(avatar);
+                return false;
             }
+            return true;
         }
         return false;
+//        return !avatar.equals(identifier) && !identifier.equals(sDefaultAvatarId);
     }
 
     public void askAvatar(UserInfoBean userInfo, String host) {
@@ -190,11 +220,16 @@ public class AvatarManager {
     }
 
     public void receiveAvatar(String receiver, String rid, String path) {
-        new Thread(new Runnable() {
+        Runnable receive = new Runnable() {
             @Override
             public void run() {
                 AvatarDao avatarDao = MyDataBase.getInstance().getAvatarDao();
-                AvatarEntity avatar = avatarDao.getAvatar(receiver);
+                AvatarEntity avatar = mAvatarMap.get(
+                        ContactManager.
+                                getInstance().
+                                getContact(receiver).
+                                getAvatar());
+                TLog.d(TAG,"<<<<<<<< " + avatar.toString() + " >>>>>>>>>>>>");
                 avatar.setIdentifier(rid);
                 avatar.setPath(path);
                 avatarDao.update(avatar);
@@ -202,6 +237,8 @@ public class AvatarManager {
                 mSignal.receiver = receiver;
                 EventBus.getDefault().post(mSignal);
             }
-        }).start();
+        };
+
+        mHandler.post(receive);
     }
 }

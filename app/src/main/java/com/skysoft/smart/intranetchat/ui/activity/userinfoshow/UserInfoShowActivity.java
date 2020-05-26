@@ -117,7 +117,7 @@ public class UserInfoShowActivity extends BaseActivity {
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void receiveAvatarSignal(AvatarSignal signal) {
-        if (mContact.getIdentifier().equals(signal)) {
+        if (mContact.getIdentifier().equals(signal.receiver)) {
             AvatarManager.
                     getInstance().
                     loadContactAvatar(

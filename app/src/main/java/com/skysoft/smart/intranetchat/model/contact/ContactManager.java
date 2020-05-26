@@ -181,9 +181,10 @@ public class ContactManager {
         if (contact == null) {
             contact = generatorContact(userInfoBean,host);
         } else {
+            TLog.d(TAG,"<<<<<<<<<<< " + contact.toString());
             if (isInUserInfoShowActivity) {
                 //更换头像
-                if (AvatarManager.getInstance().checkAvatar(contact.getAvatar(),userInfoBean.getIdentifier())) {
+                if (AvatarManager.getInstance().checkAvatar(contact.getAvatar(),userInfoBean.getAvatarIdentifier())) {
                     AvatarManager.getInstance().askAvatar(userInfoBean,host);
                 }
 

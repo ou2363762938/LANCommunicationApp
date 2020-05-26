@@ -58,37 +58,17 @@ public class FileManager {
     }
 
     public FileEntity notify(ContactEntity contact, String path, int type, int contentLength) {
-        FileBean bean = generatorFileBean(path,type,contentLength);
-        bean.setReceiver(MineInfoManager.getInstance().getIdentifier());
-        bean.setSender(bean.getReceiver());
-        FileDrops drops = FilePool.
-                getInstance().
-                put(bean,path,Config.STEP_NOTIFY);
-        notify(bean,path,contact.getHost());
-        return drops.getFileEntity();
+        String receiver = MineInfoManager.getInstance().getIdentifier();
+        return notify(contact.getHost(),receiver,receiver,path,type,contentLength);
     }
 
     public FileEntity notify(GroupEntity group, String path, int type, int contentLength) {
-        FileBean bean = generatorFileBean(path,type,contentLength);
-        bean.setReceiver(group.getIdentifier());
-        bean.setSender(MineInfoManager.getInstance().getIdentifier());
-        FileDrops drops = FilePool.getInstance().put(bean,path,Config.STEP_NOTIFY);
-        notify(bean,path,"255.255.255.255");
-        return drops.getFileEntity();
-    }
-
-    private void notify(FileBean bean, String path, String host) {
-        bean.setSender(MineInfoManager.getInstance().getIdentifier());
-//        {"contentLength":0,"fileLength":93586,"md5":"47349402ace64397d0fec836dbdccee9","name":"1590453768118392.jpeg","receiver":"64ee242befc61c2e","rid":"qgbm5ebmmp29ymgb","type":42}
-//        {rid='qgbm5ebmmp29ymgb', name='1590453768118392.jpeg', md5='47349402ace64397d0fec836dbdccee9', sender='null', receiver='64ee242befc61c2e', fileLength=93586, contentLength=0, type=42}
-        TLog.d(TAG,"=========> notify " + bean.toString());
-        try {
-            TLog.d(TAG,"----------> notify " + host);
-            IntranetChatApplication.sAidlInterface.sendFile(GsonTools.toJson(bean),path,host);
-        } catch (RemoteException e) {
-            e.printStackTrace();
-            TLog.d(TAG,"========== Exception =========");
-        }
+        return notify("255.255.255.255",
+                group.getIdentifier(),
+                MineInfoManager.getInstance().getIdentifier(),
+                path,
+                type,
+                contentLength);
     }
 
     public void notify(GroupEntity group, FileEntity file) {
@@ -104,6 +84,51 @@ public class FileManager {
             notify(GroupManager.getInstance().getGroup(id),file);
         } else {
             notify(ContactManager.getInstance().getContact(id),file);
+        }
+    }
+
+    public void notifyAvatar(String host, String rid) {
+        TLog.d(TAG,">>>>>Notify Avatar <<<<<< " + rid);
+        String avatar = MineInfoManager.getInstance().getAvatarIdentifier();
+        if (avatar.equals(rid)) {
+            String receiver = MineInfoManager.getInstance().getIdentifier();
+            String path = MineInfoManager.getInstance().getAvatarPath();
+            FileBean bean = generatorFileBean(path, Config.FILE_AVATAR, 0);
+            bean.setRid(rid);
+            generatorFileDrops(bean,path,receiver,receiver);
+            sendNotify(bean,path,host);
+        }
+    }
+
+    private FileEntity notify(String host,
+                              String receiver,
+                              String sender,
+                              String path,
+                              int type,
+                              int contentLength) {
+        FileBean bean = generatorFileBean(path,type,contentLength);
+        bean.setSender(sender);
+        bean.setReceiver(receiver);
+        FileDrops drops = generatorFileDrops(bean,path,receiver,sender);
+
+        sendNotify(bean,path,host);
+        return drops.getFileEntity();
+    }
+
+    private FileDrops generatorFileDrops(FileBean bean, String path, String receiver, String sender) {
+        bean.setSender(sender);
+        bean.setReceiver(receiver);
+        return FilePool.getInstance().put(bean,path,Config.STEP_NOTIFY);
+    }
+
+    private void sendNotify(FileBean bean, String path, String host) {
+        TLog.d(TAG,"=========> notify " + bean.toString());
+        try {
+            TLog.d(TAG,"----------> notify " + host);
+            IntranetChatApplication.sAidlInterface.sendFile(GsonTools.toJson(bean),path,host);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+            TLog.d(TAG,"========== Exception =========");
         }
     }
 

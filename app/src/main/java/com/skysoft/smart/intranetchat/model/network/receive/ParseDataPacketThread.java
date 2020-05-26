@@ -226,7 +226,7 @@ public class ParseDataPacketThread extends Thread {
     private void onReceiveRequestBean(DataPacketBean dataPacketBean, String host) {
 
         AskBean askBean = (AskBean) GsonTools.formJson( dataPacketBean.getData(), AskBean.class);
-        TLog.d(TAG, "onReceiveRequestBean: " + askBean.getRequestType() + ",   " + host);
+        TLog.d(TAG, "onReceiveRequestBean: " + askBean.toString() + ",   " + host);
         if (askBean == null){
             return;
         }
