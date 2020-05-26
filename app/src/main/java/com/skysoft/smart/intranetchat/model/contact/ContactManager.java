@@ -13,7 +13,9 @@ import com.skysoft.smart.intranetchat.bean.signal.ContactSignal;
 import com.skysoft.smart.intranetchat.database.MyDataBase;
 import com.skysoft.smart.intranetchat.database.dao.ContactDao;
 import com.skysoft.smart.intranetchat.database.table.ContactEntity;
+import com.skysoft.smart.intranetchat.database.table.LatestEntity;
 import com.skysoft.smart.intranetchat.model.avatar.AvatarManager;
+import com.skysoft.smart.intranetchat.model.latest.LatestManager;
 import com.skysoft.smart.intranetchat.model.login.Login;
 import com.skysoft.smart.intranetchat.model.mine.MineInfoManager;
 import com.skysoft.smart.intranetchat.model.net_model.SendRequest;
@@ -190,6 +192,7 @@ public class ContactManager {
 
                 if (!contact.getName().equals(userInfoBean.getName())) {
                     contact.setName(userInfoBean.getName());
+                    LatestManager.getInstance().notifyDataChanged();
                 }
             }
         }

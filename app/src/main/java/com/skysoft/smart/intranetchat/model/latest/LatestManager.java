@@ -99,7 +99,7 @@ public class LatestManager {
             public void run() {
                 int base = group ? 1000 : 0;
                 int u = user + base;
-                LatestEntity latest = mLatestMap.get(mLatestIndex.get(u));
+                LatestEntity latest = findLatest(user,group);
                 LatestDao latestDao = MyDataBase.getInstance().getLatestDao();
                 boolean inRoom = RecordManager.getInstance().isInRoom();
 
@@ -172,8 +172,7 @@ public class LatestManager {
             public void run() {
                 int base = group ? 1000 : 0;
                 int u = user + base;
-                TLog.d(TAG,"==========<> User : " + u + ", id : " + mLatestIndex.get(u));
-                LatestEntity latest = mLatestMap.get(mLatestIndex.get(u));
+                LatestEntity latest = findLatest(user,group);
                 if (latest == null) {
                     TLog.d(TAG,"=====Null-----");
                     latest = new LatestEntity();
@@ -216,7 +215,7 @@ public class LatestManager {
             public void run() {
                 int base = group ? 1000 : 0;
                 int u = base + user;
-                LatestEntity latest = mLatestMap.get(u);
+                LatestEntity latest = findLatest(user,group);
                 if (latest != null) {
                     latest.setContent(content);
                     MyDataBase.getInstance().getLatestDao().update(latest);
@@ -235,6 +234,11 @@ public class LatestManager {
             }
         };
         mHandler.post(update);
+    }
+
+    private LatestEntity findLatest(int user, boolean group) {
+        int u = user + (group ? 1000 : 0);
+        return mLatestMap.get(mLatestIndex.get(u));
     }
 
     public void clickLatest(Context context, LatestEntity latest, int position) {
