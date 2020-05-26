@@ -367,6 +367,8 @@ public class ChatRoomActivity extends BaseActivity implements View.OnClickListen
         }
 
         myAudioManager = new MyAudioManager();
+
+        LatestManager.getInstance().refreshUnRead(mReceiver,isGroup);
     }
 
     private void initView() {

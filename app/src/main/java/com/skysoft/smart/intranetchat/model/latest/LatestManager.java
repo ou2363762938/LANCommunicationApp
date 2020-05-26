@@ -126,8 +126,7 @@ public class LatestManager {
                 latest.setGroup(base);
 
                 latestDao.update(latest);
-                sortLatest();
-                EventBus.getDefault().post(mSignal);
+                notifyRS();
             }
         };
 
@@ -197,8 +196,7 @@ public class LatestManager {
                     mLatestIndex.put(u,id);
                 }
 
-                sortLatest();
-                EventBus.getDefault().post(mSignal);
+                notifyRS();
             }
         };
 
@@ -268,11 +266,11 @@ public class LatestManager {
 //                LatestManager.getInstance().totalUnReadNumber());
         update(latest);
         EventBus.getDefault().post(mSignal);
-        mAdapter.notifyDataSetChanged();
+//        mAdapter.notifyDataSetChanged();
     }
 
-    public void refreshUnRead(int contact) {
-        refreshUnRead(mLatestMap.get(contact));
+    public void refreshUnRead(int user, boolean group) {
+        refreshUnRead(findLatest(user,group));
     }
 
     public void delete(int position) {
@@ -374,9 +372,14 @@ public class LatestManager {
         return mAdapter;
     }
 
+    private void notifyRS() {
+        sortLatest();
+        mSignal.code = Code.NOTHING;
+        EventBus.getDefault().post(mSignal);
+    }
+    
     public void notifyDataChanged() {
-        if (mAdapter != null) {
-            mAdapter.notifyDataSetChanged();
-        }
+        mSignal.code = Code.NOTHING;
+        EventBus.getDefault().post(mSignal);
     }
 }

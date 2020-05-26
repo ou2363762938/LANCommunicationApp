@@ -87,7 +87,7 @@ import static androidx.core.app.NotificationCompat.VISIBILITY_SECRET;
 //B: [Intranet Chat] [APP] [Communication] Create a new process service with message sending and receiving,Oliver ou,2019/10/30
 
 public class IntranetChatApplication extends Application {
-    private final String TAG = IntranetChatApplication.class.getSimpleName();
+    private static final String TAG = IntranetChatApplication.class.getSimpleName();
 
     public static IIntranetChatAidlInterface sAidlInterface = null;
 
@@ -222,7 +222,7 @@ public class IntranetChatApplication extends Application {
     public void receiveLatestSignal(LatestSignal signal) {
         switch (signal.code) {
             case Code.INIT_UNREAD:
-                initTotalUnReadNumber(signal.unRead);
+                sTotalUnReadNumber = signal.unRead;
                 break;
             case Code.CLICK_ITEM:
                 reduceTotalUnReadNumber(signal.unRead);
@@ -267,9 +267,10 @@ public class IntranetChatApplication extends Application {
         }
     }
 
-    private static void addTotalUnReadNumber() {
+    private void addTotalUnReadNumber() {
         sTotalUnReadNumber += 1;
 
+        TLog.d(TAG,"<<<<<<< UnRead : " + sTotalUnReadNumber);
         mTextBadgeItem.show();
         mTextBadgeItem.setText(String.valueOf(sTotalUnReadNumber));
     }

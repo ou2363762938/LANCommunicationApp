@@ -44,7 +44,7 @@ public class ContactFragment extends BaseFragment {
                     UserInfoShowActivity.go(getContext(),contact.getId());
                     break;
                 case R.id.contact_list_item:
-                    LatestManager.getInstance().refreshUnRead(contact.getId());
+//                    LatestManager.getInstance().refreshUnRead(contact.getId());
                     ChatRoomActivity.go(getContext(), GsonTools.toJson(contact),false);
                     break;
 
