@@ -1,6 +1,8 @@
 package com.skysoft.smart.intranetchat.model.filemanager;
 
 import android.content.Context;
+import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.RemoteException;
 import android.text.TextUtils;
 
@@ -35,12 +37,16 @@ import java.security.MessageDigest;
 public class FileManager {
     private static final String TAG = "FileManager";
     private static FileManager sInstance;
-    private static String sMineId = MineInfoManager.getInstance().getIdentifier();
     private Context mContext;
+    private HandlerThread mHandlerThread;
+    private Handler mHandler;
 
 
     private FileManager(Context context) {
         mContext = context;
+        mHandlerThread = new HandlerThread(TAG);
+        mHandlerThread.start();
+        mHandler = new Handler(mHandlerThread.getLooper());
     }
 
     public static void init(Context context) {
@@ -53,8 +59,8 @@ public class FileManager {
 
     public FileEntity notify(ContactEntity contact, String path, int type, int contentLength) {
         FileBean bean = generatorFileBean(path,type,contentLength);
-        bean.setReceiver(contact.getIdentifier());
-        bean.setSender(sMineId);
+        bean.setReceiver(MineInfoManager.getInstance().getIdentifier());
+        bean.setSender(bean.getReceiver());
         FileDrops drops = FilePool.
                 getInstance().
                 put(bean,path,Config.STEP_NOTIFY);
@@ -72,6 +78,9 @@ public class FileManager {
     }
 
     private void notify(FileBean bean, String path, String host) {
+        bean.setSender(MineInfoManager.getInstance().getIdentifier());
+//        {"contentLength":0,"fileLength":93586,"md5":"47349402ace64397d0fec836dbdccee9","name":"1590453768118392.jpeg","receiver":"64ee242befc61c2e","rid":"qgbm5ebmmp29ymgb","type":42}
+//        {rid='qgbm5ebmmp29ymgb', name='1590453768118392.jpeg', md5='47349402ace64397d0fec836dbdccee9', sender='null', receiver='64ee242befc61c2e', fileLength=93586, contentLength=0, type=42}
         TLog.d(TAG,"=========> notify " + bean.toString());
         try {
             TLog.d(TAG,"----------> notify " + host);
@@ -100,34 +109,55 @@ public class FileManager {
 
     public void requestFile(FileBean bean, String host) {
         TLog.d(TAG,"requestFile----------> " + bean.toString());
+        TLog.d(TAG,"<<<<<<<<<<>>>>>>> " + MineInfoManager.getInstance().toString());
+        if (host.equals(MineInfoManager.getInstance().getHost()) ||
+            bean.getSender().equals(MineInfoManager.getInstance().getIdentifier())) {
+            TLog.d(TAG,"========>>>>>>>>> repeat");
+            return;
+        }
+
         FilePool.getInstance().put(bean,"",Config.STEP_REQUEST);
         AskFile.askFile(bean.getRid(), host);
     }
 
     public void receiveRequest(String rid, String host) {
-        TLog.d(TAG,"receiveRequest--------> " + rid);
-        FileDrops drops = FilePool.getInstance().get(rid);
-        drops.setStep(Config.STEP_SEND);
-        try {
-            IntranetChatApplication.
-                    sAidlInterface.
-                    sendFileContent(rid, drops.getPath(), host);
-        } catch (RemoteException e) {
-            e.printStackTrace();
-        }
+        Runnable receiveRequest = new Runnable() {
+            @Override
+            public void run() {
+                TLog.d(TAG,"receiveRequest--------> " + rid);
+                FileDrops drops = FilePool.getInstance().get(rid);
+                TLog.d(TAG,".....>>>><<<<<<< " + drops.toString());
+                drops.setStep(Config.STEP_SEND);
+                try {
+                    IntranetChatApplication.
+                            sAidlInterface.
+                            sendFileContent(rid, drops.getPath(), host);
+                } catch (RemoteException e) {
+                    e.printStackTrace();
+                }
+            }
+        };
+
+        mHandler.post(receiveRequest);
     }
 
     public void receiveFile(ReceiveFileContentBean bean, String host) {
         FileDrops drops = FilePool.getInstance().get(bean.getRid());
+        TLog.d(TAG,"<><><>>><>< " + drops.toString() + bean.toString());
         if (drops.getFileBean().getMd5().equals(bean.getMd5())) {
+            TLog.d(TAG,",,,,,,,,,,,,,,,,,,,,,,,,,,,,,1");
             String path = generatorFilePath(drops);
+//            bean.setPath(path);
+            TLog.d(TAG,",,,,,,,,,,,,,,,,,,,,,,,,,,,,, " + path);
             File temp = new File(bean.getPath());
+            TLog.d(TAG,",,,,,,,,,,,,,,,,,,,,,,,,,,,,,2");
             temp.renameTo(new File(path));
 
             drops.setStep(Config.STEP_SUCCESS);
             drops.setPath(path);
             FileEntity entity = drops.getFileEntity();
             saveFileEntity(entity);
+            TLog.d(TAG,",,,,,,,,,,,,,,,,,,,,,,,,,5");
 
             if (entity.getType() == Config.FILE_AVATAR) {
                 AvatarManager.
@@ -136,6 +166,7 @@ public class FileManager {
                                 drops.getFileBean().getReceiver(),
                                 entity.getRid(),
                                 path);
+                TLog.d(TAG,",,,,,,,,,,,,,,,,,,,,,,,,,,,,,Avatar");
             } else {
                 RecordManager.
                         getInstance().
@@ -146,6 +177,7 @@ public class FileManager {
                         getInstance().
                         receive(drops.getFileBean().getReceiver(),
                                 entity.getType());
+                TLog.d(TAG,",,,,,,,,,,,,,,,,,,,,,,,,,,,,,UI");
             }
         } else {
             FileEntity entity = drops.getFileEntity();
@@ -219,6 +251,7 @@ public class FileManager {
     private String generatorFilePath(FileDrops drops) {
         String name = drops.getFileBean().getName();
         String suffix = name.substring(name.lastIndexOf("."));
+        TLog.d(TAG,"=======Suffix : " + suffix);
         FilePath filePath = FilePath.getInstance();
         switch (drops.getFileBean().getType()) {
             case Config.FILE_VOICE:
@@ -240,7 +273,14 @@ public class FileManager {
         return generatorFilePath(parent,name,suffix,false);
     }
 
-    private String generatorFilePath(String parent, String name, String suffix, boolean common) {
+    private String generatorFilePath(String parent,
+                                     String name,
+                                     String suffix,
+                                     boolean common) {
+        TLog.d(TAG,">>>>>>> Parent : " + parent +
+                ", name " + name +
+                ", suffix " + suffix +
+                ", common " + common);
         StringBuilder sb = new StringBuilder();
         sb.append(parent).
                 append(FilePath.getInstance().getSeparator()).

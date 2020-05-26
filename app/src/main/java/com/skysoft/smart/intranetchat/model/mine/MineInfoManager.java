@@ -8,8 +8,10 @@ import com.skysoft.smart.intranetchat.model.contact.ContactManager;
 import com.skysoft.smart.intranetchat.model.network.bean.UserInfoBean;
 import com.skysoft.smart.intranetchat.server.IntranetChatServer;
 import com.skysoft.smart.intranetchat.tools.Identifier;
+import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 
 public class MineInfoManager {
+    private static final String TAG = "MineInfoManager";
     private Context mContext;
     private SharedPreferences mShared;
     private SharedPreferences.Editor mEditor;
@@ -133,6 +135,7 @@ public class MineInfoManager {
         avatarIdentifier = mShared.getString(AVATAR_IDENTIFIER,"");
         avatarPath = mShared.getString(AVATAR_PATH,"");
         host = IntranetChatServer.getHostIP();
+        TLog.d(TAG,"-===-=-=-=-=>>>> " + host);
         return sInstance;
     }
 

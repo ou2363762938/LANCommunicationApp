@@ -54,7 +54,6 @@ public class LaunchVideoCallActivity extends BaseCallActivity {
     private long intervalTime = 550;
     private Timer affirmWaitingTimer;
     private Timer requestConsentTimer;
-    private String mIdentifier;
     private int mAvatar;
     @Override
     protected void onCreate(Bundle savedInstanceState) {

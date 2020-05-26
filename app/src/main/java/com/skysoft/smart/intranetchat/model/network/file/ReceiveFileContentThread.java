@@ -51,9 +51,10 @@ public class ReceiveFileContentThread extends Thread {
     public void run() {
         super.run();
 
-        File f = new File(
+        File f = new File(Config.PATH_TEMP,
                 Thread.currentThread().getName()
                         + System.currentTimeMillis());
+        TLog.d(TAG,"=<><<>>< Path : " + f.getPath());
         FileOutputStream fos = null;
         InputStream is = null;
         MessageDigest digest = null;
@@ -76,13 +77,14 @@ public class ReceiveFileContentThread extends Thread {
             fos.write(buf,start,count);
             digest.update(buf,start,count);
 
-            while ((count = is.read(buf,0,bl)) != 1) {
+            while ((count = is.read(buf,0,bl)) != -1) {
                 fos.write(buf,0,count);
                 digest.update(buf,0,count);
             }
 
             BigInteger bi = new BigInteger(1,digest.digest());
             String md5 = bi.toString(Config.RADIX_16);
+            TLog.d(TAG,"==========MD5=Rid==Over====== " + md5 + ", " + mRid);
 
             ReceiveFileContentBean bean = new ReceiveFileContentBean(mRid,md5,f.getPath());
             MonitorUdpReceivePortThread.

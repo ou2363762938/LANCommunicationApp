@@ -47,7 +47,6 @@ public class AnswerVoiceCallActivity extends BaseCallActivity {
     private long intervalTime = 550;
     private long lastRequestConsentTime;
     private Timer affirmRequestConsentTimer;
-    private String mIdentifier;
 
 
     @Override

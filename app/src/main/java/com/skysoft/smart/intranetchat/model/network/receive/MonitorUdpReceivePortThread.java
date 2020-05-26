@@ -19,7 +19,7 @@ import java.net.DatagramSocket;
 import java.net.SocketException;
 
 public class MonitorUdpReceivePortThread extends Thread {
-    private final String TAG = MonitorUdpReceivePortThread.class.getSimpleName();
+    private static final String TAG = MonitorUdpReceivePortThread.class.getSimpleName();
 
     private DatagramSocket mMonitor ;
     private static RemoteCallbackList<IIntranetChatAidlInterfaceCallback> callbackList;
@@ -83,6 +83,7 @@ public class MonitorUdpReceivePortThread extends Thread {
                             broadcastItem.onReceiveRequest(data,host);
                             break;
                         case Config.CODE_FILE:
+                            TLog.d(TAG,"++++++++++CODE_FILE++++++++");
                             broadcastItem.onReceiveFileBean(data,host);
                             break;
                         case Config.CODE_ASK_RESOURCE:
@@ -131,6 +132,7 @@ public class MonitorUdpReceivePortThread extends Thread {
                         case Config.STEP_RECEIVE:
                             broadcastItem.onReceiveFile(data,host);
                             //下载文件失败（原因在对方）
+                            break;
                         case Config.STEP_FAILURE:
                             broadcastItem.receiveFileFailure(data);
                             break;

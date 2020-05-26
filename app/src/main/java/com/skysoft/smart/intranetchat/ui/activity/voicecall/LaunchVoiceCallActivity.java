@@ -50,7 +50,6 @@ public class LaunchVoiceCallActivity extends BaseCallActivity {
     private long intervalTime = 550;
     private Timer affirmWaitingTimer;
     private Timer requestConsentTimer;
-    private String mIdentifier;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

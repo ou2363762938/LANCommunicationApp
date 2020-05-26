@@ -59,7 +59,6 @@ public class AnswerVideoCallActivity extends BaseCallActivity {
     private Timer affirmRequestConsentTimer;
 
     private String host;
-    private String mIdentifier;
     private String mImagePath;
 
     @Override

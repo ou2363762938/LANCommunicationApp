@@ -111,5 +111,6 @@ public class Config {
     public static final String PATH_AVATAR = "/Android/data/com.skysoft.smart.intranetchat/files/avatar/";
     public static final String PATH_VOICE = "/Android/data/com.skysoft.smart.intranetchat/files/voice/";
     public static final String PATH_VIDEO = "/Android/data/com.skysoft.smart.intranetchat/files/video/";
+    public static final String PATH_TEMP = "/storage/emulated/0/Android/data/com.skysoft.smart.intranetchat/files/temp/";
     public static final String PATH_RECEIVE_FILE = "/Android/data/com.skysoft.smart.intranetchat/files/requestFile";
 }

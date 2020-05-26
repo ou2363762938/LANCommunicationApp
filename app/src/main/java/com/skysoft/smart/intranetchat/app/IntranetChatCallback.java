@@ -142,26 +142,30 @@ public class IntranetChatCallback extends IIntranetChatAidlInterfaceCallback.Stu
     public void onReceiveFileBean(String fileJson, String host) throws RemoteException {
         TLog.d(TAG, "onReceiveFile: fileJson" + fileJson + ",host: " + host);
         //向host请求文件
-        if (host.equals(MineInfoManager.getInstance().getHost())){
-            return;
-        }
-        FileBean fileBean = (FileBean) GsonTools.formJson(fileJson,FileBean.class);
-        if (fileBean.getSender().equals(MineInfoManager.getInstance().getIdentifier())){
-            return;
-        }
 
+        FileBean fileBean = (FileBean) GsonTools.formJson(fileJson,FileBean.class);
         FileManager.getInstance().requestFile(fileBean, host);
+//        if (fileBean.getSender().equals(MineInfoManager.getInstance().getIdentifier())){
+//            return;
+//        }
+//        if (host.equals(MineInfoManager.getInstance().getHost())){
+//            return;
+//        }
+
+
     }
 
     @Override
     public void onReceiveAskResource(String askResourceJson, String host) throws RemoteException {
-        if (host.equals(MineInfoManager.getInstance().getHost())){
+//        TLog.d(TAG,"========<? " + MineInfoManager.getInstance().toString());
+
+        AskResourceBean bean = (AskResourceBean) GsonTools.formJson(askResourceJson,AskResourceBean.class);
+        if (host.equals(MineInfoManager.getInstance().getHost())) {
             return;
         }
-        AskResourceBean bean = (AskResourceBean) GsonTools.formJson(askResourceJson,AskResourceBean.class);
         switch (bean.getResourceType()){
             case Config.RESOURCE_AVATAR:        //某个用户向我请求头像数据
-                Login.notifyChangeAvatar(host);
+                Login.notifyChangeAvatar(bean.host);
                 break;
             case Config.REQUEST_MONITOR:        //某个用户请求做我的监视者
                 if (ContactManager.getInstance().watchMeNumber() < 4){
@@ -201,7 +205,6 @@ public class IntranetChatCallback extends IIntranetChatAidlInterfaceCallback.Stu
                 }
                 break;
             case Config.RESOURCE_FILE:
-                TLog.d(TAG,"---------> " + askResourceJson);
                 FileManager.getInstance().receiveRequest(bean.getResourceUniqueIdentifier(), host);
                 break;
         }

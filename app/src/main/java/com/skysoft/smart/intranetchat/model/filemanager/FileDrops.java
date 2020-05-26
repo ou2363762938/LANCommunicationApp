@@ -49,4 +49,14 @@ public class FileDrops {
         entity.setTime(time);
         return entity;
     }
+
+    @Override
+    public String toString() {
+        return "FileDrops{" +
+                "fileBean=" + fileBean +
+                ", path='" + path + '\'' +
+                ", time=" + time +
+                ", step=" + step +
+                '}';
+    }
 }

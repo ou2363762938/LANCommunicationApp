@@ -247,7 +247,7 @@ public class IntranetChatAidl extends IIntranetChatAidlInterface.Stub {
 
     /*发送*/
     private void send(String data,int code,String host){
-        TLog.d(TAG, "notify: code : " + code + " host = " + host);
+//        TLog.d(TAG, "notify: code : " + code + " host = " + host);
         Sender.sender(data,code,host);
     }
 

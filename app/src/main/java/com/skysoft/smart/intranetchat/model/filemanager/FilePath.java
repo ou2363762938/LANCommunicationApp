@@ -3,9 +3,12 @@ package com.skysoft.smart.intranetchat.model.filemanager;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
+
 import java.io.File;
 
 public class FilePath {
+    private static final String TAG = "FilePath";
     private static FilePath sInstance;
     private FilePath(Context context) {
         mContext = context;
@@ -118,11 +121,18 @@ public class FilePath {
                      String avatar,
                      String common,
                      String temp) {
+        this.video = video;
         mEditor.putString(VIDEO,video);
+        this.voice = voice;
         mEditor.putString(VOICE,voice);
+        this.picture = image;
         mEditor.putString(IMAGE,image);
+        this.avatar = avatar;
         mEditor.putString(AVATAR,avatar);
+        this.temp = temp;
         mEditor.putString(TEMP,temp);
+        TLog.d(TAG,">>>>>>>>>> Temp : " + temp);
+        this.common = common;
         mEditor.putString(COMMON,common);
         mEditor.commit();
     }

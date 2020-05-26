@@ -75,12 +75,16 @@ public class SendFileContentThread extends Thread {
             }
             start += 1;
 
-            while ((count = fis.read(buf, start, bl)) != -1) {
-                count += start;
+            if ((count = fis.read(buf,start,bl-start)) != -1) {
+                os.write(buf,0,count+start);
+                os.flush();
+            }
+
+            while ((count = fis.read(buf, 0, bl)) != -1) {
                 os.write(buf,0,count);
                 os.flush();
-                start = 0;
             }
+            TLog.d(TAG,"=========Over=========");
         } catch (IOException e) {
             e.printStackTrace();
         } finally {

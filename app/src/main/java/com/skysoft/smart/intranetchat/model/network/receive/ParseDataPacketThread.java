@@ -148,7 +148,7 @@ public class ParseDataPacketThread extends Thread {
     private void onReceiveFileBean(DataPacketBean dataPacketBean, String host) {
         TLog.d(TAG, "onReceiveFileBean: " +
                 dataPacketBean.getData() +
-                ", " + host);
+                ", " + host);           //1次
 //        FileBean fileBean = (FileBean) GsonTools.formJson(dataPacketBean.getData(), FileBean.class);
 //        if (fileBean == null || fileBean.getSender().equals(IntranetChatAidl.getUserInfoBean().getIdentifier())){
 //            return;
@@ -173,8 +173,8 @@ public class ParseDataPacketThread extends Thread {
 
     /*当从数据包获取到AskResourceBean时的处理方法*/
     private void onReceiveAskResourceBean(DataPacketBean dataPacketBean, String host) {
-        TLog.d(TAG, "onReceiveAskResourceBean: " + host);
-        MonitorUdpReceivePortThread.broadcastReceive(Config.CODE_ASK_RESOURCE,dataPacketBean.getData(),host);
+//        TLog.d(TAG, "onReceiveAskResourceBean: " + host);
+//        MonitorUdpReceivePortThread.broadcastReceive(Config.CODE_ASK_RESOURCE,dataPacketBean.getData(),host);
 //        AskResourceBean askResourceBean = (AskResourceBean) GsonTools.formJson(dataPacketBean.getData(),AskResourceBean.class);
 //        if (askResourceBean == null){
 //            return;

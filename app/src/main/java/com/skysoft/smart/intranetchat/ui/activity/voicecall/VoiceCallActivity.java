@@ -42,7 +42,6 @@ public class VoiceCallActivity extends BaseCallActivity {
     private int mAvatar;
     private MyAudioManager myAudioManager;
     private VioceCallPlay mVoicePlay;
-    private String mIdentifier;
     private boolean isAnswer;
     @Override
     protected void onCreate(Bundle savedInstanceState) {

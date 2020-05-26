@@ -78,7 +78,6 @@ public class VideoCallActivity extends BaseCallActivity implements View.OnClickL
     private Manager mManager;
     private boolean isMute = false;
     private Surface mInputSurface;
-    private String mIdentifier;
     private boolean isAnswer;
     private boolean isHaungUp = false;
 

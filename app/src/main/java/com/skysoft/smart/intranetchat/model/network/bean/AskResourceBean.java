@@ -8,6 +8,7 @@ package com.skysoft.smart.intranetchat.model.network.bean;
 public class AskResourceBean {
     private int resourceType;
     private String resourceUniqueIdentifier;
+    public String host;
 
     public int getResourceType() {
         return resourceType;
