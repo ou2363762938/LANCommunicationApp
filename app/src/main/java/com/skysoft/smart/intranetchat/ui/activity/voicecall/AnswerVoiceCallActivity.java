@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.os.Bundle;
 
 import com.skysoft.smart.intranetchat.app.BaseCallActivity;
-import com.skysoft.smart.intranetchat.bean.chat.RecordCallBean;
 import com.skysoft.smart.intranetchat.bean.signal.AvatarSignal;
 import com.skysoft.smart.intranetchat.model.avatar.AvatarManager;
 import com.skysoft.smart.intranetchat.model.chat.record.RecordManager;
@@ -13,8 +12,6 @@ import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
-
-import androidx.appcompat.app.AppCompatActivity;
 
 import com.skysoft.smart.intranetchat.R;
 import com.skysoft.smart.intranetchat.app.IntranetChatApplication;
@@ -66,6 +63,8 @@ public class AnswerVoiceCallActivity extends BaseCallActivity {
         host = bundle.getString("host");
         name = bundle.getString("name");
         mAvatar = bundle.getInt("avatar");
+
+        init();
 
         mName = findViewById(R.id.answer_voice_phone_name);
         mName.setText(name);
@@ -161,7 +160,7 @@ public class AnswerVoiceCallActivity extends BaseCallActivity {
                 return;
             }
             IntranetChatApplication.setInCall(false);
-            endCall(getString(R.string.call_refuse_answer));
+            endAnswerCall(getString(R.string.call_refuse_answer));
             AnswerVoiceCallActivity.this.finish();
         }
     };
@@ -194,7 +193,7 @@ public class AnswerVoiceCallActivity extends BaseCallActivity {
         super.onBackPressed();
         VoiceCall.hungUpVoiceCall(host);
         IntranetChatApplication.setInCall(false);
-        endCall(getString(R.string.call_refuse_answer_mine));
+        endAnswerCall(getString(R.string.call_refuse_answer_mine));
         AnswerVoiceCallActivity.this.finish();
     }
 

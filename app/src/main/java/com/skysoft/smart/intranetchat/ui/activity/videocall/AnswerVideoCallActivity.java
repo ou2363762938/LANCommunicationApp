@@ -14,15 +14,11 @@ import android.text.TextUtils;
 import com.skysoft.smart.intranetchat.app.BaseCallActivity;
 import com.skysoft.smart.intranetchat.bean.signal.AvatarSignal;
 import com.skysoft.smart.intranetchat.model.avatar.AvatarManager;
-import com.skysoft.smart.intranetchat.model.chat.record.RecordManager;
-import com.skysoft.smart.intranetchat.model.network.Config;
 import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 import android.view.TextureView;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
-
-import androidx.appcompat.app.AppCompatActivity;
 
 import com.bumptech.glide.Glide;
 import com.skysoft.smart.intranetchat.R;
@@ -77,6 +73,8 @@ public class AnswerVideoCallActivity extends BaseCallActivity {
         mIdentifier = bundle.getString("identifier");
         host = bundle.getString("host");
 
+        init();
+
         refuseCall = findViewById(R.id.activity_answer_refuse_video_call);
         consentCall = findViewById(R.id.activity_answer_consent_video_call);
         mHeadImg = findViewById(R.id.activity_answer_video_head_img);
@@ -99,7 +97,7 @@ public class AnswerVideoCallActivity extends BaseCallActivity {
             public void onClick(View v) {
                 VoiceCall.refuseVoiceCall(host);
                 IntranetChatApplication.setInCall(false);
-                endCall(getString(R.string.call_refuse_answer_mine));
+                endAnswerCall(getString(R.string.call_refuse_answer_mine));
                 finish();
             }
         });
@@ -129,7 +127,7 @@ public class AnswerVideoCallActivity extends BaseCallActivity {
                 TLog.d(TAG, "run: responseConsentOutTime");
                 VoiceCall.responseConsentOutTime(host);
                 IntranetChatApplication.setInCall(false);
-                endCall(getString(R.string.call_refuse_answer));
+                endAnswerCall(getString(R.string.call_refuse_answer));
                 finish();
             }
         };
@@ -142,7 +140,7 @@ public class AnswerVideoCallActivity extends BaseCallActivity {
                 if (System.currentTimeMillis() - lastRequestConsentTime > intervalTime){
                     VoiceCall.hungUpVoiceCall(host);
                     IntranetChatApplication.setInCall(false);
-                    endCall(getString(R.string.call_die));
+                    endAnswerCall(getString(R.string.call_die));
                     finish();
                 }
             }
@@ -157,7 +155,7 @@ public class AnswerVideoCallActivity extends BaseCallActivity {
                 return;
             }
             IntranetChatApplication.setInCall(false);
-            endCall(getString(R.string.call_refuse_answer));
+            endAnswerCall(getString(R.string.call_refuse_answer));
             finish();
         }
     };
@@ -175,7 +173,7 @@ public class AnswerVideoCallActivity extends BaseCallActivity {
         super.onBackPressed();
         VoiceCall.hungUpVoiceCall(host);
         IntranetChatApplication.setInCall(false);
-        endCall(getString(R.string.call_refuse_answer_mine));
+        endAnswerCall(getString(R.string.call_refuse_answer_mine));
         finish();
     }
 

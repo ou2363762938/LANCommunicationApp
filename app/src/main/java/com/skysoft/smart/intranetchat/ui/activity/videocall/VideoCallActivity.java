@@ -24,7 +24,6 @@ import android.os.Handler;
 import android.os.HandlerThread;
 
 import com.skysoft.smart.intranetchat.app.BaseCallActivity;
-import com.skysoft.smart.intranetchat.model.chat.record.RecordManager;
 import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 import android.view.Surface;
 import android.view.TextureView;
@@ -32,7 +31,6 @@ import android.view.View;
 import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
 import com.skysoft.smart.intranetchat.R;
@@ -45,9 +43,6 @@ import com.skysoft.smart.intranetchat.model.camera.util.CameraUtil;
 import com.skysoft.smart.intranetchat.model.camera.videocall.Manager;
 import com.skysoft.smart.intranetchat.tools.customstatusbar.CustomStatusBarBackground;
 import com.skysoft.smart.intranetchat.tools.toastutil.ToastUtil;
-import com.skysoft.smart.intranetchat.ui.activity.chatroom.ChatRoom.ChatRoomConfig;
-
-import org.greenrobot.eventbus.EventBus;
 
 import java.util.Arrays;
 
@@ -95,8 +90,11 @@ public class VideoCallActivity extends BaseCallActivity implements View.OnClickL
         host = bundle.getString("host");
         mIdentifier = bundle.getString("identifier");
         isAnswer = bundle.getBoolean("answer");
-        startBackgroundThread();
+
         init();
+
+        startBackgroundThread();
+        initView();
         setMuteImg();
         mManager = new Manager();
         mHungUpCall.setOnClickListener(new View.OnClickListener() {
@@ -105,7 +103,7 @@ public class VideoCallActivity extends BaseCallActivity implements View.OnClickL
                 VoiceCall.hungUpVoiceCall(host);
                 IntranetChatApplication.setInCall(false);
                 IntranetChatApplication.setEndCallTime(System.currentTimeMillis());
-                endCall(mIdentifier,isAnswer);
+                endLaunchCall(mIdentifier,isAnswer);
                 isHaungUp = true;
                 finish();
             }
@@ -113,7 +111,7 @@ public class VideoCallActivity extends BaseCallActivity implements View.OnClickL
     }
 
 
-    private void init() {
+    private void initView() {
         mOtherTexture = findViewById(R.id.activity_on_video_call_other);
         mTexture = findViewById(R.id.activity_on_video_call_mine);
         mMute = findViewById(R.id.activity_video_mute);
@@ -131,7 +129,7 @@ public class VideoCallActivity extends BaseCallActivity implements View.OnClickL
             }
             IntranetChatApplication.setInCall(false);
             IntranetChatApplication.setEndCallTime(System.currentTimeMillis());
-            endCall(mIdentifier,isAnswer);
+            endLaunchCall(mIdentifier,isAnswer);
             isHaungUp = true;
             finish();
         }
@@ -144,7 +142,7 @@ public class VideoCallActivity extends BaseCallActivity implements View.OnClickL
             VoiceCall.hungUpVoiceCall(host);
             IntranetChatApplication.setInCall(false);
             IntranetChatApplication.setEndCallTime(System.currentTimeMillis());
-            endCall(mIdentifier, isAnswer);
+            endLaunchCall(mIdentifier, isAnswer);
         }
         try {
             mManager.stop();
@@ -161,7 +159,7 @@ public class VideoCallActivity extends BaseCallActivity implements View.OnClickL
         VoiceCall.hungUpVoiceCall(host);
         IntranetChatApplication.setInCall(false);
         IntranetChatApplication.setEndCallTime(System.currentTimeMillis());
-        endCall(mIdentifier, isAnswer);
+        endLaunchCall(mIdentifier, isAnswer);
         isHaungUp = true;
         finish();
     }

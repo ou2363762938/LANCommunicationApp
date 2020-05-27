@@ -8,7 +8,6 @@ package com.skysoft.smart.intranetchat.ui.activity.voicecall;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.text.TextUtils;
 
 import com.skysoft.smart.intranetchat.app.BaseCallActivity;
 import com.skysoft.smart.intranetchat.model.avatar.AvatarManager;
@@ -17,9 +16,6 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import androidx.appcompat.app.AppCompatActivity;
-
-import com.bumptech.glide.Glide;
 import com.skysoft.smart.intranetchat.R;
 import com.skysoft.smart.intranetchat.app.IntranetChatApplication;
 import com.skysoft.smart.intranetchat.model.net_model.VoiceCall;
@@ -28,7 +24,6 @@ import com.skysoft.smart.intranetchat.app.impl.OnReceiveCallHungUp;
 import com.skysoft.smart.intranetchat.model.camera.audioTrack.VioceCallPlay;
 import com.skysoft.smart.intranetchat.model.camera.manager.MyAudioManager;
 import com.skysoft.smart.intranetchat.tools.customstatusbar.CustomStatusBarBackground;
-import com.skysoft.smart.intranetchat.ui.activity.videocall.VideoCallActivity;
 
 public class VoiceCallActivity extends BaseCallActivity {
 
@@ -60,6 +55,9 @@ public class VoiceCallActivity extends BaseCallActivity {
         mAvatar = bundle.getInt("avatar");
         mIdentifier = bundle.getString("identifier");
         isAnswer = bundle.getBoolean("answer");
+
+        init();
+
         mTime = findViewById(R.id.activity_on_voice_call_time);
         mName = findViewById(R.id.activity_on_voice_call_name);
         headImg = findViewById(R.id.activity_on_voice_call_img);
@@ -75,7 +73,7 @@ public class VoiceCallActivity extends BaseCallActivity {
                 VoiceCall.hungUpVoiceCall(host);
                 IntranetChatApplication.setInCall(false);
                 IntranetChatApplication.setEndCallTime(System.currentTimeMillis());
-                endCall(mIdentifier,isAnswer);
+                endLaunchCall(mIdentifier,isAnswer);
                 finish();
             }
         });
@@ -90,7 +88,7 @@ public class VoiceCallActivity extends BaseCallActivity {
             }
             IntranetChatApplication.setInCall(false);
             IntranetChatApplication.setEndCallTime(System.currentTimeMillis());
-            endCall(mIdentifier,isAnswer);
+            endLaunchCall(mIdentifier,isAnswer);
             finish();
         }
     };
@@ -142,7 +140,7 @@ public class VoiceCallActivity extends BaseCallActivity {
         VoiceCall.hungUpVoiceCall(host);
         IntranetChatApplication.setInCall(false);
         IntranetChatApplication.setEndCallTime(System.currentTimeMillis());
-        endCall(mIdentifier,isAnswer);
+        endLaunchCall(mIdentifier,isAnswer);
         finish();
     }
 }

@@ -13,15 +13,12 @@ import android.os.Bundle;
 import com.skysoft.smart.intranetchat.app.BaseCallActivity;
 import com.skysoft.smart.intranetchat.bean.signal.AvatarSignal;
 import com.skysoft.smart.intranetchat.model.avatar.AvatarManager;
-import com.skysoft.smart.intranetchat.model.chat.record.RecordManager;
 import com.skysoft.smart.intranetchat.model.mine.MineInfoManager;
 import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 import android.view.TextureView;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
-
-import androidx.appcompat.app.AppCompatActivity;
 
 import com.skysoft.smart.intranetchat.R;
 import com.skysoft.smart.intranetchat.app.IntranetChatApplication;
@@ -81,6 +78,9 @@ public class LaunchVideoCallActivity extends BaseCallActivity {
         mIdentifier = bundle.getString("identifier");
         mName.setText(bundle.getString("name"));
         mAvatar = bundle.getInt("avatar");
+
+        init();
+
         VoiceCall.startVideoCall(MineInfoManager.getInstance().getUserInfo(), host);
         AvatarManager.getInstance().loadContactAvatar(this,mHeadImg,mAvatar);
 
@@ -89,7 +89,7 @@ public class LaunchVideoCallActivity extends BaseCallActivity {
             public void onClick(View v) {
                 VoiceCall.hungUpVoiceCall(host);
                 IntranetChatApplication.setInCall(false);
-                endCall(getString(R.string.call_refuse_launch_mine));
+                endLaunchCall(getString(R.string.call_refuse_launch_mine));
                 finish();
             }
         });
@@ -133,7 +133,7 @@ public class LaunchVideoCallActivity extends BaseCallActivity {
                 if (System.currentTimeMillis() - lastWaitingConsentCall > intervalTime) {
                     VoiceCall.hungUpVoiceCall(host);
                     IntranetChatApplication.setInCall(false);
-                    endCall(getString(R.string.call_die));
+                    endLaunchCall(getString(R.string.call_die));
                     finish();
                 }
             }
@@ -165,7 +165,7 @@ public class LaunchVideoCallActivity extends BaseCallActivity {
             if (!LaunchVideoCallActivity.this.host.equals(host)){
                 return;
             }
-            endCall(getString(R.string.call_refuse_launch));
+            endLaunchCall(getString(R.string.call_refuse_launch));
             IntranetChatApplication.setInCall(false);
             finish();
         }
@@ -180,7 +180,7 @@ public class LaunchVideoCallActivity extends BaseCallActivity {
         public void onReceiveConsentOutTime() {
             TLog.d(TAG, "onReceiveConsentOutTime: ");
             IntranetChatApplication.setInCall(false);
-            endCall(getString(R.string.call_out_time));
+            endLaunchCall(getString(R.string.call_out_time));
             finish();
         }
 
@@ -191,7 +191,7 @@ public class LaunchVideoCallActivity extends BaseCallActivity {
                 return;
             }
 //            Toast.makeText(LaunchVideoCallActivity.this,"对方正在通话中",Toast.LENGTH_SHORT).show();
-            endCall(getString(R.string.call_in_call));
+            endLaunchCall(getString(R.string.call_in_call));
 //            EventBus.getDefault().post(new RecordCallBean
 //                    (mIdentifier,ChatRoomConfig.CALL_IN_CALL,host,false));
         }
@@ -236,7 +236,7 @@ public class LaunchVideoCallActivity extends BaseCallActivity {
         super.onBackPressed();
         VoiceCall.hungUpVoiceCall(host);
         IntranetChatApplication.setInCall(false);
-        endCall(getString(R.string.call_refuse_launch_mine));
+        endLaunchCall(getString(R.string.call_refuse_launch_mine));
         finish();
     }
 
@@ -276,7 +276,7 @@ public class LaunchVideoCallActivity extends BaseCallActivity {
                 return;
             }
             IntranetChatApplication.setInCall(false);
-            endCall(getString(R.string.call_refuse_launch));
+            endLaunchCall(getString(R.string.call_refuse_launch));
             finish();
         }
     };

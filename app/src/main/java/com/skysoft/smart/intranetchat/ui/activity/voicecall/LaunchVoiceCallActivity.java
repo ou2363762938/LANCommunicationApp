@@ -11,15 +11,11 @@ import android.os.Bundle;
 
 import com.skysoft.smart.intranetchat.app.BaseCallActivity;
 import com.skysoft.smart.intranetchat.model.avatar.AvatarManager;
-import com.skysoft.smart.intranetchat.model.chat.record.RecordManager;
 import com.skysoft.smart.intranetchat.model.mine.MineInfoManager;
-import com.skysoft.smart.intranetchat.model.network.Config;
 import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
-
-import androidx.appcompat.app.AppCompatActivity;
 
 import com.skysoft.smart.intranetchat.R;
 import com.skysoft.smart.intranetchat.app.IntranetChatApplication;
@@ -68,8 +64,11 @@ public class LaunchVoiceCallActivity extends BaseCallActivity {
         name = bundle.getString("name");
         mAvatar = bundle.getInt("avatar");
         mIdentifier = bundle.getString("identifier");
-        EventBus.getDefault().register(this);
+
         init();
+
+        EventBus.getDefault().register(this);
+        initView();
         VoiceCall.startVoiceCall(MineInfoManager.getInstance().getUserInfo(), host);
 
         hungVoiceCall.setOnClickListener(new View.OnClickListener() {
@@ -77,7 +76,7 @@ public class LaunchVoiceCallActivity extends BaseCallActivity {
             public void onClick(View v) {
                 VoiceCall.hungUpVoiceCall(host);
                 IntranetChatApplication.setInCall(false);
-                endCall(getString(R.string.call_refuse_launch_mine));
+                endLaunchCall(getString(R.string.call_refuse_launch_mine));
                 LaunchVoiceCallActivity.this.finish();
             }
         });
@@ -94,7 +93,7 @@ public class LaunchVoiceCallActivity extends BaseCallActivity {
                 if (System.currentTimeMillis() - lastWaitingConsentCall > intervalTime){
                     VoiceCall.hungUpVoiceCall(host);
                     IntranetChatApplication.setInCall(false);
-                    endCall(getString(R.string.call_die));
+                    endLaunchCall(getString(R.string.call_die));
                     LaunchVoiceCallActivity.this.finish();
                 }
             }
@@ -111,7 +110,7 @@ public class LaunchVoiceCallActivity extends BaseCallActivity {
         requestConsentTimer.schedule(requestConsentTask,100,300);
     }
 
-    private void init() {
+    private void initView() {
         mImgHead = findViewById(R.id.activity_start_voice_img);
         mName = findViewById(R.id.activity_start_voice_name);
         mName.setText(name);
@@ -152,7 +151,7 @@ public class LaunchVoiceCallActivity extends BaseCallActivity {
                 return;
             }
             IntranetChatApplication.setInCall(false);
-            endCall(getString(R.string.call_refuse_launch));
+            endLaunchCall(getString(R.string.call_refuse_launch));
             LaunchVoiceCallActivity.this.finish();
         }
 
@@ -166,7 +165,7 @@ public class LaunchVoiceCallActivity extends BaseCallActivity {
         public void onReceiveConsentOutTime() {
             TLog.d(TAG, "onReceiveConsentOutTime: ");
             IntranetChatApplication.setInCall(false);
-            endCall(getString(R.string.call_refuse_answer));
+            endLaunchCall(getString(R.string.call_refuse_answer));
             LaunchVoiceCallActivity.this.finish();
         }
 
@@ -177,7 +176,7 @@ public class LaunchVoiceCallActivity extends BaseCallActivity {
                 return;
             }
 //            Toast.makeText(LaunchVoiceCallActivity.this,"对方正在通话中",Toast.LENGTH_SHORT).show();
-            endCall(getString(R.string.call_in_call));
+            endLaunchCall(getString(R.string.call_in_call));
 //            EventBus.getDefault().post(new RecordCallBean(
 //                    mIdentifier,ChatRoomConfig.CALL_IN_CALL,host,true));
         }
@@ -210,7 +209,7 @@ public class LaunchVoiceCallActivity extends BaseCallActivity {
         super.onBackPressed();
         VoiceCall.hungUpVoiceCall(host);
         IntranetChatApplication.setInCall(false);
-        endCall(getString(R.string.call_refuse_launch_mine));
+        endLaunchCall(getString(R.string.call_refuse_launch_mine));
         finish();
     }
 
@@ -234,7 +233,7 @@ public class LaunchVoiceCallActivity extends BaseCallActivity {
                 return;
             }
             IntranetChatApplication.setInCall(false);
-            endCall(getString(R.string.call_refuse_launch));
+            endLaunchCall(getString(R.string.call_refuse_launch));
             finish();
         }
     };

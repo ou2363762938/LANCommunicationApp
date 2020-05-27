@@ -106,6 +106,7 @@ public class RecordManager {
     }
 
     public void loadMoreRecord(int receiver, int group) {
+        TLog.d(TAG,"<<<<<<<<<<loadMoreRecord Receiver : " + group);
         Runnable loadMore = new Runnable() {
             @Override
             public void run() {
@@ -284,6 +285,11 @@ public class RecordManager {
     }
 
     public void recordCall(String content, long length, int type, String sender) {
+        int id = ContactManager.getInstance().getContact(sender).getId();
+        recordCall(content,length,type,id);
+    }
+
+    public void recordCall(String content, long length, int type, int sender) {
         RecordCallBean bean = new RecordCallBean();
         bean.setContent(content);
         bean.setLength(length);
