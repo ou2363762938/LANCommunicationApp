@@ -197,6 +197,10 @@ public class AvatarManager {
 //        return !avatar.equals(identifier) && !identifier.equals(sDefaultAvatarId);
     }
 
+    public boolean isDefault(String avatar) {
+        return !TextUtils.isEmpty(avatar) && avatar.equals(sDefaultAvatarId);
+    }
+
     public void askAvatar(UserInfoBean userInfo, String host) {
         AskResourceBean askResourceBean = new AskResourceBean();
         askResourceBean.setResourceType(Config.RESOURCE_AVATAR);

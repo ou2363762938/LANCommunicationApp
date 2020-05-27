@@ -216,7 +216,11 @@ public class ContactManager {
         contactEntity.setIdentifier(userInfo.getIdentifier());
         contactEntity.setId(-1);
 
-        AvatarManager.getInstance().askAvatar(userInfo.getAvatarIdentifier(),host);
+        if (!AvatarManager.getInstance().
+                isDefault(userInfo.getAvatarIdentifier())) {
+            AvatarManager.getInstance().
+                    askAvatar(userInfo.getAvatarIdentifier(),host);
+        }
         return contactEntity;
     }
 
