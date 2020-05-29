@@ -55,6 +55,8 @@ public class DeviceInfoBean {
 
     public void set(int keyBroadHeight, int screenSize) {
         TLog.d(TAG,"----->keyBroadHeight : " + keyBroadHeight);
+        this.keyBroadHeight = keyBroadHeight;
+        this.screenSize = screenSize;
         mEditor.putInt(KEY_BROAD_HEIGHT,keyBroadHeight);
         mEditor.putInt(SCREEN_SIZE,screenSize);
         mEditor.commit();
