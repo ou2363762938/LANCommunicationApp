@@ -89,7 +89,7 @@ public class EstablishGroupActivity extends BaseActivity {
             @Override
             public void onClick(View v) {
                 if (QuickClickListener.isFastClick()) {
-                    if (mAdapter.getSelectedNumber() < 2) {
+                    if (mAdapter.getSelectedNumber() < 1) {
                         ToastUtil.toast(EstablishGroupActivity.this, getString(R.string.build_group_number));
                         return;
                     }

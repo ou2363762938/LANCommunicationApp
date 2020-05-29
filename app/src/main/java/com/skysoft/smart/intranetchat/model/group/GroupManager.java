@@ -33,6 +33,7 @@ import com.skysoft.smart.intranetchat.model.network.bean.EstablishGroupBean;
 import com.skysoft.smart.intranetchat.tools.DialogUtil;
 import com.skysoft.smart.intranetchat.tools.GsonTools;
 import com.skysoft.smart.intranetchat.tools.Identifier;
+import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 import com.skysoft.smart.intranetchat.tools.toastutil.ToastUtil;
 import com.skysoft.smart.intranetchat.ui.activity.chatroom.ChatRoom.ChatRoomActivity;
 
@@ -189,20 +190,23 @@ public class GroupManager {
                         String newName = inputNewName.getText().toString();
                         if (!checkGroupName(context,newName)) {
                             dialog.dismiss();
+                            newName = inputNewName.getHint().toString();
+//                            return;
                         }
 
                         List<String> contactId = new ArrayList<>();
                         List<String> contactHost = new ArrayList<>();
                         GroupEntity group = generatorGroup(context
                                 , select
-                                , contactId
                                 , contactHost
+                                , contactId
                                 , newName);
 
                         if (group.getId() != -1) {
                             ChatRoomActivity.go(context, GsonTools.toJson(group),true);
                         } else {
                             EstablishGroupBean establishGroupBean = generatorEstablishGroupBean(group, contactId);
+                            TLog.d(TAG,">>>>>>>>>> " + establishGroupBean.toString());
                             EstablishGroup.establishGroup(establishGroupBean,contactHost);
                             saveGroupAndMembers(context,group,select);
                         }
@@ -277,6 +281,7 @@ public class GroupManager {
             return group;
         }
 
+        group = new GroupEntity();
         group.setId(-1);
         group.setIdentifier(groupIdentifier);
         group.setNotifyId((int) (System.currentTimeMillis() - IntranetChatApplication.getsBaseTimeLine()));
@@ -293,6 +298,9 @@ public class GroupManager {
         EstablishGroupBean bean = new EstablishGroupBean();
         bean.setmName(group.getName());
         bean.setmUsers(contactIdentifier);
+        for (String c:contactIdentifier) {
+            TLog.d(TAG,">>>>>>>>>>>>>>>>>>> " + c);
+        }
         bean.setmHolderIdentifier(group.getHolder());
         bean.setmGroupAvatarIdentifier(AvatarManager.getInstance().getDefaultAvatar());
         bean.setmGroupIdentifier(group.getIdentifier());
@@ -338,9 +346,8 @@ public class GroupManager {
 
     public void receiveGroup(EstablishGroupBean bean, String host) {
         GroupEntity group = generatorGroup(bean, host);
-        if (bean.getmUsers().contains(
-                MineInfoManager.getInstance().getIdentifier()
-        )) {
+        if (group.getId() == -1 && bean.getmUsers().contains(
+                MineInfoManager.getInstance().getIdentifier())) {
             saveGroupAndMembers(group,bean);
         } else {
             addRefuse(bean);
@@ -355,6 +362,7 @@ public class GroupManager {
             return group;
         }
 
+        group = new GroupEntity();
         group.setHost(host);
         group.setName(bean.getmGroupName());
         group.setHolder(bean.getmHolderIdentifier());
@@ -371,6 +379,10 @@ public class GroupManager {
         ContactManager contactManager = ContactManager.getInstance();
         for (String id:contacts) {
             ContactEntity contact = contactManager.getContact(id);
+            if (contact == null) {
+                TLog.d(TAG,">>>>>>>>>>> Is Mine : " + MineInfoManager.getInstance().getIdentifier().equals(id));
+                continue;
+            }
             GroupMemberEntity member = new GroupMemberEntity();
             member.setContact(contact.getId());
             member.setGroup(group);

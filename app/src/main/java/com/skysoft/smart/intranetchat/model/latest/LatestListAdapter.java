@@ -9,9 +9,11 @@ import android.content.Context;
 import android.text.TextUtils;
 
 import com.skysoft.smart.intranetchat.database.table.ContactEntity;
+import com.skysoft.smart.intranetchat.database.table.GroupEntity;
 import com.skysoft.smart.intranetchat.listener.AdapterOnClickListener;
 import com.skysoft.smart.intranetchat.model.avatar.AvatarManager;
 import com.skysoft.smart.intranetchat.model.contact.ContactManager;
+import com.skysoft.smart.intranetchat.model.group.GroupManager;
 import com.skysoft.smart.intranetchat.tools.ChatRoom.RoomUtils;
 
 import android.util.Log;
@@ -209,10 +211,21 @@ public class LatestListAdapter extends BaseAdapter {
 
     public void setView(ViewHolder holder, LatestEntity latest){
         Log.d(TAG, "---------> " + latest.toString());
-        ContactEntity contact = ContactManager
-                .getInstance()
-                .getContact(latest.getUser());
-        holder.name.setText(contact.getName());
+        String name = null;
+        int avatar = 0;
+        if (latest.getGroup() == 0) {
+            ContactEntity contact = ContactManager
+                    .getInstance()
+                    .getContact(latest.getUser());
+            name = contact.getName();
+            avatar = contact.getAvatar();
+        } else {
+            GroupEntity group = GroupManager.getInstance().getGroup(latest.getUser() - latest.getGroup());
+            name = group.getName();
+            avatar = group.getAvatar();
+        }
+        holder.name.setText(name);
+        AvatarManager.getInstance().loadContactAvatar(mContext,holder.head,avatar);
         holder.message.setText(latest.getContent());
         holder.messageTime.setText(RoomUtils.millToFullTime(latest.getTime()));
 
@@ -221,13 +234,6 @@ public class LatestListAdapter extends BaseAdapter {
         }else {
             holder.unreadNumber.setText(String.valueOf(latest.getUnReadNumber()));
             holder.unreadNumber.setVisibility(View.VISIBLE);
-        }
-
-        String avatarPath = AvatarManager.getInstance().getAvatarPath(contact.getAvatar());
-        if (!TextUtils.isEmpty(avatarPath)){
-            Glide.with(mContext).load(avatarPath).into(holder.head);
-        }else {
-            Glide.with(mContext).load(R.drawable.default_head).into(holder.head);
         }
 
         holder.delete.setText(R.string.MessageListAdapter_delete);

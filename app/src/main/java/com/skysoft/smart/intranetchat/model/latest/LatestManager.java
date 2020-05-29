@@ -249,10 +249,10 @@ public class LatestManager {
         } else {
             entity = GsonTools.toJson(
                     GroupManager.getInstance().getGroup(
-                            latest.getUser()));
+                            latest.getUser()-latest.getGroup()));
         }
 
-        ChatRoomActivity.go(context,entity,latest.getGroup() == 1);
+        ChatRoomActivity.go(context,entity,latest.getGroup() != 0);
     }
 
     private void refreshUnRead(LatestEntity latest) {

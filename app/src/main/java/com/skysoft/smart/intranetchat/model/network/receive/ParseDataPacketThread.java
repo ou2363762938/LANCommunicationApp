@@ -119,10 +119,6 @@ public class ParseDataPacketThread extends Thread {
 
     /*当收到建群通知*/
     private void onReceiveEstablishGroupBean(DataPacketBean dataPacketBean, String host) {
-        EstablishGroupBean establishGroupBean = (EstablishGroupBean) GsonTools.formJson(dataPacketBean.getData(), EstablishGroupBean.class);
-        if (establishGroupBean == null){
-            return;
-        }
         MonitorUdpReceivePortThread.broadcastReceive(Config.CODE_ESTABLISH_GROUP,dataPacketBean.getData(),host);
     }
 
