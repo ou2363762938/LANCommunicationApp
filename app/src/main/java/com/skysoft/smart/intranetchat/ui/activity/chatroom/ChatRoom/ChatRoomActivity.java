@@ -140,7 +140,6 @@ public class ChatRoomActivity extends BaseActivity implements View.OnClickListen
     private boolean isKeyboardOpened = false;
 
     private boolean isGroup = false;
-    private boolean isRefresh = false;
     private boolean isUp = false;
     private boolean isStartVoiceAnimation;
     private boolean isAudioRecording = false;
@@ -168,9 +167,6 @@ public class ChatRoomActivity extends BaseActivity implements View.OnClickListen
 
         @Override
         public void onSoftKeyboardStateChangedListener(boolean isKeyBoardShow, int keyboardHeight, int screenSize) {
-            TLog.d(TAG,"---> isKeyBoardShow : " + isKeyBoardShow +
-                    ", keyboardHeight : " + keyboardHeight +
-                    ", screenSize : " + screenSize);
             isKeyboardOpened = isKeyBoardShow;
 
             //开启软键盘
@@ -482,7 +478,7 @@ public class ChatRoomActivity extends BaseActivity implements View.OnClickListen
 //                scroll(signal.count + mAdapter.getTopPosition());
                 break;
             case Code.LOAD:
-            case Code.RS:
+//            case Code.RS:
                 smoothScroll();
                 break;
 
@@ -629,7 +625,7 @@ public class ChatRoomActivity extends BaseActivity implements View.OnClickListen
         mMoreFunctionBox.setVisibility(View.VISIBLE);
         mBlankFunctionBox.setVisibility(View.GONE);
         KeyBoardUtils.hintKeyBoard(this);
-        smoothScroll();
+        scroll();
     }
 
     /**
@@ -646,7 +642,7 @@ public class ChatRoomActivity extends BaseActivity implements View.OnClickListen
 //            mBlankFunctionBox.setVisibility(View.VISIBLE);
 //            mMoreFunctionBox.setVisibility(View.INVISIBLE);
             KeyBoardUtils.showInput(this,mInputMessage);
-            smoothScroll();
+            scroll();
         }
     }
 

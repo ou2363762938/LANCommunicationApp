@@ -114,7 +114,6 @@ public class Message {
     }
 
     private void send(MessageBean bean) {
-        TLog.d(TAG, "------> " + bean.toString());
         try {
             IntranetChatApplication.
                     sAidlInterface.

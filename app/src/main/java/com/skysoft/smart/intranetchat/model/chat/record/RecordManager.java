@@ -80,8 +80,8 @@ public class RecordManager {
     private HandlerThread mHandlerThread;
     private Handler mHandler;
 
-    private final int LOAD_RECORD_NUMBER = 30;
-    private final int LOAD_MORE_NUMBER = 20;
+    private final int LOAD_RECORD_NUMBER = 12;
+    private final int LOAD_MORE_NUMBER = 9;
     private int mReceiver;
     private int mGroup;
     private boolean isInRoom = false;
@@ -150,6 +150,8 @@ public class RecordManager {
 
     private void notifyChanged() {
         mSignal.code = Code.RS;
+        mSignal.count = 1;
+        mSignal.start = mRecordList.size() - 1;
         EventBus.getDefault().post(mSignal);
     }
 
@@ -186,7 +188,6 @@ public class RecordManager {
      * @param t1 待加入的记录的时间
      * @param t2 上一条记录的时间*/
     private boolean isRecordTime(long t1, long t2) {
-        TLog.d(TAG,"--------t1, t2------"+t1 + ", " + t2);
         if (t2 >0 && t1 - t2 > 2*60*1000) {
             return true;
         }
