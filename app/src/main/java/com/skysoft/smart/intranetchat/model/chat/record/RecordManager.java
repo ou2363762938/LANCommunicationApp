@@ -62,8 +62,6 @@ public class RecordManager {
             @Override
             public void run() {
                 loadRecord(receiver,group ? 1 : 0);
-                mSignal.code = Code.LOAD;
-                EventBus.getDefault().post(mSignal);
             }
         });
         return mRecordAdapter;
@@ -82,7 +80,7 @@ public class RecordManager {
     private HandlerThread mHandlerThread;
     private Handler mHandler;
 
-    private final int LOAD_RECORD_NUMBER = 35;
+    private final int LOAD_RECORD_NUMBER = 30;
     private final int LOAD_MORE_NUMBER = 20;
     private int mReceiver;
     private int mGroup;
@@ -95,6 +93,7 @@ public class RecordManager {
     private void loadRecord(int receiver, int group) {
         RecordDao recordDao = MyDataBase.getInstance().getRecordDao();
         int number = recordDao.getNumber(receiver,group);
+        TLog.d(TAG,">>>>>>>>> Record Number : " + number);
         int pageNum = LOAD_RECORD_NUMBER;
         List<RecordEntity> all = recordDao.getRecord(receiver,
                 group,
@@ -102,6 +101,10 @@ public class RecordManager {
                 pageNum);
         if (all != null && all.size() != 0){
             mRecordList.addAll(all);
+            mSignal.start = 0;
+            mSignal.count = pageNum;
+            mSignal.code = Code.LOAD;
+            EventBus.getDefault().post(mSignal);
         }
     }
 
@@ -123,14 +126,26 @@ public class RecordManager {
                         more = number - size;
                     }
                     List<RecordEntity> all = recordDao.getRecord(receiver,group, start, more);
-                    mRecordList.addAll(all);
-                    mSignal.code = Code.LOAD_MORE;
-                    EventBus.getDefault().post(mSignal);
+                    if (all != null && all.size() > 0) {
+                        mRecordList.addAll(0,all);
+                        mSignal.code = Code.LOAD_MORE;
+                        mSignal.start = 0;
+                        mSignal.count = all.size();
+                        EventBus.getDefault().post(mSignal);
+                    }
                 }
             }
         };
 
         mHandler.post(loadMore);
+    }
+
+    public void canLoadMoreRecord(boolean canUpScroll,
+                                  boolean isStateDragging,
+                                  boolean isUp) {
+        if (!canUpScroll && isStateDragging && isUp) {
+            loadMoreRecord(mReceiver,mGroup);
+        }
     }
 
     private void notifyChanged() {
@@ -425,5 +440,14 @@ public class RecordManager {
             e.printStackTrace();
         }
         return firstFrameFile.getPath();
+    }
+
+    public int scrollToPosition() {
+        TLog.d(TAG,">>>>>>>>>> position " + mRecordList.size());
+        if (mRecordList == null || mRecordList.size() == 0) {
+            return 0;
+        }
+
+        return mRecordList.size() - 1;
     }
 }

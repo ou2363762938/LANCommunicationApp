@@ -174,7 +174,9 @@ public class RecordAdapter extends RecyclerView.Adapter<ChatRoomMessageViewHolde
         return position;
     }
 
-
+    public void addAll(List<RecordEntity> records) {
+        mRecordList.addAll(0,records);
+    }
 
     public void setPopupRecyclerView(RecyclerView recyclerView) {
         this.mPopupRecyclerView = recyclerView;

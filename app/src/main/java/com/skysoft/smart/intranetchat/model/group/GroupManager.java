@@ -3,6 +3,8 @@ package com.skysoft.smart.intranetchat.model.group;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.os.Handler;
+import android.os.HandlerThread;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -42,6 +44,7 @@ import java.util.List;
 import java.util.Map;
 
 public class GroupManager {
+    private static final String TAG = "GroupManager";
     private static GroupManager sInstance;
     private final int BASE_NOTIFY = 10000;
 
@@ -51,6 +54,10 @@ public class GroupManager {
 
         mRefuseMap = new HashMap<>();
         mRefuseIndex = new ArrayList<>();
+
+        mHandlerThread = new HandlerThread(TAG);
+        mHandlerThread.start();
+        mHandler = new Handler(mHandlerThread.getLooper());
     }
     public static GroupManager getInstance() {
         if (sInstance == null) {
@@ -70,6 +77,8 @@ public class GroupManager {
     private Map<Integer, RefuseGroupEntity> mRefuseMap;
     private List<String> mRefuseIndex;
     private GroupSignal mSignal = new GroupSignal();
+    private HandlerThread mHandlerThread;
+    private Handler mHandler;
 
     public void initGroup(List<GroupEntity> entities) {
         int notify = 1;
@@ -130,7 +139,7 @@ public class GroupManager {
             );
             mAdapter.notifyDataSetChanged();
         } else {                //查看群
-            new Thread(new Runnable() {
+            Runnable set = new Runnable() {
                 @Override
                 public void run() {
                     List<GroupMemberEntity> allGroupMember = MyDataBase.
@@ -140,7 +149,8 @@ public class GroupManager {
                     GroupMemberList groupMembersBean = new GroupMemberList(allGroupMember);
                     EventBus.getDefault().post(groupMembersBean);
                 }
-            }).start();
+            };
+            mHandler.post(set);
             mAdapter.setEstablish(false);
         }
     }
@@ -303,7 +313,7 @@ public class GroupManager {
     private void saveGroupAndMembers(Context context
             , GroupEntity group
             , List<ContactEntity> select) {
-        new Thread(new Runnable() {
+        Runnable save = new Runnable() {
             @Override
             public void run() {
                 GroupDao groupDao = MyDataBase.getInstance().getGroupDao();
@@ -322,7 +332,8 @@ public class GroupManager {
                 LatestManager.getInstance().send(id,"快点开始聊天吧！",true);
                 ChatRoomActivity.go(context, GsonTools.toJson(group),true);
             }
-        }).start();
+        };
+        mHandler.post(save);
     }
 
     public void receiveGroup(EstablishGroupBean bean, String host) {
@@ -369,7 +380,7 @@ public class GroupManager {
     }
 
     private void saveGroupAndMembers(GroupEntity group, EstablishGroupBean bean) {
-        new Thread(new Runnable() {
+        Runnable save = new Runnable() {
             @Override
             public void run() {
                 GroupDao groupDao = MyDataBase.getInstance().getGroupDao();
@@ -393,7 +404,8 @@ public class GroupManager {
                     LatestManager.getInstance().receive(group.getId(),"更改群名为：" + group.getName(),true);
                 }
             }
-        }).start();
+        };
+        mHandler.post(save);
     }
 
     private void addRefuse(EstablishGroupBean bean) {
@@ -403,7 +415,7 @@ public class GroupManager {
         }
 
         mRefuseIndex.add(bean.getmGroupIdentifier());
-        new Thread(new Runnable() {
+        Runnable refuse = new Runnable() {
             @Override
             public void run() {
                 RefuseGroupEntity refuse = new RefuseGroupEntity();
@@ -415,7 +427,8 @@ public class GroupManager {
                 refuse.setId(id);
                 mRefuseMap.put(id,refuse);
             }
-        }).start();
+        };
+        mHandler.post(refuse);
     }
 
     private void getRefuse() {

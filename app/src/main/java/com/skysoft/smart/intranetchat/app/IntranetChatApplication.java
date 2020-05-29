@@ -514,27 +514,4 @@ public class IntranetChatApplication extends Application {
         //E: Notification 完善(notifyId),Allen Luo,2019/11/12
     }
 
-    /**
-     * 将time转String类型
-     * @param time 毫秒数时间*/
-    public String chatTime(long time) {
-        time /= 1000;
-        int hour = (int) (time / 3600);
-        int minute = (int) (time % 3600 / 60);
-        int second = (int) (time % 60);
-        StringBuilder sb = new StringBuilder();
-        if (hour != 0) {
-            sb.append(hour);
-            sb.append(getString(R.string.hour));
-        }
-        if (minute != 0) {
-            sb.append(minute);
-            sb.append(getString(R.string.minute));
-        }
-        if (second != 0) {
-            sb.append(second);
-            sb.append(getString(R.string.second));
-        }
-        return sb.toString();
-    }
 }

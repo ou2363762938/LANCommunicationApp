@@ -294,10 +294,23 @@ public class ChatRoomActivity extends BaseActivity implements View.OnClickListen
         }
     };
 
-    public OnScrollToPosition onScrollToPosition = new OnScrollToPosition() {
+    private  RecyclerView.OnScrollListener mScrollListener = new RecyclerView.OnScrollListener() {
         @Override
-        public void onLoadViewOver(int size) {
-            scroll();
+        public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+            super.onScrollStateChanged(recyclerView, newState);
+            TLog.d(TAG,">>>>>>>>>>>Can Scroll Verity " + recyclerView.canScrollVertically(-1));
+            RecordManager.getInstance().canLoadMoreRecord(
+                    recyclerView.canScrollVertically(-1),
+                    newState == RecyclerView.SCROLL_STATE_DRAGGING,
+                    isUp
+            );
+//            isUp = false;
+        }
+
+        @Override
+        public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+            super.onScrolled(recyclerView, dx, dy);
+            isUp = dy < 0;
         }
     };
 
@@ -340,12 +353,12 @@ public class ChatRoomActivity extends BaseActivity implements View.OnClickListen
 
         mAdapter = RecordManager.getInstance().initAdapter(this,mReceiver,isGroup);
         mAdapter.setHasStableIds(true);
-        mAdapter.setOnScrollToPosition(onScrollToPosition);
+        mAdapter.setHasStableIds(true);
         mAdapter.setOnClickReplayOrNotify(mOnClickReplayOrNotify);       //注册回复和@
         mRecyclerView.setAdapter(mAdapter);
-        if (mAdapter.getItemCount() > 0) {
-            mRecyclerView.smoothScrollToPosition(mAdapter.getItemCount()-1);
-        }
+//        if (mAdapter.getItemCount() > 0) {
+//            mRecyclerView.smoothScrollToPosition(mAdapter.getItemCount()-1);
+//        }
 
         mRoomName.setText(isGroup ? mGroup.getName() : mContact.getName());
 
@@ -446,28 +459,7 @@ public class ChatRoomActivity extends BaseActivity implements View.OnClickListen
             }
         });
 
-        mRecyclerView.setOnScrollListener(new RecyclerView.OnScrollListener() {
-            @Override
-            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
-                super.onScrollStateChanged(recyclerView, newState);
-                if (newState == RecyclerView.SCROLL_STATE_IDLE){
-                    if (!isRefresh){
-                        isRefresh = true;
-                        return;
-                    }
-                    if (mAdapter.getTopPosition() == 0 && isUp){
-                        isRefresh = false;
-                        RecordManager.getInstance().loadMoreRecord(mReceiver,isGroup ? 1 : 0);
-                    }
-                }
-            }
-
-            @Override
-            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
-                super.onScrolled(recyclerView, dx, dy);
-                isUp = dy < 0;
-            }
-        });
+        mRecyclerView.setOnScrollListener(mScrollListener);
     }
 
     @Override
@@ -480,12 +472,14 @@ public class ChatRoomActivity extends BaseActivity implements View.OnClickListen
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void receiveRecordSignal(RecordSignal signal) {
-        mAdapter.notifyDataSetChanged();
+        mAdapter.notifyItemRangeChanged(signal.start,signal.count);
         switch (signal.code) {
 //            case Code.LOAD:
 //                scroll();
-//                break;
+//                break
             case Code.LOAD_MORE:
+//                TLog.d(TAG,">>>>>>>>>> Count : " + signal.count);
+//                scroll(signal.count + mAdapter.getTopPosition());
                 break;
             case Code.LOAD:
             case Code.RS:
@@ -546,9 +540,6 @@ public class ChatRoomActivity extends BaseActivity implements View.OnClickListen
                 onClickSendMessage();
                 break;
             case R.id.chat_room_input_voice:
-//                if (QuickClickListener.isFastClick(100)) {
-//                    clickVoice();
-//                }
                 clickVoice();
                 break;
             case R.id.chat_room_more_function:
@@ -615,15 +606,9 @@ public class ChatRoomActivity extends BaseActivity implements View.OnClickListen
                 }
                 break;
             case R.id.chat_room_input_message:
-//                if (mMoreFunctionBox.getVisibility() != View.VISIBLE && mInputMessage.hasFocus()) {
-//                    mMoreFunctionBox.setVisibility(View.INVISIBLE);
-//                }
                 clickInputMessage();
                 break;
             case R.id.chat_room_input_voice_box:
-//                if (mMoreFunctionBox.getVisibility() == View.VISIBLE) {
-//                    fold();
-//                }
                 break;
             case R.id.replay_cancel:    //关闭回复消息展示框
                 if (QuickClickListener.isFastClick()){
@@ -641,17 +626,10 @@ public class ChatRoomActivity extends BaseActivity implements View.OnClickListen
     /**
      * 开启多功能框，关闭空白框，关闭软键盘*/
     private void openMoreFunction() {
-//        if (mMoreFunctionBox.getVisibility() != View.VISIBLE) {
-//            mMoreFunctionBox.setVisibility(View.VISIBLE);
-//        }
         mMoreFunctionBox.setVisibility(View.VISIBLE);
         mBlankFunctionBox.setVisibility(View.GONE);
         KeyBoardUtils.hintKeyBoard(this);
-        scroll();
-//        if (isKeyboardOpened) {
-//            mBlankFunctionBox.setVisibility(View.GONE);
-//            KeyBoardUtils.hintKeyBoard(this);
-//        }
+        smoothScroll();
     }
 
     /**
@@ -668,7 +646,7 @@ public class ChatRoomActivity extends BaseActivity implements View.OnClickListen
 //            mBlankFunctionBox.setVisibility(View.VISIBLE);
 //            mMoreFunctionBox.setVisibility(View.INVISIBLE);
             KeyBoardUtils.showInput(this,mInputMessage);
-            scroll();
+            smoothScroll();
         }
     }
 
@@ -726,11 +704,25 @@ public class ChatRoomActivity extends BaseActivity implements View.OnClickListen
     }
 
     private void scroll() {
-        mRecyclerView.scrollToPosition(mAdapter.getItemCount()-1);
+        mRecyclerView.scrollToPosition(
+                RecordManager.getInstance().scrollToPosition()
+        );
+    }
+
+    private void scroll(int position) {
+        mRecyclerView.scrollToPosition(
+                position
+        );
     }
 
     private void smoothScroll() {
-        mRecyclerView.smoothScrollToPosition(mAdapter.getItemCount()-1);
+        mRecyclerView.smoothScrollToPosition(
+                RecordManager.getInstance().scrollToPosition()
+        );
+    }
+
+    private void smoothScroll(int position) {
+        mRecyclerView.smoothScrollToPosition(position);
     }
 
     private void goChoseFile() {
