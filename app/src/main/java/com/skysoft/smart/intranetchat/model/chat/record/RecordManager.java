@@ -329,6 +329,7 @@ public class RecordManager {
     }
 
     public void updateLatest(RecordEntity record) {
+        TLog.d(TAG,">>>>>>>>Delete Record -> Update Latest : " + record.toString());
         LatestManager.getInstance().update(
                 record.getReceiver(),
                 latestContent(record),
@@ -368,13 +369,16 @@ public class RecordManager {
     }
 
     private String latestContent(RecordEntity record) {
-        if (record.getType() == ChatRoomConfig.RECORD_FILE) {
-            return LatestManager.
-                    getInstance().
-                    fileContent(record.getFileEntity());
-        } else {
-            return record.getContent();
+        switch (record.getType()) {
+            case ChatRoomConfig.RECORD_FILE:
+                return LatestManager.getInstance().fileContent(record.getFileEntity());
+            case ChatRoomConfig.RECORD_TEXT:
+                return record.getContent();
+            case ChatRoomConfig.RECORD_CALL:
+                RecordCallBean bean = (RecordCallBean) GsonTools.formJson(record.getContent(),RecordCallBean.class);
+                return bean.getContent();
         }
+        return null;
     }
 
     private RecordEntity generatorRecord(int type, MessageBean bean) {

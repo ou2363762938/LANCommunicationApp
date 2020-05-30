@@ -217,6 +217,8 @@ public class LatestManager {
                 if (latest != null) {
                     latest.setContent(content);
                     MyDataBase.getInstance().getLatestDao().update(latest);
+                    mSignal.code = Code.NOTHING;
+                    EventBus.getDefault().post(mSignal);
                 }
             }
         };

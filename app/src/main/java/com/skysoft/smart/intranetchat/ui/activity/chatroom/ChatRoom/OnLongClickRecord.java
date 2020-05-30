@@ -30,7 +30,6 @@ public class OnLongClickRecord implements View.OnLongClickListener {
                              RecordEntity mRecordEntity,
                              ChatRoomMessageViewHolder holder,
                              RecordAdapter adapter) {
-        TLog.d(TAG,">>>>>>>> Long Click " + mRecordEntity.toString());
         this.mContext = context;
         this.mRecordEntity = mRecordEntity;
         this.holder = holder;
