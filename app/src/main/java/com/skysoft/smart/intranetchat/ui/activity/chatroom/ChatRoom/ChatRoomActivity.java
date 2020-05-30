@@ -478,7 +478,7 @@ public class ChatRoomActivity extends BaseActivity implements View.OnClickListen
 //                scroll(signal.count + mAdapter.getTopPosition());
                 break;
             case Code.LOAD:
-//            case Code.RS:
+            case Code.RS:
                 smoothScroll();
                 break;
 

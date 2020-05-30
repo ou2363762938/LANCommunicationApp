@@ -149,10 +149,12 @@ public class RecordManager {
     }
 
     private void notifyChanged() {
-        mSignal.code = Code.RS;
-        mSignal.count = 1;
-        mSignal.start = mRecordList.size() - 1;
-        EventBus.getDefault().post(mSignal);
+        if (mRecordList != null) {
+            mSignal.code = Code.RS;
+            mSignal.count = 1;
+            mSignal.start = mRecordList.size() - 1;
+            EventBus.getDefault().post(mSignal);
+        }
     }
 
     private void recordTime(RecordDao recordDao, long time) {
@@ -224,21 +226,8 @@ public class RecordManager {
     }
 
     public void recordText(MessageBean bean) {
-        int sender = ContactManager.
-                getInstance().
-                getContact(bean.getSender()).getId();
-        RecordEntity record = generatorRecord(ChatRoomConfig.RECORD_TEXT, sender);
+        RecordEntity record = generatorRecord(ChatRoomConfig.RECORD_TEXT, bean);
         record.setContent(bean.getMsg());
-
-        if (bean.getSender().equals(bean.getSender())) {
-            record.setGroup(0);
-            record.setReceiver(sender);
-        } else {
-            record.setGroup(1);
-            record.setReceiver(
-                            GroupManager.getInstance().getGroupId(
-                                    bean.getReceiver()));
-        }
 
         record(record);
     }
@@ -386,6 +375,21 @@ public class RecordManager {
         } else {
             return record.getContent();
         }
+    }
+
+    private RecordEntity generatorRecord(int type, MessageBean bean) {
+        int sender = ContactManager.getInstance().getContactId(bean.getSender());
+        int group = bean.getSender().equals(bean.getReceiver()) ? 0 : 1;
+        int receiver = group == 0 ? sender : GroupManager.getInstance().getGroupId(bean.getReceiver());
+
+        RecordEntity record = new RecordEntity();
+        record.setSender(sender);
+        record.setGroup(group);
+        record.setReceiver(receiver);
+        record.setContent(bean.getMsg());
+        record.setType(type);
+        record.setTime(System.currentTimeMillis());
+        return record;
     }
 
     private RecordEntity generatorRecord(int type, int sender) {

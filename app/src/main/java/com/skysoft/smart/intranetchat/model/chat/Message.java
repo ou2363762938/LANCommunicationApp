@@ -114,6 +114,7 @@ public class Message {
     }
 
     private void send(MessageBean bean) {
+        TLog.d(TAG,">>>>>>>>>>>>>>> " + bean.toString());
         try {
             IntranetChatApplication.
                     sAidlInterface.
@@ -139,7 +140,7 @@ public class Message {
         MessageBean bean = new MessageBean();
         bean.setMsg(message);
         bean.setTimeStamp(System.currentTimeMillis());
-        bean.setSender(sMineId);
+        bean.setSender(MineInfoManager.getInstance().getIdentifier());
         bean.setReceiver(group.getIdentifier());
         bean.setHost("255.255.255.255");
         return bean;

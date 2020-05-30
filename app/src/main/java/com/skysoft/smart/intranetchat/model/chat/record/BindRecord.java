@@ -259,11 +259,11 @@ public class BindRecord {
         if (bean.getSender() == -1){
             holder.getMineMessage().setText(bean.getContent());
             holder.getMineMessage().setVisibility(View.VISIBLE);
-            message = holder.getSenderMessage();
+            message = holder.getMineMessage();
         }else {
             holder.getSenderMessage().setText(bean.getContent());
             holder.getSenderMessage().setVisibility(View.VISIBLE);
-            message = holder.getMineMessage();
+            message = holder.getSenderMessage();
         }
 
         message.setOnLongClickListener(new OnLongClickRecord(mContext,bean, holder, mChatRoomAdapter));
