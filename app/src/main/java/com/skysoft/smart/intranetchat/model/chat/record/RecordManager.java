@@ -71,6 +71,8 @@ public class RecordManager {
         isInRoom = false;
         mRecordAdapter = null;
         mRecordList = null;
+        mReceiver = -1;
+        mGroup = -1;
     }
 
     private RecordAdapter mRecordAdapter;
@@ -90,6 +92,21 @@ public class RecordManager {
         return isInRoom;
     }
 
+    public boolean isInRoom(int receiver, int group) {
+        return isInRoom && receiver == mReceiver && mGroup == group;
+    }
+
+    public boolean isInRoom(String receiver, boolean group) {
+        int r = 0;
+        if (group) {
+            r = GroupManager.getInstance().getGroupId(receiver);
+            return isInRoom(r, 1);
+        } else {
+            r = ContactManager.getInstance().getContactId(receiver);
+            return  isInRoom(r, 0);
+        }
+    }
+
     private void loadRecord(int receiver, int group) {
         RecordDao recordDao = MyDataBase.getInstance().getRecordDao();
         int number = recordDao.getNumber(receiver,group);
@@ -101,9 +118,7 @@ public class RecordManager {
                 pageNum);
         if (all != null && all.size() != 0){
             mRecordList.addAll(all);
-            mSignal.start = 0;
-            mSignal.count = pageNum;
-            mSignal.code = Code.LOAD;
+            setSignal(mReceiver,mGroup,Code.LOAD,0,all.size());
             EventBus.getDefault().post(mSignal);
         }
     }
@@ -128,9 +143,7 @@ public class RecordManager {
                     List<RecordEntity> all = recordDao.getRecord(receiver,group, start, more);
                     if (all != null && all.size() > 0) {
                         mRecordList.addAll(0,all);
-                        mSignal.code = Code.LOAD_MORE;
-                        mSignal.start = 0;
-                        mSignal.count = all.size();
+                        setSignal(mReceiver,mGroup,Code.LOAD_MORE,0,all.size());
                         EventBus.getDefault().post(mSignal);
                     }
                 }
@@ -148,13 +161,23 @@ public class RecordManager {
         }
     }
 
-    private void notifyChanged() {
+    private void notifyChanged(int receiver, int group) {
         if (mRecordList != null) {
-            mSignal.code = Code.RS;
-            mSignal.count = 1;
-            mSignal.start = mRecordList.size() - 1;
+            setSignal(receiver,group, Code.RS,mRecordList.size()-1,1);
             EventBus.getDefault().post(mSignal);
         }
+    }
+
+    private void setSignal(int receiver,
+                           int group,
+                           int code,
+                           int start,
+                           int count) {
+        mSignal.receiver = receiver;
+        mSignal.group = group;
+        mSignal.code = code;
+        mSignal.start = start;
+        mSignal.count = count;
     }
 
     private void recordTime(RecordDao recordDao, long time) {
@@ -202,17 +225,21 @@ public class RecordManager {
             public void run() {
                 RecordDao recordDao = MyDataBase.getInstance().getRecordDao();
 
-                if (mRecordList == null) {
-                    long time = recordDao.getLatestRecordTime(record.getReceiver(), record.getGroup());
-                    recordTime(recordDao,record.getTime(),time);
-                } else {
-                    recordTime(recordDao,record.getTime());
-                    mRecordList.add(record);
-                }
+               if (mReceiver == record.getReceiver() && mGroup == record.getGroup()) {
+                   if (mRecordList == null) {
+                       long time = recordDao.getLatestRecordTime(record.getReceiver(), record.getGroup());
+                       recordTime(recordDao,record.getTime(),time);
+                   } else {
+                       recordTime(recordDao,record.getTime());
+                       mRecordList.add(record);
+                   }
+               }
 
                 recordDao.insert(record);
 
-                notifyChanged();
+                mSignal.receiver = record.getReceiver();
+                mSignal.group = record.getGroup();
+                notifyChanged(record.getReceiver(),record.getGroup());
             }
         };
 
@@ -228,6 +255,13 @@ public class RecordManager {
     public void recordText(MessageBean bean) {
         RecordEntity record = generatorRecord(ChatRoomConfig.RECORD_TEXT, bean);
         record.setContent(bean.getMsg());
+
+        record(record);
+    }
+
+    public void recordText(String content, int receiver, int group) {
+        RecordEntity record = generatorRecord(ChatRoomConfig.RECORD_TEXT,receiver,-1,group);
+        record.setContent(content);
 
         record(record);
     }
@@ -263,7 +297,20 @@ public class RecordManager {
 
     public void recordFile(FileEntity file, int sender) {
         TLog.d(TAG,"------------> " + file.toString());
-        RecordEntity record = generatorRecord(ChatRoomConfig.RECORD_FILE, sender);
+        RecordEntity record = generatorRecord(ChatRoomConfig.RECORD_FILE,
+                mReceiver,
+                sender,
+                mGroup);
+        recordFile(file,record);
+    }
+
+    public void recordFile(FileEntity file, int receiver, int group) {
+        RecordEntity record = generatorRecord(ChatRoomConfig.RECORD_FILE, receiver, -1, group);
+        record.setFileEntity(file);
+        recordFile(file,record);
+    }
+
+    private void recordFile(FileEntity file, RecordEntity record) {
         record.setFileEntity(file);
         if (file.getType() == Config.FILE_VIDEO ) {
             file.setThumbnail(thumbnailFile(file.getPath()));
@@ -386,11 +433,19 @@ public class RecordManager {
         int group = bean.getSender().equals(bean.getReceiver()) ? 0 : 1;
         int receiver = group == 0 ? sender : GroupManager.getInstance().getGroupId(bean.getReceiver());
 
+        RecordEntity record = generatorRecord(type,receiver,sender,group);
+        record.setContent(bean.getMsg());
+        return record;
+    }
+
+    private RecordEntity generatorRecord(int type,
+                                         int receiver,
+                                         int sender,
+                                         int group) {
         RecordEntity record = new RecordEntity();
         record.setSender(sender);
         record.setGroup(group);
         record.setReceiver(receiver);
-        record.setContent(bean.getMsg());
         record.setType(type);
         record.setTime(System.currentTimeMillis());
         return record;

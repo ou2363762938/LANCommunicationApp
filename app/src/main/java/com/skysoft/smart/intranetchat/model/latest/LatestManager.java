@@ -101,7 +101,7 @@ public class LatestManager {
                 int u = user + base;
                 LatestEntity latest = findLatest(user,group);
                 LatestDao latestDao = MyDataBase.getInstance().getLatestDao();
-                boolean inRoom = RecordManager.getInstance().isInRoom();
+                boolean inRoom = RecordManager.getInstance().isInRoom(user,group ? 1 : 0);
 
                 if (latest == null) {
                     latest = new LatestEntity();
@@ -347,15 +347,35 @@ public class LatestManager {
         }
     }
 
-    public List<TransmitBean> getTransmits(int receiver) {
+    public List<TransmitBean> getTransmits(int receiver, boolean g) {
+        TLog.d(TAG,">>>>>>>>> Receiver : " + receiver + ", g : " + g);
         List<TransmitBean> transmits = new ArrayList<>();
+        ContactManager contactManager = ContactManager.getInstance();
+        GroupManager groupManager = GroupManager.getInstance();
         for (int l:mLatestSortList) {
             LatestEntity latest = mLatestMap.get(l);
-            if (latest.getUser() == receiver) {
+            if (latest.getUser() == receiver && (latest.getGroup() == 1000) == g) {
+                TLog.d(TAG,">>>>>>>> " + latest.toString() + ", " + g);
+                continue;
+            }
+            if ( g == (latest.getGroup() == 1000) && latest.getUser() - latest.getGroup() == receiver) {
                 continue;
             }
 
-            TransmitBean bean = new TransmitBean(l,latest.getGroup() == 1);
+            TransmitBean bean = new TransmitBean(
+                    latest.getUser()-latest.getGroup(),
+                    latest.getGroup() == 1000);
+            if (bean.isGroup()) {
+                GroupEntity group = groupManager.getGroup(latest.getUser() - latest.getGroup());
+                bean.setName(group.getName());
+                bean.setAvatar(group.getAvatar());
+                bean.setHost("255.255.255.255");
+            } else {
+                ContactEntity contact = contactManager.getContact(latest.getUser());
+                bean.setName(contact.getName());
+                bean.setAvatar(contact.getAvatar());
+                bean.setHost(contact.getHost());
+            }
             transmits.add(bean);
         }
         return transmits;

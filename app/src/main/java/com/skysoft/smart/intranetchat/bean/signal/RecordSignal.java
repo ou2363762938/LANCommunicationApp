@@ -5,4 +5,6 @@ public class RecordSignal {
     public int code;
     public int start;
     public int count;
+    public int receiver;
+    public int group;
 }

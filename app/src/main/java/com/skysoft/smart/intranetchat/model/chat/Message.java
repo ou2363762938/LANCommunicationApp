@@ -14,6 +14,8 @@ import com.skysoft.smart.intranetchat.database.table.ContactEntity;
 import com.skysoft.smart.intranetchat.database.table.GroupEntity;
 import com.skysoft.smart.intranetchat.database.table.RecordEntity;
 import com.skysoft.smart.intranetchat.model.chat.record.RecordManager;
+import com.skysoft.smart.intranetchat.model.contact.ContactManager;
+import com.skysoft.smart.intranetchat.model.group.GroupManager;
 import com.skysoft.smart.intranetchat.model.latest.LatestManager;
 import com.skysoft.smart.intranetchat.model.mine.MineInfoManager;
 import com.skysoft.smart.intranetchat.model.net_model.SendMessage;
@@ -72,6 +74,7 @@ public class Message {
                 }
 
                 MessageBean messageBean = (MessageBean) GsonTools.formJson(messageJson,MessageBean.class);
+                TLog.d(TAG,">>>>>>>>>>>>>>>>> " + messageBean.toString());
                 if (messageBean.getSender().equals(
                         MineInfoManager.getInstance().getIdentifier())){
                     return;
@@ -80,7 +83,11 @@ public class Message {
                 messageBean.setHost(host);
                 MessageSignal signal = new MessageSignal();
                 signal.setBean(messageBean);
-                signal.setIn(RecordManager.getInstance().isInRoom());
+                signal.setIn(
+                        RecordManager.getInstance().isInRoom(
+                                messageBean.getReceiver(),
+                                !messageBean.getReceiver().equals(
+                                        messageBean.getSender())));
                 EventBus.getDefault().post(signal);
 
                 RecordManager.getInstance().recordText(messageBean);
@@ -110,6 +117,19 @@ public class Message {
                 send(bean);
             }
         };
+        mHandler.post(send);
+    }
+
+    public void send(String message, int receiver, boolean group) {
+        Runnable send = new Runnable() {
+            @Override
+            public void run() {
+                MessageBean bean = generatorMessageBean(message, receiver, group);
+                TLog.d(TAG,">>>>>>>>>>>>>> " + bean.toString());
+                send(bean);
+            }
+        };
+
         mHandler.post(send);
     }
 
@@ -143,6 +163,23 @@ public class Message {
         bean.setSender(MineInfoManager.getInstance().getIdentifier());
         bean.setReceiver(group.getIdentifier());
         bean.setHost("255.255.255.255");
+        return bean;
+    }
+
+    private MessageBean generatorMessageBean(String message,
+                                             int receiver,
+                                             boolean group) {
+        MessageBean bean = new MessageBean();
+        bean.setMsg(message);
+        bean.setTimeStamp(System.currentTimeMillis());
+        bean.setSender(MineInfoManager.getInstance().getIdentifier());
+        if (group) {
+            bean.setReceiver(GroupManager.getInstance().getGroup(receiver).getIdentifier());
+            bean.setHost("255.255.255.255");
+        } else {
+            bean.setReceiver(bean.getSender());
+            bean.setHost(ContactManager.getInstance().getContact(receiver).getHost());
+        }
         return bean;
     }
 }

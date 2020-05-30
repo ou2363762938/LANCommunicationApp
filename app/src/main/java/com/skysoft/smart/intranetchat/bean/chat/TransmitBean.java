@@ -53,4 +53,15 @@ public class TransmitBean {
     public void setName(String name) {
         this.name = name;
     }
+
+    @Override
+    public String toString() {
+        return "TransmitBean{" +
+                "user=" + user +
+                ", avatar=" + avatar +
+                ", name='" + name + '\'' +
+                ", group=" + group +
+                ", host='" + host + '\'' +
+                '}';
+    }
 }

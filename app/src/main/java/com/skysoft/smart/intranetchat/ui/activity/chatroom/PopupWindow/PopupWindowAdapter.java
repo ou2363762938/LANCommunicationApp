@@ -132,13 +132,15 @@ public class PopupWindowAdapter extends RecyclerView.Adapter<PopupWindowAdapter.
             TransmitActivity.startActivity(mContext,
                     mRecord.getContent(),
                     mRecord.getType(),
-                    mRecord.getReceiver());
+                    mRecord.getReceiver(),
+                    mRecord.getGroup());
         }else if (mRecord.getType() == ChatRoomConfig.RECORD_FILE
-                 && mRecord.getFileEntity().getType() == Config.FILE_PICTURE){
+                 && mRecord.getFileEntity().getType() != Config.FILE_VOICE){
             TransmitActivity.startActivity(mContext,
                     mRecord.getFile(),
                     mRecord.getType(),
-                    mRecord.getReceiver());
+                    mRecord.getReceiver(),
+                    mRecord.getGroup());
         }
     }
 

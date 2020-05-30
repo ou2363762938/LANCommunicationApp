@@ -25,6 +25,7 @@ import com.skysoft.smart.intranetchat.model.contact.ContactManager;
 import com.skysoft.smart.intranetchat.model.filemanager.FileManager;
 import com.skysoft.smart.intranetchat.model.group.GroupManager;
 import com.skysoft.smart.intranetchat.model.latest.LatestManager;
+import com.skysoft.smart.intranetchat.model.transmit.TransmitManager;
 import com.skysoft.smart.intranetchat.tools.GsonTools;
 import com.skysoft.smart.intranetchat.tools.toastutil.TLog;
 import android.view.LayoutInflater;
@@ -60,11 +61,16 @@ import java.util.List;
 public class TransmitActivity extends BaseActivity implements View.OnClickListener{
     private static final String TAG = "TransmitActivity";
 
-    public static void startActivity(Context context, String message, int recordType, int receiver){
+    public static void startActivity(Context context,
+                                     String message,
+                                     int recordType,
+                                     int receiver,
+                                     int group){
         Intent intent = new Intent(context,TransmitActivity.class);
         intent.putExtra("message",message);
         intent.putExtra("recordType",recordType);
         intent.putExtra("receiver",receiver);
+        intent.putExtra("group",group);
         context.startActivity(intent);
     }
 
@@ -75,6 +81,7 @@ public class TransmitActivity extends BaseActivity implements View.OnClickListen
     private String mMessage;
     private int mRecordType;        //转发消息的内型
     private int mReceiver;     //转发消息的聊天室Identifier
+    private int mGroup;
     private FileEntity mFile;
     private ScrollView mScroll;     //title以下的内容
     private ConstraintLayout mTitle;
@@ -132,6 +139,7 @@ public class TransmitActivity extends BaseActivity implements View.OnClickListen
         mMessage = intent.getStringExtra("message");
         mRecordType = intent.getIntExtra("recordType",-1);
         mReceiver = intent.getIntExtra("receiver",-1);
+        mGroup = intent.getIntExtra("group",-1);
     }
 
     private void initView() {
@@ -166,7 +174,7 @@ public class TransmitActivity extends BaseActivity implements View.OnClickListen
     }
 
     private void initData() {
-        mTransmitUsers = LatestManager.getInstance().getTransmits(mReceiver);
+        mTransmitUsers = LatestManager.getInstance().getTransmits(mReceiver, mGroup == 1);
 
         LayoutInflater inflater = LayoutInflater.from(this);
         int index = 0;
@@ -177,26 +185,10 @@ public class TransmitActivity extends BaseActivity implements View.OnClickListen
             CircleImageView avatar = view.findViewById(R.id.contact_head);
             TextView name = view.findViewById(R.id.contact_name);
 
-            if (bean.isGroup()) {
-                GroupEntity group = GroupManager.getInstance().getGroup(bean.getUser());
-                bean.setHost(group.getHost());
-                bean.setAvatar(group.getAvatar());
-                bean.setName(group.getName());
-            } else {
-                ContactEntity contact = ContactManager.getInstance().getContact(bean.getUser());
-                bean.setHost(contact.getHost());
-                bean.setAvatar(contact.getAvatar());
-                bean.setName(contact.getName());
-            }
-
             //取出加载内容
             AvatarManager.getInstance().loadContactAvatar(this,avatar,bean.getAvatar());
 
-            if (!TextUtils.isEmpty(bean.getName())){
-                name.setText(bean.getName());
-            }else {
-                continue;
-            }
+            name.setText(bean.getName());
 
             //设置背景为透明色
             view.setBackgroundColor(getResources().getColor(R.color.color_transparent));
@@ -260,19 +252,13 @@ public class TransmitActivity extends BaseActivity implements View.OnClickListen
                     alertDialog.dismiss();
                 }else {
                     String leave = leaveWord.getText().toString();      //获得输入的留言
-                    TLog.d(TAG, "onClick: leave = " + leave);
 
-                    if (mRecordType == ChatRoomConfig.RECORD_TEXT){
-                        //转发文字
-                        transmitMessage(mMessage,mTransmitUsers.get(id));
-                    }else if (mRecordType == ChatRoomConfig.RECORD_FILE){
-                        //转发图片
-                        transmitFile(id);
-                    }
-                    if (!TextUtils.isEmpty(leave)){     //如果输入留言，转发留言
-                        mMessage = leave;
-                        transmitMessage(leave,mTransmitUsers.get(id));
-                    }
+                    TransmitManager.getInstance().transmit(
+                            mRecordType,
+                            mMessage,
+                            leave,
+                            mFile,
+                            bean);
 
                     alertDialog.dismiss();
                     TransmitActivity.this.finish();
@@ -326,35 +312,6 @@ public class TransmitActivity extends BaseActivity implements View.OnClickListen
 
         mTitle.setVisibility(View.VISIBLE);
         mScroll.setVisibility(View.VISIBLE);
-    }
-
-    /**
-     * 转发文字
-     * @param message 转发的文字
-     * @param bean 转发对象*/
-    public static void transmitMessage(String message, TransmitBean bean){
-        if (bean.isGroup()) {
-            Message.getInstance().send(
-                    GroupManager.getInstance().getGroup(bean.getUser()),
-                    message);
-        } else {
-            Message.getInstance().send(
-                    ContactManager.getInstance().getContact(bean.getUser()),
-                    message);
-        }
-
-        RecordManager.getInstance().recordText(message,-1);
-        LatestManager.getInstance().send(bean.getUser(),message,bean.isGroup());
-    }
-
-    /**
-     * 转发文件，目前仅支持图片和视频
-     * @param i 转发对象在mTransmitUsers中的位置*/
-    private void transmitFile(int i){
-        TransmitBean bean = mTransmitUsers.get(i);
-        FileManager.getInstance().notify(bean.getUser(),mFile,bean.isGroup());
-        RecordManager.getInstance().recordFile(mFile,-1);
-        LatestManager.getInstance().send(bean.getUser(),mFile,bean.isGroup());
     }
 
     @Override
